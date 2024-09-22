@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <array>
+#include <chrono>
 
 using PIECE_INDEX = int;
 
@@ -99,6 +100,9 @@ public:
 
 using MOVES = std::vector<Move>;
 
+/// @brief 获取棋子名称
+/// @param pieceid
+/// @return
 std::string getPieceName(PIECEID pieceid)
 {
     if (pieceid == R_KING)
@@ -161,4 +165,19 @@ std::string getPieceName(PIECEID pieceid)
     {
         return "  ";
     }
+}
+
+using CHRONO_TIME_T = long long;
+
+/// @brief 获取当前时间戳（毫秒）
+/// @return
+long long getCurrentTimeWithMS()
+{
+    // 获取当前时间戳
+    auto now = std::chrono::system_clock::now();
+
+    // 将时间戳转换为毫秒数
+    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    auto value = now_ms.time_since_epoch().count();
+    return long long(value);
 }

@@ -536,7 +536,7 @@ MOVES MovesGenerator::getMovesOf(Board board, TEAM team)
     MOVES result{};
 
     std::vector<Piece> pieces = board.getPiecesByTeam(team);
-    for (Piece piece : pieces)
+    for (const Piece& piece : pieces)
     {
         std::vector<Move> moves = MovesGenerator::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)

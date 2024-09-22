@@ -7,8 +7,7 @@ int main()
     MOVES a = MovesGenerator::getMovesOf(board, RED);
 
     board.print();
-    Searcher::minmax(board, 3, true);
+    Node s = Searcher::search(board, RED, 1);
 
-    system("pause");
     return 0;
 }
