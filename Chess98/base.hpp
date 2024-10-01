@@ -7,6 +7,7 @@
 #include <chrono>
 
 using PIECE_INDEX = int;
+using U64 = unsigned long long;
 
 using PIECEID = int;
 const PIECEID EMPTY_PIECEID = 0;
@@ -42,7 +43,7 @@ const PIECEID_MAP DEFAULT_MAP{
      {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
      {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
      {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-     {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}} };
+     {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
 
 /// @brief 棋子类
 class Piece
@@ -50,9 +51,9 @@ class Piece
 public:
     Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
         : pieceid(pieceid),
-        x(x),
-        y(y),
-        pieceIndex(pieceIndex) {}
+          x(x),
+          y(y),
+          pieceIndex(pieceIndex) {}
 
     TEAM getTeam()
     {
@@ -88,9 +89,9 @@ public:
     Move() {}
     Move(int x1, int y1, int x2, int y2)
         : x1(x1),
-        y1(y1),
-        x2(x2),
-        y2(y2) {}
+          y1(y1),
+          x2(x2),
+          y2(y2) {}
 
     int x1 = -1;
     int y1 = -1;
@@ -167,11 +168,11 @@ std::string getPieceName(PIECEID pieceid)
     }
 }
 
-using CHRONO_TIME_T = long long;
+using TIME_T = long long;
 
 /// @brief 获取当前时间戳（毫秒）
 /// @return
-long long getCurrentTimeWithMS()
+TIME_T getCurrentTimeWithMS()
 {
     // 获取当前时间戳
     auto now = std::chrono::system_clock::now();
@@ -179,5 +180,32 @@ long long getCurrentTimeWithMS()
     // 将时间戳转换为毫秒数
     auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
     auto value = now_ms.time_since_epoch().count();
-    return long long(value);
+    return TIME_T(value);
+}
+
+/// @brief 获取一个64位的随机整数
+/// @return
+U64 rand64()
+{
+    return rand() ^ ((U64)rand() << 15) ^ ((U64)rand() << 30) ^ ((U64)rand() << 45) ^ ((U64)rand() << 60);
+}
+
+U64 zobristMap[7][2][9][10];
+
+/// @brief 初始化
+void initZobrist()
+{
+    for (int i = 0; i < 7; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            for (int k = 0; k < 9; k++)
+            {
+                for (U64& v : zobristMap[i][j][k])
+                {
+                    v = rand64();
+                }
+            }
+        }
+    }
 }

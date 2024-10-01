@@ -31,6 +31,10 @@ private:
 
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};
+
+    U64 zobrist = 0l;
+    std::vector<U64> zobristHistory{};
+    void updateZobrist();
 };
 
 /// @brief 初始化棋盘
@@ -45,7 +49,7 @@ Board::Board(PIECEID_MAP pieceidMap)
             PIECEID pieceid = this->pieceidMap[x][y];
             if (pieceid != 0)
             {
-                Piece piece{ this->pieceidMap[x][y], x, y, (int)this->pieces.size() };
+                Piece piece{this->pieceidMap[x][y], x, y, (int)this->pieces.size()};
                 this->pieces.emplace_back(piece);
                 this->pieceIndexMap[x][y] = int(this->pieces.size()) - 1;
                 if (pieceid > 0)
@@ -76,7 +80,6 @@ Piece Board::findPieceByIndex(PIECE_INDEX pieceIndex)
     }
     else
     {
-        std::clog << "try to access an invaild pieceIndex!" << std::endl;
         throw "try to access an invaild pieceIndex";
     }
 }
@@ -97,12 +100,12 @@ Piece Board::findPieceByPosition(int x, int y)
         }
         else
         {
-            return Piece{ EMPTY_PIECEID, x, y, -1 };
+            return Piece{EMPTY_PIECEID, x, y, -1};
         }
     }
     else
     {
-        return Piece{ OVERFLOW_PIECEID, x, y, -1 };
+        return Piece{OVERFLOW_PIECEID, x, y, -1};
     }
 }
 
@@ -205,7 +208,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         this->pieces[eaten.pieceIndex].isLive = false;
     }
-
+    this->updateZobrist();
     return eaten;
 }
 
@@ -238,6 +241,15 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     {
         this->pieces[eaten.pieceIndex].isLive = true;
     }
+    if (this->zobristHistory.size() > 0)
+    {
+        this->zobrist = *(this->zobristHistory.end() - 1);
+        this->zobristHistory.pop_back();
+    }
+    else
+    {
+        this->updateZobrist();
+    }
 }
 
 /// @brief 撤销步进
@@ -248,6 +260,26 @@ void Board::undoMove(Move move, Piece eaten)
     this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
 }
 
+/// @brief 生成局面的zobrist
+/// @return
+void Board::updateZobrist()
+{
+    U64 result = U64(0);
+
+    for (const Piece &piece : this->getAllPieces())
+    {
+        U64 zobristID = zobristMap
+            [abs(piece.pieceid)]
+            [piece.pieceid > 0 ? 0 : 1]
+            [piece.x][piece.y];
+        result ^= zobristID;
+    }
+
+    this->zobrist = result;
+    this->zobristHistory.emplace_back(result);
+}
+
+/// @brief 打印
 void Board::print()
 {
     for (int i = -1; i <= 8; i++)

@@ -29,8 +29,7 @@ Node Searcher::search(Board &board, TEAM currentTeam, int time)
     Node result{Move{}, 0};
     int depth = 0;
 
-    CHRONO_TIME_T startTime = getCurrentTimeWithMS();
-    std::cout << startTime;
+    TIME_T startTime = getCurrentTimeWithMS();
     do
     {
         result = Searcher::alphabeta(
@@ -40,11 +39,11 @@ Node Searcher::search(Board &board, TEAM currentTeam, int time)
             -100000, 100000);
         depth += 1;
     } while (getCurrentTimeWithMS() - startTime < time);
-    
+
     return result;
 }
 
-/// @brief minmax搜索算法
+/// @brief alphabeta搜索
 /// @param depth 深度
 /// @param isMax 节点类型，true为max节点，false为min节点
 /// @return 节点
