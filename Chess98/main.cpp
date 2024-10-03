@@ -3,13 +3,14 @@
 int main()
 {
     initZobrist();
-    
+    HistoryHeuristic::init();
+
     Board board{ DEFAULT_MAP };
 
-    MOVES a = MovesGenerator::getMovesOf(board, RED);
+    MOVES a = Moves::getMovesOf(board, RED);
 
     board.print();
-    Node s = Searcher::search(board, RED, 1000);
+    Node s = Search::search(board, RED, 300);
     system("pause");
 
     return 0;

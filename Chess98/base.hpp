@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 #include <chrono>
+#include <map>
 
 using PIECE_INDEX = int;
 using U64 = unsigned long long;
@@ -97,6 +98,16 @@ public:
     int y1 = -1;
     int x2 = -1;
     int y2 = -1;
+
+    bool operator==(Move move)
+    {
+        return (
+            this->x1 == move.x1 &&
+            this->x2 == move.x2 &&
+            this->y1 == move.y1 &&
+            this->y2 == move.y2
+        );
+    }
 };
 
 using MOVES = std::vector<Move>;

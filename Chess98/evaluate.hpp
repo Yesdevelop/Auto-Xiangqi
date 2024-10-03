@@ -1,3 +1,5 @@
+#pragma once
+
 #include "board.hpp"
 
 const int SCORE_KING = 100000;
@@ -9,7 +11,7 @@ const int SCORE_CANNON = 500;
 const int SCORE_PAWN = 50;
 
 /// @brief 评估算法
-class Evaluator
+class Evaluate
 {
 public:
     static int evaluate(Board board);
@@ -19,7 +21,7 @@ public:
 /// @version 1.0.0 最简单的基本评估
 /// @param board
 /// @return
-int Evaluator::evaluate(Board board)
+int Evaluate::evaluate(Board board)
 {
     int redScore = 0;
     int blackScore = 0;

@@ -1,6 +1,6 @@
-#include <chrono>
 #include "moves.hpp"
 #include "evaluate.hpp"
+#include "history_heuristic.hpp"
 
 /// @brief 节点对象，存储分数 + 着法
 class Node
@@ -12,7 +12,7 @@ public:
 };
 
 /// @brief 搜索工具类
-class Searcher
+class Search
 {
 public:
     static Node search(Board &board, TEAM currentTeam, int time);
@@ -24,7 +24,7 @@ public:
 /// @param currentTeam
 /// @param depth
 /// @return
-Node Searcher::search(Board &board, TEAM currentTeam, int time)
+Node Search::search(Board &board, TEAM currentTeam, int time)
 {
     Node result{Move{}, 0};
     int depth = 0;
@@ -32,7 +32,7 @@ Node Searcher::search(Board &board, TEAM currentTeam, int time)
     TIME_T startTime = getCurrentTimeWithMS();
     do
     {
-        result = Searcher::alphabeta(
+        result = Search::alphabeta(
             board,
             depth,
             currentTeam == RED ? true : false,
@@ -47,10 +47,11 @@ Node Searcher::search(Board &board, TEAM currentTeam, int time)
 /// @param depth 深度
 /// @param isMax 节点类型，true为max节点，false为min节点
 /// @return 节点
-Node Searcher::alphabeta(Board &board, int depth, bool isMax, int alpha, int beta)
+Node Search::alphabeta(Board &board, int depth, bool isMax, int alpha, int beta)
 {
     TEAM team = isMax ? RED : BLACK;
-    MOVES availableMoves = MovesGenerator::getMovesOf(board, team);
+    MOVES availableMoves = Moves::getMovesOf(board, team);
+    HistoryHeuristic::sort(&availableMoves);
 
     std::vector<int> scores{};
     std::vector<Move> moves{};
@@ -62,12 +63,12 @@ Node Searcher::alphabeta(Board &board, int depth, bool isMax, int alpha, int bet
         Node node{move, 0};
         if (depth > 0)
         {
-            Node temp = Searcher::alphabeta(board, depth - 1, !isMax, alpha, beta);
+            Node temp = Search::alphabeta(board, depth - 1, !isMax, alpha, beta);
             node.score = temp.score;
         }
         else
         {
-            node.score = Evaluator::evaluate(board);
+            node.score = Evaluate::evaluate(board);
         }
         if (isMax == false && node.score < beta)
         {
@@ -100,7 +101,7 @@ Node Searcher::alphabeta(Board &board, int depth, bool isMax, int alpha, int bet
             index = int(std::min_element(scores.begin(), scores.end()) - scores.begin());
         }
         Node node{moves[index], scores[index]};
-
+        HistoryHeuristic::add(node.move, depth);
         return node;
     }
     else

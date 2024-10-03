@@ -3,7 +3,7 @@
 #include "board.hpp"
 
 /// @brief 着法生成工具类
-class MovesGenerator
+class Moves
 {
 public:
     static MOVES king(TEAM team, Board board, int x, int y);
@@ -26,7 +26,7 @@ public:
 };
 
 /// @brief 生成将帅的着法
-MOVES MovesGenerator::king(TEAM team, Board board, int x, int y)
+MOVES Moves::king(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
     MOVES mayAvailableMoves{
@@ -96,7 +96,7 @@ MOVES MovesGenerator::king(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成士的着法
-MOVES MovesGenerator::guard(TEAM team, Board board, int x, int y)
+MOVES Moves::guard(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
     MOVES mayAvailableMoves{
@@ -131,7 +131,7 @@ MOVES MovesGenerator::guard(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成象的着法
-MOVES MovesGenerator::bishop(TEAM team, Board board, int x, int y)
+MOVES Moves::bishop(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
     MOVES mayAvailableMoves{};
@@ -180,7 +180,7 @@ MOVES MovesGenerator::bishop(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成马的着法
-MOVES MovesGenerator::knight(TEAM team, Board board, int x, int y)
+MOVES Moves::knight(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
     MOVES mayAvailableMoves{};
@@ -218,7 +218,7 @@ MOVES MovesGenerator::knight(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成车的着法
-MOVES MovesGenerator::rook(TEAM team, Board board, int x, int y)
+MOVES Moves::rook(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
 
@@ -291,7 +291,7 @@ MOVES MovesGenerator::rook(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成炮的着法
-MOVES MovesGenerator::cannon(TEAM team, Board board, int x, int y)
+MOVES Moves::cannon(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
 
@@ -408,7 +408,7 @@ MOVES MovesGenerator::cannon(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成兵的着法
-MOVES MovesGenerator::pawn(TEAM team, Board board, int x, int y)
+MOVES Moves::pawn(TEAM team, Board board, int x, int y)
 {
     if (team == RED)
     {
@@ -488,38 +488,38 @@ MOVES MovesGenerator::pawn(TEAM team, Board board, int x, int y)
 }
 
 /// @brief 生成着法
-MOVES MovesGenerator::generateMoves(Board board, int x, int y)
+MOVES Moves::generateMoves(Board board, int x, int y)
 {
     PIECEID chessid = board.pieceidOn(x, y);
     TEAM team = board.teamOn(x, y);
 
     if (chessid == R_KING || chessid == B_KING)
     {
-        return MovesGenerator::king(team, board, x, y);
+        return Moves::king(team, board, x, y);
     }
     else if (chessid == R_GUARD || chessid == B_GUARD)
     {
-        return MovesGenerator::guard(team, board, x, y);
+        return Moves::guard(team, board, x, y);
     }
     else if (chessid == R_BISHOP || chessid == B_BISHOP)
     {
-        return MovesGenerator::bishop(team, board, x, y);
+        return Moves::bishop(team, board, x, y);
     }
     else if (chessid == R_KNIGHT || chessid == B_KNIGHT)
     {
-        return MovesGenerator::knight(team, board, x, y);
+        return Moves::knight(team, board, x, y);
     }
     else if (chessid == R_ROOK || chessid == B_ROOK)
     {
-        return MovesGenerator::rook(team, board, x, y);
+        return Moves::rook(team, board, x, y);
     }
     else if (chessid == R_CANNON || chessid == B_CANNON)
     {
-        return MovesGenerator::cannon(team, board, x, y);
+        return Moves::cannon(team, board, x, y);
     }
     else if (chessid == R_PAWN || chessid == B_PAWN)
     {
-        return MovesGenerator::pawn(team, board, x, y);
+        return Moves::pawn(team, board, x, y);
     }
     else
     {
@@ -531,14 +531,14 @@ MOVES MovesGenerator::generateMoves(Board board, int x, int y)
 /// @brief 获取一队的所有可行着法
 /// @param team
 /// @return
-MOVES MovesGenerator::getMovesOf(Board board, TEAM team)
+MOVES Moves::getMovesOf(Board board, TEAM team)
 {
     MOVES result{};
 
     std::vector<Piece> pieces = board.getPiecesByTeam(team);
     for (const Piece& piece : pieces)
     {
-        std::vector<Move> moves = MovesGenerator::generateMoves(board, piece.x, piece.y);
+        std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)
         {
             result.emplace_back(move);
