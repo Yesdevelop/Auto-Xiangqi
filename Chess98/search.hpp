@@ -65,8 +65,7 @@ Node Search::alphabeta(Board &board, int depth, bool isMax, int alpha, int beta)
         Node node{move, 0};
         if (depth > 0)
         {
-            Node temp = Search::alphabeta(board, depth - 1, !isMax, alpha, beta);
-            node.score = temp.score;
+            node.score = Search::alphabeta(board, depth - 1, !isMax, alpha, beta).score;
         }
         else
         {

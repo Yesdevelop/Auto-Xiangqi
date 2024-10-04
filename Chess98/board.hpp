@@ -54,11 +54,11 @@ Board::Board(PIECEID_MAP pieceidMap)
                 this->pieceIndexMap[x][y] = int(this->pieces.size()) - 1;
                 if (pieceid > 0)
                 {
-                    this->redPieces.emplace_back(this->pieces.size() - 1);
+                    this->redPieces.emplace_back(int(this->pieces.size()) - 1);
                 }
                 else
                 {
-                    this->blackPieces.emplace_back(this->pieces.size() - 1);
+                    this->blackPieces.emplace_back(int(this->pieces.size()) - 1);
                 }
             }
             else
