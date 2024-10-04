@@ -46,7 +46,7 @@ Node Search::search(Board &board, TEAM currentTeam, int time)
     return result;
 }
 
- int __count__ = 0;
+int __count__ = 0;
 // /// @brief alphabeta搜索
 // /// @param depth 深度
 // /// @param isMax 节点类型，true为max节点，false为min节点
@@ -54,9 +54,10 @@ Node Search::search(Board &board, TEAM currentTeam, int time)
 Node Search::alphabeta(Board &board, int depth, TEAM isRedGo, int alpha, int beta)
 {
 
-    if (depth <= 0) {
+    if (depth <= 0)
+    {
         int eval = isRedGo == RED ? Evaluate::evaluate(board) : -Evaluate::evaluate(board);
-        return Node(Move(),eval);
+        return Node(Move(), eval);
     }
     __count__++;
     MOVES availableMoves = Moves::getMovesOf(board, isRedGo);
@@ -64,30 +65,35 @@ Node Search::alphabeta(Board &board, int depth, TEAM isRedGo, int alpha, int bet
 
     Move(*pBestMove) = nullptr;
     int vlBest = -INF;
-    for (auto & move : availableMoves)
+    for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
         int vl = -Search::alphabeta(board, depth - 1, -isRedGo, -beta, -alpha).score;
         board.undoMove(move, eaten);
 
-        if (vl > vlBest && abs(vl) != BAN) {
+        if (vl > vlBest && abs(vl) != BAN)
+        {
             vlBest = vl;
             pBestMove = &move;
-            if (vl >= beta) {
+            if (vl >= beta)
+            {
                 break;
             }
-            if (vl > alpha) {
+            if (vl > alpha)
+            {
                 alpha = vl;
             }
         }
     }
 
-    if (pBestMove) {
-        Node node{ *pBestMove,vlBest};
+    if (pBestMove)
+    {
+        Node node{*pBestMove, vlBest};
         HistoryHeuristic::add(node.move, depth);
         return node;
     }
-    else {
-        return Node{ Move{}, isRedGo ? -BAN : BAN};
+    else
+    {
+        return Node{Move{}, isRedGo ? -BAN : BAN};
     }
 }
