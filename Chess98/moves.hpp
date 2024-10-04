@@ -2,7 +2,7 @@
 
 #include "board.hpp"
 
-/// @brief 着法生成工具类
+/// @brief 着法生成（工具类）
 class Moves
 {
 public:

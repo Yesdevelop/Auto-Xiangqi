@@ -1,8 +1,11 @@
 #include "base.hpp"
 
+/* ***** 历史启发 ***** */
+
+/// @brief 历史表
 std::array<std::array<int, 90>, 90> historyTable{};
 
-/// @brief 历史启发式算法
+/// @brief 历史启发（工具类）
 class HistoryHeuristic
 {
 public:
@@ -11,6 +14,10 @@ public:
     static void add(Move move, int depth);
 };
 
+/// @brief 二维坐标转索引
+/// @param x
+/// @param y
+/// @return
 int toIndex(int x, int y)
 {
     return 10 * x + y;
@@ -65,3 +72,9 @@ void HistoryHeuristic::add(Move move, int depth)
     int pos2 = toIndex(move.x2, move.y2);
     historyTable[pos1][pos2] += depth * depth;
 }
+
+/* ***** 杀手启发 ***** */
+
+std::vector<std::array<Move, 2>> killerMoves {};
+
+// TODO:

@@ -1,6 +1,6 @@
 #include "moves.hpp"
 #include "evaluate.hpp"
-#include "history_heuristic.hpp"
+#include "heuristic.hpp"
 
 #define INF 1000000
 #define BAN (INF - 2000)
@@ -14,12 +14,12 @@ public:
     int score = 0;
 };
 
-/// @brief 搜索工具类
+/// @brief 搜索（工具类）
 class Search
 {
 public:
     static Node search(Board &board, TEAM currentTeam, int time);
-    static Node alphabeta(Board &board, int depth, TEAM isRedGo, int alpha, int beta);
+    static Node alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int alpha, int beta);
 };
 
 /// @brief 迭代加深搜索
@@ -36,8 +36,7 @@ Node Search::search(Board &board, TEAM currentTeam, int time)
     do
     {
         result = Search::alphabeta(
-            board,
-            depth,
+            board, depth, depth,
             currentTeam == RED ? true : false,
             -100000, 100000);
         depth += 1;
@@ -51,15 +50,14 @@ int __count__ = 0;
 // /// @param depth 深度
 // /// @param isMax 节点类型，true为max节点，false为min节点
 // /// @return 节点
-Node Search::alphabeta(Board &board, int depth, TEAM isRedGo, int alpha, int beta)
+Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int alpha, int beta)
 {
-
+    __count__++;
     if (depth <= 0)
     {
         int eval = isRedGo == RED ? Evaluate::evaluate(board) : -Evaluate::evaluate(board);
         return Node(Move(), eval);
     }
-    __count__++;
     MOVES availableMoves = Moves::getMovesOf(board, isRedGo);
     HistoryHeuristic::sort(availableMoves);
 
@@ -68,7 +66,7 @@ Node Search::alphabeta(Board &board, int depth, TEAM isRedGo, int alpha, int bet
     for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -Search::alphabeta(board, depth - 1, -isRedGo, -beta, -alpha).score;
+        int vl = -Search::alphabeta(board, depth - 1, maxDepth, -isRedGo, -beta, -alpha).score;
         board.undoMove(move, eaten);
 
         if (vl > vlBest && abs(vl) != BAN)
@@ -89,7 +87,7 @@ Node Search::alphabeta(Board &board, int depth, TEAM isRedGo, int alpha, int bet
     if (pBestMove)
     {
         Node node{*pBestMove, vlBest};
-        HistoryHeuristic::add(node.move, depth);
+        HistoryHeuristic::add(node.move, maxDepth + 1 - depth);
         return node;
     }
     else

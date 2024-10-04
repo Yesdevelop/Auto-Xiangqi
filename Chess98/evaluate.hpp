@@ -10,7 +10,7 @@ const int SCORE_ROOK = 1000;
 const int SCORE_CANNON = 500;
 const int SCORE_PAWN = 50;
 
-/// @brief 评估算法
+/// @brief 评估（工具类）
 class Evaluate
 {
 public:
@@ -18,7 +18,6 @@ public:
 };
 
 /// @brief 评估函数
-/// @version 1.0.0 最简单的基本评估
 /// @param board
 /// @return
 int Evaluate::evaluate(Board board)
