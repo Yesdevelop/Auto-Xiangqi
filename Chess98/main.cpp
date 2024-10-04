@@ -11,9 +11,13 @@ int main()
 
     board.print();
 
-    Node s = Search::alphabeta(board, 3, true, -100000, 100000);
+    Node s = Search::alphabeta(board, 5, true, -INF, INF);
 
-    system("pause");
+    board.doMove(s.move);
+
+    board.print();
+
+    //system("pause");
 
     return 0;
 }
