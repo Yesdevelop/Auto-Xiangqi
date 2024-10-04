@@ -43,15 +43,17 @@ Node Search::search(Board &board, TEAM currentTeam, int time)
     return result;
 }
 
-/// @brief alphabeta搜索
-/// @param depth 深度
-/// @param isMax 节点类型，true为max节点，false为min节点
-/// @return 节点
+ int __count__ = 0;
+// /// @brief alphabeta搜索
+// /// @param depth 深度
+// /// @param isMax 节点类型，true为max节点，false为min节点
+// /// @return 节点
 Node Search::alphabeta(Board &board, int depth, bool isMax, int alpha, int beta)
 {
+    __count__++;
     TEAM team = isMax ? RED : BLACK;
     MOVES availableMoves = Moves::getMovesOf(board, team);
-    HistoryHeuristic::sort(&availableMoves);
+    HistoryHeuristic::sort(availableMoves);
 
     std::vector<int> scores{};
     std::vector<Move> moves{};

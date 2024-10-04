@@ -7,7 +7,7 @@ class HistoryHeuristic
 {
 public:
     static void init();
-    static void sort(MOVES *moves);
+    static void sort(MOVES &moves);
     static void add(Move move, int depth);
 };
 
@@ -31,12 +31,12 @@ void HistoryHeuristic::init()
 /// @brief 历史表排序
 /// @param moves
 /// @return
-void HistoryHeuristic::sort(MOVES *moves)
+void HistoryHeuristic::sort(MOVES &moves)
 {
     MOVES result {};
     std::vector<int> valList {};
     std::map<int, std::vector<Move>> valMoves {};
-    for (const Move &move : *moves)
+    for (const Move &move : moves)
     {
         int pos1 = toIndex(move.x1, move.y1);
         int pos2 = toIndex(move.x2, move.y2);
@@ -45,14 +45,15 @@ void HistoryHeuristic::sort(MOVES *moves)
         valList.emplace_back(val);
     }
     std::sort(valList.begin(), valList.end(), std::greater<int>());
-    for (int val : valList)
+    int m = int(std::unique(valList.begin(), valList.end()) - valList.begin());
+    for (int i = 0; i < m; i++)
     {
-        for (Move move : valMoves[val])
+        for (Move move : valMoves[valList[i]])
         {
             result.emplace_back(move);
         }
     }
-    *moves = result;
+    moves = result;
 }
 
 /// @brief 在历史表中增加一个历史记录
