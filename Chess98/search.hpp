@@ -68,7 +68,7 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int 
         int vl = -Search::alphabeta(board, depth - 1, maxDepth, -isRedGo, -beta, -alpha).score;
         board.undoMove(move, eaten);
 
-        if (vl > vlBest && abs(vl) != BAN)
+        if (vl > vlBest)
         {
             vlBest = vl;
             pBestMove = &move;
@@ -92,6 +92,6 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int 
     }
     else
     {
-        return Node{Move{}, isRedGo ? -BAN : BAN};
+        return Node{Move{}, isRedGo ? -INF + depth: INF - depth};
     }
 }
