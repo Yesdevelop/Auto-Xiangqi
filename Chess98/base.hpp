@@ -6,7 +6,6 @@
 #include <array>
 #include <chrono>
 #include <map>
-
 using PIECE_INDEX = int;
 using U64 = unsigned long long;
 
@@ -45,6 +44,9 @@ const PIECEID_MAP DEFAULT_MAP{
      {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
      {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
      {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
+
+const int INF = 1000000;
+const int BAN = INF - 2000;
 
 /// @brief 棋子类
 class Piece
@@ -99,6 +101,10 @@ public:
     int x2 = -1;
     int y2 = -1;
 
+    /// @brief 等于
+    /// @note 这个实现有点耗时，不过暂时这样，我之后改一下
+    /// @param move
+    /// @return
     bool operator==(Move move)
     {
         return (
@@ -107,6 +113,11 @@ public:
             this->y1 == move.y1 &&
             this->y2 == move.y2
         );
+    }
+
+    bool operator!=(Move move)
+    {
+        return !(*this == move);
     }
 };
 

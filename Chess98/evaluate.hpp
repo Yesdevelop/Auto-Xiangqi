@@ -10,7 +10,7 @@ const int SCORE_ROOK = 1000;
 const int SCORE_CANNON = 500;
 const int SCORE_PAWN = 50;
 
-/// @brief 评估（工具类）
+/// @brief 评估
 class Evaluate
 {
 public:

@@ -133,6 +133,7 @@
     <ClInclude Include="base.hpp" />
     <ClInclude Include="board.hpp" />
     <ClInclude Include="evaluate.hpp" />
+    <ClInclude Include="heuristic.hpp" />
     <ClInclude Include="moves.hpp" />
     <ClInclude Include="search.hpp" />
   </ItemGroup>

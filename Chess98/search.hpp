@@ -2,9 +2,6 @@
 #include "evaluate.hpp"
 #include "heuristic.hpp"
 
-#define INF 1000000
-#define BAN (INF - 2000)
-
 /// @brief 节点对象，存储分数 + 着法
 class Node
 {
@@ -14,7 +11,7 @@ public:
     int score = 0;
 };
 
-/// @brief 搜索（工具类）
+/// @brief 搜索
 class Search
 {
 public:
@@ -46,10 +43,11 @@ Node Search::search(Board &board, TEAM currentTeam, int time)
 }
 
 int __count__ = 0;
-// /// @brief alphabeta搜索
-// /// @param depth 深度
-// /// @param isMax 节点类型，true为max节点，false为min节点
-// /// @return 节点
+
+/// @brief alphabeta搜索
+/// @param depth 深度
+/// @param isMax 节点类型，true为max节点，false为min节点
+/// @return 节点
 Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int alpha, int beta)
 {
     __count__++;
@@ -59,6 +57,7 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int 
         return Node(Move(), eval);
     }
     MOVES availableMoves = Moves::getMovesOf(board, isRedGo);
+    KillerHeuristic::sort(depth, availableMoves);
     HistoryHeuristic::sort(availableMoves);
 
     Move(*pBestMove) = nullptr;
@@ -75,6 +74,7 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int 
             pBestMove = &move;
             if (vl >= beta)
             {
+                KillerHeuristic::add(depth, move);
                 break;
             }
             if (vl > alpha)
