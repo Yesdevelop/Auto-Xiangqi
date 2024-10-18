@@ -1,6 +1,6 @@
 #pragma once
 
-#include "board.hpp"
+#include "moves.hpp"
 
 const int SCORE_KING = 100000;
 const int SCORE_GUARD = 100;

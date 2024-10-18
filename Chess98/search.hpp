@@ -1,3 +1,5 @@
+#pragma once
+
 #include "moves.hpp"
 #include "evaluate.hpp"
 #include "heuristic.hpp"

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "base.hpp"
 
 /* ***** 历史启发 ***** */
@@ -117,3 +119,4 @@ void KillerHeuristic::add(int depth, Move cutMove)
         killerMoves[depth][0] = cutMove;
     }
 }
+

@@ -310,6 +310,7 @@ void Board::print()
                 }
             }
         }
-        std::cout << std::endl;
+        std::cout << "\n";
     }
+    std::cout << std::endl;
 }
