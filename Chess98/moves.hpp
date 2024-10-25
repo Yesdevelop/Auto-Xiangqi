@@ -31,7 +31,7 @@ MOVES Moves::king(TEAM team, Board board, int x, int y)
     MOVES result{};
     MOVES mayAvailableMoves{
         Move{x, y, x + 1, y}, Move{x, y, x - 1, y},
-        Move{x, y, x, y + 1}, Move{x, y, x, y - 1} };
+        Move{x, y, x, y + 1}, Move{x, y, x, y - 1}};
 
     for (Move v : mayAvailableMoves)
     {
@@ -67,7 +67,7 @@ MOVES Moves::king(TEAM team, Board board, int x, int y)
                 {
                     if (board.pieceidOn(x, _y) == R_KING || board.pieceidOn(x, _y) == B_KING)
                     {
-                        result.emplace_back(Move{ x, y, x, _y });
+                        result.emplace_back(Move{x, y, x, _y});
                     }
                 }
                 break;
@@ -84,7 +84,7 @@ MOVES Moves::king(TEAM team, Board board, int x, int y)
                 {
                     if (board.pieceidOn(x, _y) == R_KING || board.pieceidOn(x, _y) == B_KING)
                     {
-                        result.emplace_back(Move{ x, y, x, _y });
+                        result.emplace_back(Move{x, y, x, _y});
                     }
                 }
                 break;
@@ -101,7 +101,7 @@ MOVES Moves::guard(TEAM team, Board board, int x, int y)
     MOVES result{};
     MOVES mayAvailableMoves{
         Move{x, y, x + 1, y + 1}, Move{x, y, x - 1, y - 1},
-        Move{x, y, x - 1, y + 1}, Move{x, y, x + 1, y - 1} };
+        Move{x, y, x - 1, y + 1}, Move{x, y, x + 1, y - 1}};
 
     for (Move v : mayAvailableMoves)
     {
@@ -137,19 +137,19 @@ MOVES Moves::bishop(TEAM team, Board board, int x, int y)
     MOVES mayAvailableMoves{};
     if (board.pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x + 2, y + 2 });
+        mayAvailableMoves.emplace_back(Move{x, y, x + 2, y + 2});
     }
     if (board.pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x - 2, y + 2 });
+        mayAvailableMoves.emplace_back(Move{x, y, x - 2, y + 2});
     }
     if (board.pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x + 2, y - 2 });
+        mayAvailableMoves.emplace_back(Move{x, y, x + 2, y - 2});
     }
     if (board.pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x - 2, y - 2 });
+        mayAvailableMoves.emplace_back(Move{x, y, x - 2, y - 2});
     }
 
     for (Move v : mayAvailableMoves)
@@ -186,23 +186,23 @@ MOVES Moves::knight(TEAM team, Board board, int x, int y)
     MOVES mayAvailableMoves{};
     if (board.pieceidOn(x, y + 1) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x + 1, y + 2 });
-        mayAvailableMoves.emplace_back(Move{ x, y, x - 1, y + 2 });
+        mayAvailableMoves.emplace_back(Move{x, y, x + 1, y + 2});
+        mayAvailableMoves.emplace_back(Move{x, y, x - 1, y + 2});
     }
     if (board.pieceidOn(x, y - 1) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x + 1, y - 2 });
-        mayAvailableMoves.emplace_back(Move{ x, y, x - 1, y - 2 });
+        mayAvailableMoves.emplace_back(Move{x, y, x + 1, y - 2});
+        mayAvailableMoves.emplace_back(Move{x, y, x - 1, y - 2});
     }
     if (board.pieceidOn(x + 1, y) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x + 2, y + 1 });
-        mayAvailableMoves.emplace_back(Move{ x, y, x + 2, y - 1 });
+        mayAvailableMoves.emplace_back(Move{x, y, x + 2, y + 1});
+        mayAvailableMoves.emplace_back(Move{x, y, x + 2, y - 1});
     }
     if (board.pieceidOn(x - 1, y) == EMPTY_PIECEID)
     {
-        mayAvailableMoves.emplace_back(Move{ x, y, x - 2, y + 1 });
-        mayAvailableMoves.emplace_back(Move{ x, y, x - 2, y - 1 });
+        mayAvailableMoves.emplace_back(Move{x, y, x - 2, y + 1});
+        mayAvailableMoves.emplace_back(Move{x, y, x - 2, y - 1});
     }
 
     for (Move v : mayAvailableMoves)
@@ -226,11 +226,11 @@ MOVES Moves::rook(TEAM team, Board board, int x, int y)
     {
         if (board.teamOn(_x, y) == EMPTY_TEAM)
         {
-            result.emplace_back(Move{ x, y, _x, y });
+            result.emplace_back(Move{x, y, _x, y});
         }
         else if (board.teamOn(_x, y) != team)
         {
-            result.emplace_back(Move{ x, y, _x, y });
+            result.emplace_back(Move{x, y, _x, y});
             break;
         }
         else
@@ -242,11 +242,11 @@ MOVES Moves::rook(TEAM team, Board board, int x, int y)
     {
         if (board.teamOn(_x, y) == EMPTY_TEAM)
         {
-            result.emplace_back(Move{ x, y, _x, y });
+            result.emplace_back(Move{x, y, _x, y});
         }
         else if (board.teamOn(_x, y) != team)
         {
-            result.emplace_back(Move{ x, y, _x, y });
+            result.emplace_back(Move{x, y, _x, y});
             break;
         }
         else
@@ -258,11 +258,11 @@ MOVES Moves::rook(TEAM team, Board board, int x, int y)
     {
         if (board.teamOn(x, _y) == EMPTY_TEAM)
         {
-            result.emplace_back(Move{ x, y, x, _y });
+            result.emplace_back(Move{x, y, x, _y});
         }
         else if (board.teamOn(x, _y) != team)
         {
-            result.emplace_back(Move{ x, y, x, _y });
+            result.emplace_back(Move{x, y, x, _y});
             break;
         }
         else
@@ -274,11 +274,11 @@ MOVES Moves::rook(TEAM team, Board board, int x, int y)
     {
         if (board.teamOn(x, _y) == EMPTY_TEAM)
         {
-            result.emplace_back(Move{ x, y, x, _y });
+            result.emplace_back(Move{x, y, x, _y});
         }
         else if (board.teamOn(x, _y) != team)
         {
-            result.emplace_back(Move{ x, y, x, _y });
+            result.emplace_back(Move{x, y, x, _y});
             break;
         }
         else
@@ -307,7 +307,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
                 }
                 else if (board.teamOn(_x2, y) != team)
                 {
-                    result.emplace_back(Move{ x, y, _x2, y });
+                    result.emplace_back(Move{x, y, _x2, y});
                     break;
                 }
                 else
@@ -319,7 +319,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
         }
         else
         {
-            result.emplace_back(Move{ x, y, _x, y });
+            result.emplace_back(Move{x, y, _x, y});
         }
     }
     for (int _x = x - 1; _x >= 0; _x--)
@@ -334,7 +334,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
                 }
                 else if (board.teamOn(_x2, y) != team)
                 {
-                    result.emplace_back(Move{ x, y, _x2, y });
+                    result.emplace_back(Move{x, y, _x2, y});
                     break;
                 }
                 else
@@ -346,7 +346,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
         }
         else
         {
-            result.emplace_back(Move{ x, y, _x, y });
+            result.emplace_back(Move{x, y, _x, y});
         }
     }
     for (int _y = y + 1; _y <= 9; _y++)
@@ -361,7 +361,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
                 }
                 else if (board.teamOn(x, _y2) != team)
                 {
-                    result.emplace_back(Move{ x, y, x, _y2 });
+                    result.emplace_back(Move{x, y, x, _y2});
                     break;
                 }
                 else
@@ -373,7 +373,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
         }
         else
         {
-            result.emplace_back(Move{ x, y, x, _y });
+            result.emplace_back(Move{x, y, x, _y});
         }
     }
     for (int _y = y - 1; _y >= 0; _y--)
@@ -388,7 +388,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
                 }
                 else if (board.teamOn(x, _y2) != team)
                 {
-                    result.emplace_back(Move{ x, y, x, _y2 });
+                    result.emplace_back(Move{x, y, x, _y2});
                     break;
                 }
                 else
@@ -400,7 +400,7 @@ MOVES Moves::cannon(TEAM team, Board board, int x, int y)
         }
         else
         {
-            result.emplace_back(Move{ x, y, x, _y });
+            result.emplace_back(Move{x, y, x, _y});
         }
     }
 
@@ -416,7 +416,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
         {
             if (board.teamOn(x, y + 1) != team)
             {
-                return MOVES{ Move{x, y, x, y + 1} };
+                return MOVES{Move{x, y, x, y + 1}};
             }
         }
         else
@@ -426,7 +426,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
             {
                 if (x >= 0 && x <= 8 || y + 1 >= 0 || y + 1 <= 9)
                 {
-                    result.emplace_back(Move{ x, y, x, y + 1 });
+                    result.emplace_back(Move{x, y, x, y + 1});
                 }
             }
             if (board.teamOn(x + 1, y) != team)
@@ -434,14 +434,14 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
                 if (x + 1 >= 0 && x + 1 <= 8 || y >= 0 || y <= 9)
                 {
 
-                    result.emplace_back(Move{ x, y, x + 1, y });
+                    result.emplace_back(Move{x, y, x + 1, y});
                 }
             }
             if (board.teamOn(x - 1, y) != team)
             {
                 if (x - 1 >= 0 && x - 1 <= 8 || y >= 0 || y <= 9)
                 {
-                    result.emplace_back(Move{ x, y, x - 1, y });
+                    result.emplace_back(Move{x, y, x - 1, y});
                 }
             }
             return result;
@@ -453,7 +453,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
         {
             if (board.teamOn(x, y - 1) != team)
             {
-                return MOVES{ Move{x, y, x, y - 1} };
+                return MOVES{Move{x, y, x, y - 1}};
             }
         }
         else
@@ -463,7 +463,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
             {
                 if (x >= 0 && x <= 8 || y - 1 >= 0 || y - 1 <= 9)
                 {
-                    result.emplace_back(Move{ x, y, x, y - 1 });
+                    result.emplace_back(Move{x, y, x, y - 1});
                 }
             }
             if (board.teamOn(x + 1, y) != team)
@@ -471,14 +471,14 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
                 if (x + 1 >= 0 && x + 1 <= 8 || y >= 0 || y <= 9)
                 {
 
-                    result.emplace_back(Move{ x, y, x + 1, y });
+                    result.emplace_back(Move{x, y, x + 1, y});
                 }
             }
             if (board.teamOn(x - 1, y) != team)
             {
                 if (x - 1 >= 0 && x - 1 <= 8 || y >= 0 || y <= 9)
                 {
-                    result.emplace_back(Move{ x, y, x - 1, y });
+                    result.emplace_back(Move{x, y, x - 1, y});
                 }
             }
             return result;
@@ -533,10 +533,15 @@ MOVES Moves::generateMoves(Board board, int x, int y)
 /// @return
 MOVES Moves::getMovesOf(Board board, TEAM team)
 {
+    if (board.isKingLive(team) == false)
+    {
+        return MOVES{};
+    }
+    
     MOVES result{};
 
     std::vector<Piece> pieces = board.getPiecesByTeam(team);
-    for (const Piece& piece : pieces)
+    for (const Piece &piece : pieces)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)

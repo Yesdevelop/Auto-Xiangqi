@@ -50,24 +50,24 @@ int __count__ = 0;
 /// @param depth 深度
 /// @param isMax 节点类型，true为max节点，false为min节点
 /// @return 节点
-Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int alpha, int beta)
+Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM currentTeam, int alpha, int beta)
 {
     __count__++;
     if (depth <= 0)
     {
-        int eval = isRedGo == RED ? Evaluate::evaluate(board) : -Evaluate::evaluate(board);
+        int eval = currentTeam == RED ? Evaluate::evaluate(board) : -Evaluate::evaluate(board);
         return Node(Move(), eval);
     }
-    MOVES availableMoves = Moves::getMovesOf(board, isRedGo);
+    MOVES availableMoves = Moves::getMovesOf(board, currentTeam);
     KillerHeuristic::sort(depth, availableMoves);
     HistoryHeuristic::sort(availableMoves);
 
-    Move(*pBestMove) = nullptr;
+    Move *pBestMove = nullptr;
     int vlBest = -INF;
     for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -Search::alphabeta(board, depth - 1, maxDepth, -isRedGo, -beta, -alpha).score;
+        int vl = -Search::alphabeta(board, depth - 1, maxDepth, -currentTeam, -beta, -alpha).score;
         board.undoMove(move, eaten);
 
         if (vl > vlBest)
@@ -94,6 +94,6 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int 
     }
     else
     {
-        return Node{Move{}, isRedGo ? -INF + depth: INF - depth};
+        return Node{Move{}, currentTeam ? -INF + depth : INF - depth};
     }
 }

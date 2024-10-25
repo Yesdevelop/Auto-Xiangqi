@@ -22,6 +22,11 @@ public:
     void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
     void undoMove(Move move, Piece eaten);
 
+    bool isKingLive(TEAM team)
+    {
+        return team == RED ? this->isRedKingLive : this->isBlackKingLive;
+    }
+
     void print();
 
 private:
@@ -35,6 +40,9 @@ private:
     U64 zobrist = 0l;
     std::vector<U64> zobristHistory{};
     void updateZobrist();
+
+    bool isRedKingLive = false;
+    bool isBlackKingLive = false;
 };
 
 /// @brief 初始化棋盘
@@ -59,6 +67,14 @@ Board::Board(PIECEID_MAP pieceidMap)
                 else
                 {
                     this->blackPieces.emplace_back(int(this->pieces.size()) - 1);
+                }
+                if (pieceid == R_KING)
+                {
+                    this->isRedKingLive = true;
+                }
+                if (pieceid == B_KING)
+                {
+                    this->isBlackKingLive = true;
                 }
             }
             else
@@ -209,6 +225,14 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
         this->pieces[eaten.pieceIndex].isLive = false;
     }
     this->updateZobrist();
+    if (eaten.pieceid == R_KING)
+    {
+        this->isRedKingLive = false;
+    }
+    if (eaten.pieceid == B_KING)
+    {
+        this->isBlackKingLive = false;
+    }
     return eaten;
 }
 
@@ -249,6 +273,14 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     else
     {
         this->updateZobrist();
+    }
+    if (eaten.pieceid == R_KING)
+    {
+        this->isRedKingLive = true;
+    }
+    if (eaten.pieceid == B_KING)
+    {
+        this->isBlackKingLive = true;
     }
 }
 

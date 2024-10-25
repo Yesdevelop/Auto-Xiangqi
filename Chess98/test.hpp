@@ -16,10 +16,8 @@ void standardTest()
     s = Search::alphabeta(board, 1, 1, true, -INF, INF);
     s = Search::alphabeta(board, 2, 2, true, -INF, INF);
     s = Search::alphabeta(board, 3, 3, true, -INF, INF);
-
-    __count__ = 0;
-
     s = Search::alphabeta(board, 4, 4, true, -INF, INF);
+    s = Search::alphabeta(board, 5, 5, true, -INF, INF);
 
     board.doMove(s.move);
 
