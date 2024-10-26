@@ -59,7 +59,6 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM currentTeam, 
         return Node(Move(), eval);
     }
     MOVES availableMoves = Moves::getMovesOf(board, currentTeam);
-    KillerHeuristic::sort(depth, availableMoves);
     HistoryHeuristic::sort(availableMoves);
 
     Move *pBestMove = nullptr;
@@ -76,7 +75,6 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM currentTeam, 
             pBestMove = &move;
             if (vl >= beta)
             {
-                KillerHeuristic::add(depth, move);
                 break;
             }
             if (vl > alpha)

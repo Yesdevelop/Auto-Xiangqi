@@ -222,38 +222,6 @@ MOVES Moves::rook(TEAM team, Board board, int x, int y)
 {
     MOVES result{};
 
-    for (int _x = x + 1; _x <= 8; _x++)
-    {
-        if (board.teamOn(_x, y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-        else if (board.teamOn(_x, y) != team)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (int _x = x - 1; _x >= 0; _x--)
-    {
-        if (board.teamOn(_x, y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-        else if (board.teamOn(_x, y) != team)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
     for (int _y = y + 1; _y <= 9; _y++)
     {
         if (board.teamOn(x, _y) == EMPTY_TEAM)
@@ -279,6 +247,38 @@ MOVES Moves::rook(TEAM team, Board board, int x, int y)
         else if (board.teamOn(x, _y) != team)
         {
             result.emplace_back(Move{x, y, x, _y});
+            break;
+        }
+        else
+        {
+            break;
+        }
+    }
+    for (int _x = x + 1; _x <= 8; _x++)
+    {
+        if (board.teamOn(_x, y) == EMPTY_TEAM)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+        }
+        else if (board.teamOn(_x, y) != team)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+            break;
+        }
+        else
+        {
+            break;
+        }
+    }
+    for (int _x = x - 1; _x >= 0; _x--)
+    {
+        if (board.teamOn(_x, y) == EMPTY_TEAM)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+        }
+        else if (board.teamOn(_x, y) != team)
+        {
+            result.emplace_back(Move{x, y, _x, y});
             break;
         }
         else
@@ -537,7 +537,7 @@ MOVES Moves::getMovesOf(Board board, TEAM team)
     {
         return MOVES{};
     }
-    
+
     MOVES result{};
 
     std::vector<Piece> pieces = board.getPiecesByTeam(team);

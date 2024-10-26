@@ -22,7 +22,7 @@ public:
     void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
     void undoMove(Move move, Piece eaten);
 
-    bool isKingLive(TEAM team)
+    bool isKingLive(TEAM team) const
     {
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
