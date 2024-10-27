@@ -60,7 +60,7 @@ WEIGHT_MAP WEIGHT_KNIGHT{
 
 WEIGHT_MAP WEIGHT_ROOK{
     {
-        {598, 608, 604, 606, 612, 612, 612, 612, 616, 614},
+        {580, 608, 604, 606, 612, 612, 612, 612, 616, 614},
         {610, 604, 608, 610, 616, 614, 618, 612, 620, 614},
         {606, 608, 606, 608, 614, 612, 616, 612, 618, 612},
         {614, 616, 614, 614, 620, 618, 622, 618, 624, 618},
@@ -68,7 +68,7 @@ WEIGHT_MAP WEIGHT_ROOK{
         {614, 616, 614, 614, 620, 618, 622, 618, 624, 618},
         {606, 608, 606, 608, 614, 612, 616, 612, 618, 612},
         {610, 604, 608, 610, 616, 614, 618, 612, 620, 614},
-        {598, 608, 604, 606, 612, 612, 612, 612, 616, 614},
+        {580, 608, 604, 606, 612, 612, 612, 612, 616, 614},
     }};
 
 WEIGHT_MAP WEIGHT_CANNON{
@@ -103,12 +103,14 @@ std::map<PIECEID, WEIGHT_MAP> pieceWeights {
     {R_BISHOP, WEIGHT_BISHOP},
     {R_KNIGHT, WEIGHT_KNIGHT},
     {R_ROOK, WEIGHT_ROOK},
+    {R_CANNON, WEIGHT_CANNON},
     {R_PAWN, WEIGHT_PAWN},
     {B_KING, WEIGHT_KING},
     {B_GUARD, WEIGHT_GUARD},
     {B_BISHOP, WEIGHT_BISHOP},
     {B_KNIGHT, WEIGHT_KNIGHT},
     {B_ROOK, WEIGHT_ROOK},
+    {B_CANNON, WEIGHT_CANNON},
     {B_PAWN, WEIGHT_PAWN}
 };
 
@@ -133,11 +135,10 @@ int Evaluate::evaluate(Board board)
     }
     // 黑方评估分
     int blackScore = 0;
-    std::vector<Piece> blackPieces = board.getPiecesByTeam(RED);
+    std::vector<Piece> blackPieces = board.getPiecesByTeam(BLACK);
     for (const Piece &piece : blackPieces)
     {
-        redScore += pieceWeights[piece.pieceid][piece.x][size_t(9) - piece.y];
+        blackScore += pieceWeights[piece.pieceid][piece.x][size_t(9) - piece.y];
     }
-
     return redScore - blackScore;
 }

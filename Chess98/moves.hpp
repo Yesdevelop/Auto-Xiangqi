@@ -169,7 +169,7 @@ MOVES Moves::bishop(TEAM team, Board board, int x, int y)
         }
         else
         {
-            if (x >= 0 && x <= 0 && y >= 5 && y <= 9)
+            if (x >= 0 && x <= 8 && y >= 5 && y <= 9)
             {
                 result.emplace_back(v);
             }
