@@ -2,25 +2,13 @@
 
 #include "search.hpp"
 
-void standardTest(Board board = DEFAULT_MAP, TEAM team = BLACK)
+void standardTest(TEAM team = BLACK)
 {
+    Board board = Board(DEFAULT_MAP,team);
     board.print();
-    auto v = Moves::bishop(BLACK, board, 2, 9);
-
-    std::cout << Evaluate::evaluate(board);
-    Node s{Move{}, 0};
-
-    s = Search::alphabeta(board, 4, 4, BLACK, -INF, INF);
-
-    board.doMove(s.move);
-
+    Search ss;
+    Node n = ss.searchMain(board,6,10);
+    board.doMove(n.move);
     board.print();
-
-    std::cout << "score: " << s.score << std::endl;
-
-    std::cout << __count__ << std::endl;
-
-    system("pause");
-
-    standardTest(board, -team);
+    std::cout << "score: " << n.score << std::endl;
 }

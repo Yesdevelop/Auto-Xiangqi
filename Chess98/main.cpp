@@ -3,9 +3,8 @@
 int main()
 {
     initZobrist();
-    HistoryHeuristic::init();
 
-    standardTest();
+    standardTest(RED);
 
     return 0;
 }

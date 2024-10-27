@@ -140,5 +140,8 @@ int Evaluate::evaluate(Board board)
     {
         blackScore += pieceWeights[piece.pieceid][piece.x][size_t(9) - piece.y];
     }
+    if(board.team == BLACK){
+        return blackScore - redScore;
+    }
     return redScore - blackScore;
 }

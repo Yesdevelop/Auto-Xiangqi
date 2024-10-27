@@ -22,7 +22,7 @@ public:
 
     static MOVES generateMoves(Board board, int x, int y);
 
-    static MOVES getMovesOf(Board board, TEAM team);
+    static MOVES getMovesOf(Board board);
 };
 
 /// @brief 生成将帅的着法
@@ -531,16 +531,16 @@ MOVES Moves::generateMoves(Board board, int x, int y)
 /// @brief 获取一队的所有可行着法
 /// @param team
 /// @return
-MOVES Moves::getMovesOf(Board board, TEAM team)
+MOVES Moves::getMovesOf(Board board)
 {
-    if (board.isKingLive(team) == false)
+    if (!board.isKingLive(board.team))
     {
         return MOVES{};
     }
 
     MOVES result{};
 
-    std::vector<Piece> pieces = board.getPiecesByTeam(team);
+    std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
     for (const Piece &piece : pieces)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);

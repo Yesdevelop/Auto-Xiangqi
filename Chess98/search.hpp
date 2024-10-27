@@ -3,6 +3,8 @@
 #include "moves.hpp"
 #include "evaluate.hpp"
 #include "heuristic.hpp"
+#include <cassert>
+#include <windows.h>
 
 /// @brief 节点对象，存储分数 + 着法
 class Node
@@ -13,60 +15,117 @@ public:
     int score = 0;
 };
 
-/// @brief 搜索
 class Search
 {
 public:
-    static Node search(Board &board, TEAM currentTeam, int time);
-    static Node alphabeta(Board &board, int depth, int maxDepth, TEAM isRedGo, int alpha, int beta);
+    void searchInit(){
+        rootMoves.resize(0);
+        this->hisCache.init();
+    }
+    void searchStep(Move& bestMove){
+        for(auto &move : rootMoves){
+            if(bestMove == move){
+                move.val = INF;
+            }else{
+                move.val--;
+            }
+        }
+    }
+    void searchIterate(){
+        std::sort(rootMoves.begin(),rootMoves.end(), vlMoveCompare);
+    }
+public:
+    Node searchMain(Board& board,int maxDepth,int maxTime);
+    Node searchRoot(Board &board, int depth,int alpha, int beta);
+    int searchPV(Board &board, int depth,int alpha, int beta);
+    int searchCut(Board &board, int depth,int beta);
+public:
+    static bool vlMoveCompare(Move& first,Move& second){
+        return first.val > second.val;
+    }
+public:
+    HistoryHeuristic hisCache;
+    MOVES rootMoves;
 };
 
-/// @brief 迭代加深搜索
-/// @param board
-/// @param currentTeam
-/// @param depth
-/// @return
-Node Search::search(Board &board, TEAM currentTeam, int time)
-{
-    Node result{Move{}, 0};
-    int depth = 0;
+Node Search::searchMain(Board &board, int maxDepth,int maxTime = 3) {
+    searchInit();
+    this->rootMoves = Moves::getMovesOf(board);
+    Node bestNode = Node(Move(),0);
+    clock_t start = clock();
+    for(int depth = 1;depth <= maxDepth;depth++){
+        bestNode = searchRoot(board,depth,-INF,INF);
 
-    TIME_T startTime = getCurrentTimeWithMS();
-    do
-    {
-        result = Search::alphabeta(
-            board, depth, depth,
-            currentTeam == RED ? true : false,
-            -100000, 100000);
-        depth += 1;
-    } while (getCurrentTimeWithMS() - startTime < time);
-
-    return result;
+        if(clock() - start >= maxTime * 1000 / 3){
+            break;
+        }
+    }
+    return bestNode;
 }
 
-int __count__ = 0;
-
-/// @brief alphabeta搜索
-/// @param depth 深度
-/// @param isMax 节点类型，true为max节点，false为min节点
-/// @return 节点
-Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM currentTeam, int alpha, int beta)
+Node Search::searchRoot(Board &board, int depth, int alpha, int beta)
 {
-    __count__++;
-    if (depth <= 0)
-    {
-        int eval = currentTeam == RED ? Evaluate::evaluate(board) : -Evaluate::evaluate(board);
-        return Node(Move(), eval);
-    }
-    MOVES availableMoves = Moves::getMovesOf(board, currentTeam);
-    HistoryHeuristic::sort(availableMoves);
-
+    assert(depth > 0);
     Move *pBestMove = nullptr;
+    int vl = -INF;
+    int vlBest = -INF;
+    for (auto &move : rootMoves)
+    {
+        Piece eaten = board.doMove(move);
+        if(vlBest == -INF){
+            vl = -searchPV(board, depth - 1, -beta, -alpha);
+        }else{
+            vl = -searchCut(board,depth - 1,-beta + 1);
+            if(vl > alpha && vl < beta){
+                vl = -searchPV(board, depth - 1, -beta, -alpha);
+            }
+        }
+        board.undoMove(move, eaten);
+
+        if (vl > vlBest)
+        {
+            vlBest = vl;
+            pBestMove = &move;
+            searchStep(move);
+            if (vl >= beta)
+            {
+                break;
+            }
+            if (vl > alpha)
+            {
+                alpha = vl;
+            }
+        }
+    }
+
+    if(!pBestMove){
+        vlBest += depth;
+    }else{
+        hisCache.add(*pBestMove,depth);
+    }
+    return Node(!pBestMove ? Move{} : *pBestMove, vlBest);
+}
+
+int Search::searchPV(Board &board, int depth,int alpha, int beta){
+    if(depth <= 0){
+        return Evaluate::evaluate(board);
+    }
+    MOVES availableMoves = Moves::getMovesOf(board);
+    hisCache.sort(availableMoves);
+    Move *pBestMove = nullptr;
+    int vl = -INF;
     int vlBest = -INF;
     for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -Search::alphabeta(board, depth - 1, maxDepth, -currentTeam, -beta, -alpha).score;
+        if(vlBest == -INF){
+            vl = -searchPV(board, depth - 1, -beta, -alpha);
+        }else{
+            vl = -searchCut(board,depth - 1,-beta + 1);
+            if(vl > alpha && vl < beta){
+                vl = -searchPV(board, depth - 1, -beta, -alpha);
+            }
+        }
         board.undoMove(move, eaten);
 
         if (vl > vlBest)
@@ -84,14 +143,43 @@ Node Search::alphabeta(Board &board, int depth, int maxDepth, TEAM currentTeam, 
         }
     }
 
-    if (pBestMove)
-    {
-        Node node{*pBestMove, vlBest};
-        HistoryHeuristic::add(node.move, maxDepth + 1 - depth);
-        return node;
+    if(!pBestMove){
+        vlBest += depth;
+    }else{
+        hisCache.add(*pBestMove,depth);
     }
-    else
-    {
-        return Node{Move{}, currentTeam ? -INF + depth : INF - depth};
+    return vlBest;
+}
+
+int Search::searchCut(Board &board, int depth,int beta){
+    if(depth <= 0){
+        return Evaluate::evaluate(board);
     }
+    MOVES availableMoves = Moves::getMovesOf(board);
+    hisCache.sort(availableMoves);
+    Move *pBestMove = nullptr;
+    int vlBest = -INF;
+    for (auto &move : availableMoves)
+    {
+        Piece eaten = board.doMove(move);
+        int vl = -searchCut(board, depth - 1, -beta + 1);
+        board.undoMove(move, eaten);
+
+        if (vl > vlBest)
+        {
+            vlBest = vl;
+            pBestMove = &move;
+            if (vl >= beta)
+            {
+                break;
+            }
+        }
+    }
+
+    if(!pBestMove){
+        vlBest += depth;
+    }else{
+        hisCache.add(*pBestMove,depth);
+    }
+    return vlBest;
 }

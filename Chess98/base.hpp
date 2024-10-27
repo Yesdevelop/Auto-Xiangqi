@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -7,6 +7,8 @@
 #include <array>
 #include <chrono>
 #include <map>
+#include "board.hpp"
+
 using PIECE_INDEX = int;
 using U64 = unsigned long long;
 
@@ -35,7 +37,7 @@ const TEAM BLACK = -1;
 const TEAM OVERFLOW_TEAM = 2;
 
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
-const PIECEID_MAP DEFAULT_MAP{
+PIECEID_MAP DEFAULT_MAP{
    {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
@@ -89,17 +91,22 @@ public:
 class Move
 {
 public:
-    Move() {}
-    Move(int x1, int y1, int x2, int y2)
+    Move() {
+    }
+    Move(int x1, int y1, int x2, int y2,int val = 0)
         : x1(x1),
           y1(y1),
           x2(x2),
-          y2(y2) {}
+          y2(y2) {
+        this->val = val;
+    }
 
     int x1 = -1;
     int y1 = -1;
     int x2 = -1;
     int y2 = -1;
+    int val = 0;
+
 
     /// @brief 等于
     /// @note 这个实现有点耗时，不过暂时这样，我之后改一下
@@ -217,17 +224,5 @@ U64 zobristMap[7][2][9][10];
 /// @brief 初始化
 void initZobrist()
 {
-    for (int i = 0; i < 7; i++)
-    {
-        for (int j = 0; j < 2; j++)
-        {
-            for (int k = 0; k < 9; k++)
-            {
-                for (U64& v : zobristMap[i][j][k])
-                {
-                    v = rand64();
-                }
-            }
-        }
-    }
+    memset(zobristMap,static_cast<U64>(0),sizeof(U64) * 7 * 2 * 9 * 10);
 }

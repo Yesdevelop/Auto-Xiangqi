@@ -6,7 +6,7 @@
 class Board
 {
 public:
-    Board(PIECEID_MAP pieceidMap);
+    Board(PIECEID_MAP pieceidMap,int initTeam);
 
     Piece findPieceByIndex(PIECE_INDEX pieceIndex);
     Piece findPieceByPosition(int x, int y);
@@ -28,7 +28,8 @@ public:
     }
 
     void print();
-
+public:
+    int team;
 private:
     PIECEID_MAP pieceidMap{};
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
@@ -47,8 +48,9 @@ private:
 
 /// @brief 初始化棋盘
 /// @param pieceidMap 棋子id位置表，一般传DEFAULT_PIECEID_MAP
-Board::Board(PIECEID_MAP pieceidMap)
+Board::Board(PIECEID_MAP pieceidMap,int initTeam)
 {
+    this->team = initTeam;
     this->pieceidMap = pieceidMap;
     for (int x = 0; x < 9; x++)
     {
@@ -210,6 +212,7 @@ std::vector<Piece> Board::getPiecesByTeam(TEAM team)
 /// @return 被吃掉的子
 Piece Board::doMove(int x1, int y1, int x2, int y2)
 {
+    this->team = -this->team;
     Piece eaten = this->findPieceByPosition(x2, y2);
     Piece attackStarter = this->findPieceByPosition(x1, y1);
 
@@ -252,6 +255,7 @@ Piece Board::doMove(Move move)
 /// @param eaten
 void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 {
+    this->team = -this->team;
     Piece attackStarter = this->findPieceByPosition(x2, y2);
 
     // 维护棋盘的棋子追踪
