@@ -36,7 +36,7 @@ public:
     }
 public:
     Node searchMain(Board& board,int maxDepth,int maxTime);
-    Node searchRoot(Board &board, int depth,int alpha, int beta);
+    Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth,int alpha, int beta);
     int searchCut(Board &board, int depth,int beta);
 public:
@@ -54,7 +54,7 @@ Node Search::searchMain(Board &board, int maxDepth,int maxTime = 3) {
     Node bestNode = Node(Move(),0);
     clock_t start = clock();
     for(int depth = 1;depth <= maxDepth;depth++){
-        bestNode = searchRoot(board,depth,-INF,INF);
+        bestNode = searchRoot(board,depth);
 
         if(clock() - start >= maxTime * 1000 / 3){
             break;
@@ -63,7 +63,7 @@ Node Search::searchMain(Board &board, int maxDepth,int maxTime = 3) {
     return bestNode;
 }
 
-Node Search::searchRoot(Board &board, int depth, int alpha, int beta)
+Node Search::searchRoot(Board &board, int depth)
 {
     assert(depth > 0);
     Move *pBestMove = nullptr;
@@ -73,11 +73,11 @@ Node Search::searchRoot(Board &board, int depth, int alpha, int beta)
     {
         Piece eaten = board.doMove(move);
         if(vlBest == -INF){
-            vl = -searchPV(board, depth - 1, -beta, -alpha);
+            vl = -searchPV(board, depth - 1, -INF, -vlBest);
         }else{
-            vl = -searchCut(board,depth - 1,-beta + 1);
-            if(vl > alpha && vl < beta){
-                vl = -searchPV(board, depth - 1, -beta, -alpha);
+            vl = -searchCut(board,depth - 1,-vlBest);
+            if(vl > vlBest){
+                vl = -searchPV(board, depth - 1, -INF, -vlBest);
             }
         }
         board.undoMove(move, eaten);
@@ -87,14 +87,6 @@ Node Search::searchRoot(Board &board, int depth, int alpha, int beta)
             vlBest = vl;
             pBestMove = &move;
             searchStep(move);
-            if (vl >= beta)
-            {
-                break;
-            }
-            if (vl > alpha)
-            {
-                alpha = vl;
-            }
         }
     }
 
@@ -121,7 +113,7 @@ int Search::searchPV(Board &board, int depth,int alpha, int beta){
         if(vlBest == -INF){
             vl = -searchPV(board, depth - 1, -beta, -alpha);
         }else{
-            vl = -searchCut(board,depth - 1,-beta + 1);
+            vl = -searchCut(board,depth - 1,-alpha);
             if(vl > alpha && vl < beta){
                 vl = -searchPV(board, depth - 1, -beta, -alpha);
             }
