@@ -97,7 +97,7 @@ WEIGHT_MAP WEIGHT_PAWN{
         {30, 30, 30, 30, 32, 36, 40, 44, 48, 30},
     }};
 
-std::map<PIECEID, WEIGHT_MAP> pieceWeights {
+std::map<PIECEID, WEIGHT_MAP> pieceWeights{
     {R_KING, WEIGHT_KING},
     {R_GUARD, WEIGHT_GUARD},
     {R_BISHOP, WEIGHT_BISHOP},
@@ -111,8 +111,7 @@ std::map<PIECEID, WEIGHT_MAP> pieceWeights {
     {B_KNIGHT, WEIGHT_KNIGHT},
     {B_ROOK, WEIGHT_ROOK},
     {B_CANNON, WEIGHT_CANNON},
-    {B_PAWN, WEIGHT_PAWN}
-};
+    {B_PAWN, WEIGHT_PAWN}};
 
 /// @brief 评估
 class Evaluate
@@ -129,7 +128,7 @@ int Evaluate::evaluate(Board board)
     // 红方评估分
     int redScore = 0;
     std::vector<Piece> redPieces = board.getPiecesByTeam(RED);
-    for (const Piece& piece : redPieces)
+    for (const Piece &piece : redPieces)
     {
         redScore += pieceWeights[piece.pieceid][piece.x][piece.y];
     }
@@ -140,7 +139,8 @@ int Evaluate::evaluate(Board board)
     {
         blackScore += pieceWeights[piece.pieceid][piece.x][size_t(9) - piece.y];
     }
-    if(board.team == BLACK){
+    if (board.team == BLACK)
+    {
         return blackScore - redScore;
     }
     return redScore - blackScore;

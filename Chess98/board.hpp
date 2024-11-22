@@ -6,7 +6,7 @@
 class Board
 {
 public:
-    Board(PIECEID_MAP pieceidMap,int initTeam);
+    Board(PIECEID_MAP pieceidMap, int initTeam);
 
     Piece findPieceByIndex(PIECE_INDEX pieceIndex);
     Piece findPieceByPosition(int x, int y);
@@ -28,8 +28,9 @@ public:
     }
 
     void print();
-public:
+
     int team;
+
 private:
     PIECEID_MAP pieceidMap{};
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
@@ -48,8 +49,9 @@ private:
 
 /// @brief 初始化棋盘
 /// @param pieceidMap 棋子id位置表，一般传DEFAULT_PIECEID_MAP
-Board::Board(PIECEID_MAP pieceidMap,int initTeam)
+Board::Board(PIECEID_MAP pieceidMap, int initTeam)
 {
+    initZobrist();
     this->team = initTeam;
     this->pieceidMap = pieceidMap;
     for (int x = 0; x < 9; x++)
@@ -92,14 +94,7 @@ Board::Board(PIECEID_MAP pieceidMap,int initTeam)
 /// @return
 Piece Board::findPieceByIndex(PIECE_INDEX pieceIndex)
 {
-    if (pieceIndex != -1)
-    {
-        return this->pieces[pieceIndex];
-    }
-    else
-    {
-        throw "try to access an invaild pieceIndex";
-    }
+    return this->pieces[pieceIndex];
 }
 
 /// @brief 通过位置查找piece（若为空则返回一个index为-1的piece）

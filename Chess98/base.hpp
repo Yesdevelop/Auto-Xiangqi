@@ -38,15 +38,15 @@ const TEAM OVERFLOW_TEAM = 2;
 
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 PIECEID_MAP DEFAULT_MAP{
-   {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
-    {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-    {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-    {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-    {R_KING, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_KING},
-    {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-    {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-    {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-    {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
+    {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
+     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
+     {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
+     {R_KING, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_KING},
+     {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
+     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
+     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+     {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
 const int INF = 1000000;
 const int BAN = INF - 2000;
 
@@ -91,40 +91,30 @@ public:
 class Move
 {
 public:
-    Move() {
-    }
-    Move(int x1, int y1, int x2, int y2,int val = 0)
+    Move() {}
+    Move(int x1, int y1, int x2, int y2, int val = 0)
         : x1(x1),
           y1(y1),
           x2(x2),
-          y2(y2) {
-        this->val = val;
-    }
+          y2(y2),
+          id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
+          val(val) {}
 
     int x1 = -1;
     int y1 = -1;
     int x2 = -1;
     int y2 = -1;
+    int id = -1;
     int val = 0;
 
-
-    /// @brief 等于
-    /// @note 这个实现有点耗时，不过暂时这样，我之后改一下
-    /// @param move
-    /// @return
     bool operator==(Move move)
     {
-        return (
-            this->x1 == move.x1 &&
-            this->x2 == move.x2 &&
-            this->y1 == move.y1 &&
-            this->y2 == move.y2
-        );
+        return this->id == move.id;
     }
 
     bool operator!=(Move move)
     {
-        return !(*this == move);
+        return this->id != move.id;
     }
 };
 
@@ -219,10 +209,10 @@ U64 rand64()
     return rand() ^ ((U64)rand() << 15) ^ ((U64)rand() << 30) ^ ((U64)rand() << 45) ^ ((U64)rand() << 60);
 }
 
-U64 zobristMap[7][2][9][10];
+U64 zobristMap[7][2][9][10]{};
 
 /// @brief 初始化
 void initZobrist()
 {
-    memset(zobristMap,static_cast<U64>(0),sizeof(U64) * 7 * 2 * 9 * 10);
+    memset(zobristMap, static_cast<U64>(0), sizeof(U64) * 7 * 2 * 9 * 10);
 }

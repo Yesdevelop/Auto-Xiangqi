@@ -12,12 +12,15 @@ class HistoryHeuristic
 {
 public:
     void init();
-    void sort(MOVES& moves);
+    void sort(MOVES &moves);
     void add(Move move, int depth);
+
 public:
-    static bool vlHisCompare(Move& first,Move& second){
+    static bool vlHisCompare(Move &first, Move &second)
+    {
         return first.val > second.val;
     }
+
 public:
     int historyTable[90][90];
 };
@@ -34,15 +37,15 @@ int toIndex(int x, int y)
 /// @brief 初始化
 void HistoryHeuristic::init()
 {
-    std::memset(historyTable,0,sizeof(int) * 90 * 90);
+    std::memset(historyTable, 0, sizeof(int) * 90 * 90);
 }
 
 /// @brief 历史表排序
 /// @param moves
 /// @return
-void HistoryHeuristic::sort(MOVES& moves)
+void HistoryHeuristic::sort(MOVES &moves)
 {
-    for (Move& move : moves)
+    for (Move &move : moves)
     {
         int pos1 = toIndex(move.x1, move.y1);
         int pos2 = toIndex(move.x2, move.y2);
