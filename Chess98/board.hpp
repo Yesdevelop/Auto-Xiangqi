@@ -27,9 +27,11 @@ public:
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    void print();
+    TEAM team;
+    Piece* pieceRedKing = nullptr;
+    Piece* pieceBlackKing = nullptr;
 
-    int team;
+    void print();
 
 private:
     PIECEID_MAP pieceidMap{};
@@ -75,10 +77,12 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
                 if (pieceid == R_KING)
                 {
                     this->isRedKingLive = true;
+                    this->pieceRedKing = &this->pieces.back();
                 }
                 if (pieceid == B_KING)
                 {
                     this->isBlackKingLive = true;
+                    this->pieceBlackKing = &this->pieces.back();
                 }
             }
             else

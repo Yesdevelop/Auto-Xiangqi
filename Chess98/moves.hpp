@@ -22,7 +22,7 @@ public:
 
     static MOVES generateMoves(Board board, int x, int y);
 
-    static MOVES getMovesOf(Board board);
+    static MOVES getMoves(Board board);
 };
 
 /// @brief 生成将帅的着法
@@ -531,7 +531,7 @@ MOVES Moves::generateMoves(Board board, int x, int y)
 /// @brief 获取一队的所有可行着法
 /// @param team
 /// @return
-MOVES Moves::getMovesOf(Board board)
+MOVES Moves::getMoves(Board board)
 {
     if (!board.isKingLive(board.team))
     {

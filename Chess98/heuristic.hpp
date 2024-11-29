@@ -12,16 +12,14 @@ class HistoryHeuristic
 {
 public:
     void init();
-    void sort(MOVES &moves);
+    void sort(MOVES& moves);
     void add(Move move, int depth);
 
-public:
     static bool vlHisCompare(Move &first, Move &second)
     {
         return first.val > second.val;
     }
-
-public:
+    
     int historyTable[90][90];
 };
 
@@ -43,7 +41,7 @@ void HistoryHeuristic::init()
 /// @brief 历史表排序
 /// @param moves
 /// @return
-void HistoryHeuristic::sort(MOVES &moves)
+void HistoryHeuristic::sort(MOVES& moves)
 {
     for (Move &move : moves)
     {
