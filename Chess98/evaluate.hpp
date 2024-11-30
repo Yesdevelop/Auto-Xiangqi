@@ -1,6 +1,6 @@
 #pragma once
 
-#include "moves.hpp"
+#include "base.hpp"
 
 using WEIGHT_MAP = const std::array<std::array<int, 10>, 9>;
 
@@ -112,36 +112,3 @@ std::map<PIECEID, WEIGHT_MAP> pieceWeights{
     {B_ROOK, WEIGHT_ROOK},
     {B_CANNON, WEIGHT_CANNON},
     {B_PAWN, WEIGHT_PAWN}};
-
-/// @brief 评估
-class Evaluate
-{
-public:
-    static int evaluate(Board board);
-};
-
-/// @brief 评估函数
-/// @param board
-/// @return
-int Evaluate::evaluate(Board board)
-{
-    // 红方评估分
-    int redScore = 0;
-    std::vector<Piece> redPieces = board.getPiecesByTeam(RED);
-    for (const Piece &piece : redPieces)
-    {
-        redScore += pieceWeights[piece.pieceid][piece.x][piece.y];
-    }
-    // 黑方评估分
-    int blackScore = 0;
-    std::vector<Piece> blackPieces = board.getPiecesByTeam(BLACK);
-    for (const Piece &piece : blackPieces)
-    {
-        blackScore += pieceWeights[piece.pieceid][piece.x][size_t(9) - piece.y];
-    }
-    if (board.team == BLACK)
-    {
-        return blackScore - redScore;
-    }
-    return redScore - blackScore;
-}

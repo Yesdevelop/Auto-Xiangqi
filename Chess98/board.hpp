@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base.hpp"
+#include "evaluate.hpp"
 
 /// @brief 棋盘类
 class Board
@@ -8,13 +9,13 @@ class Board
 public:
     Board(PIECEID_MAP pieceidMap, int initTeam);
 
-    Piece findPieceByIndex(PIECE_INDEX pieceIndex);
-    Piece findPieceByPosition(int x, int y);
+    Piece pieceIndex(PIECE_INDEX pieceIndex);
+    Piece piecePosition(int x, int y);
 
     PIECEID pieceidOn(int x, int y);
     TEAM teamOn(int x, int y);
 
-    std::vector<Piece> getAllPieces();
+    std::vector<Piece> getAllLivePieces();
     std::vector<Piece> getPiecesByTeam(TEAM team);
 
     Piece doMove(int x1, int y1, int x2, int y2);
@@ -28,25 +29,28 @@ public:
     }
 
     TEAM team;
-    Piece* pieceRedKing = nullptr;
-    Piece* pieceBlackKing = nullptr;
+    Piece *pieceRedKing = nullptr;
+    Piece *pieceBlackKing = nullptr;
 
     void print();
 
+    int evaluate() const
+    {
+        return this->team == RED ? -this->eval : this->eval;
+    }
+
 private:
+    // 棋盘相关
     PIECEID_MAP pieceidMap{};
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     std::vector<Piece> pieces{};
-
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};
-
-    U64 zobrist = 0l;
-    std::vector<U64> zobristHistory{};
-    void updateZobrist();
-
     bool isRedKingLive = false;
     bool isBlackKingLive = false;
+
+    // 评估相关
+    int eval = 0;
 };
 
 /// @brief 初始化棋盘
@@ -96,7 +100,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
 /// @brief 通过索引号查找piece
 /// @param pieceIndex
 /// @return
-Piece Board::findPieceByIndex(PIECE_INDEX pieceIndex)
+Piece Board::pieceIndex(PIECE_INDEX pieceIndex)
 {
     return this->pieces[pieceIndex];
 }
@@ -105,7 +109,7 @@ Piece Board::findPieceByIndex(PIECE_INDEX pieceIndex)
 /// @param x
 /// @param y
 /// @return
-Piece Board::findPieceByPosition(int x, int y)
+Piece Board::piecePosition(int x, int y)
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -113,7 +117,7 @@ Piece Board::findPieceByPosition(int x, int y)
         if (pieceid != 0)
         {
             PIECE_INDEX pieceIndex = this->pieceIndexMap[x][y];
-            return this->findPieceByIndex(pieceIndex);
+            return this->pieceIndex(pieceIndex);
         }
         else
         {
@@ -172,7 +176,7 @@ TEAM Board::teamOn(int x, int y)
 
 /// @brief 获取棋盘上所有存活的棋子
 /// @return
-std::vector<Piece> Board::getAllPieces()
+std::vector<Piece> Board::getAllLivePieces()
 {
     std::vector<Piece> result{};
     result.reserve(32);
@@ -192,7 +196,7 @@ std::vector<Piece> Board::getAllPieces()
 std::vector<Piece> Board::getPiecesByTeam(TEAM team)
 {
     std::vector<Piece> result{};
-    std::vector<Piece> allPieces = this->getAllPieces();
+    std::vector<Piece> allPieces = this->getAllLivePieces();
     for (Piece piece : allPieces)
     {
         if (piece.getTeam() == team)
@@ -211,9 +215,8 @@ std::vector<Piece> Board::getPiecesByTeam(TEAM team)
 /// @return 被吃掉的子
 Piece Board::doMove(int x1, int y1, int x2, int y2)
 {
-    this->team = -this->team;
-    Piece eaten = this->findPieceByPosition(x2, y2);
-    Piece attackStarter = this->findPieceByPosition(x1, y1);
+    Piece eaten = this->piecePosition(x2, y2);
+    Piece attackStarter = this->piecePosition(x1, y1);
 
     // 维护棋盘的棋子追踪
     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
@@ -226,7 +229,6 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         this->pieces[eaten.pieceIndex].isLive = false;
     }
-    this->updateZobrist();
     if (eaten.pieceid == R_KING)
     {
         this->isRedKingLive = false;
@@ -235,6 +237,24 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         this->isBlackKingLive = false;
     }
+    // 更新评估分
+    if (attackStarter.getTeam() == RED)
+    {
+        int valNewPos = pieceWeights[attackStarter.pieceid][x2][y2];
+        int valOldPos = pieceWeights[attackStarter.pieceid][x1][y1];
+        int valEaten = pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+        this->eval += (valNewPos - valOldPos) + valEaten;
+    }
+    else
+    {
+        int valNewPos = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
+        int valOldPos = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
+        int valEaten = pieceWeights[eaten.pieceid][x2][y2];
+        this->eval -= (valNewPos - valOldPos) + valEaten;
+    }
+
+    this->team = -this->team;
+
     return eaten;
 }
 
@@ -255,7 +275,8 @@ Piece Board::doMove(Move move)
 void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 {
     this->team = -this->team;
-    Piece attackStarter = this->findPieceByPosition(x2, y2);
+
+    Piece attackStarter = this->piecePosition(x2, y2);
 
     // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
@@ -268,15 +289,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     {
         this->pieces[eaten.pieceIndex].isLive = true;
     }
-    if (this->zobristHistory.size() > 0)
-    {
-        this->zobrist = *(this->zobristHistory.end() - 1);
-        this->zobristHistory.pop_back();
-    }
-    else
-    {
-        this->updateZobrist();
-    }
     if (eaten.pieceid == R_KING)
     {
         this->isRedKingLive = true;
@@ -284,6 +296,21 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     if (eaten.pieceid == B_KING)
     {
         this->isBlackKingLive = true;
+    }
+    // 更新评估分
+    if (attackStarter.getTeam() == RED)
+    {
+        int valPos1 = pieceWeights[attackStarter.pieceid][x1][y1];
+        int valPos2 = pieceWeights[attackStarter.pieceid][x2][y2];
+        int valEaten = pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+        this->eval -= (valPos2 - valPos1) + valEaten;
+    }
+    else
+    {
+        int valPos1 = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
+        int valPos2 = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
+        int valEaten = pieceWeights[eaten.pieceid][x2][y2];
+        this->eval += (valPos2 - valPos1) + valEaten;
     }
 }
 
@@ -293,25 +320,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 void Board::undoMove(Move move, Piece eaten)
 {
     this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
-}
-
-/// @brief 生成局面的zobrist
-/// @return
-void Board::updateZobrist()
-{
-    U64 result = U64(0);
-
-    for (const Piece &piece : this->getAllPieces())
-    {
-        U64 zobristID = zobristMap
-            [abs(piece.pieceid)]
-            [piece.pieceid > 0 ? 0 : 1]
-            [piece.x][piece.y];
-        result ^= zobristID;
-    }
-
-    this->zobrist = result;
-    this->zobristHistory.emplace_back(result);
 }
 
 /// @brief 打印
