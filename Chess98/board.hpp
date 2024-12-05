@@ -34,10 +34,12 @@ public:
 
     void print();
 
-    int evaluate() const
-    {
-        return this->team == RED ? -this->eval : this->eval;
+    void initEvaluate();
+
+    int evaluate() const {
+        return this->team == RED ? (vlRed - vlBlack) : (vlBlack - vlRed);
     }
+
 
 private:
     // 棋盘相关
@@ -50,7 +52,8 @@ private:
     bool isBlackKingLive = false;
 
     // 评估相关
-    int eval = 0;
+    int vlRed = 0;
+    int vlBlack = 0;
 };
 
 /// @brief 初始化棋盘
@@ -95,6 +98,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
             }
         }
     }
+    initEvaluate();
 }
 
 /// @brief 通过索引号查找piece
@@ -207,6 +211,20 @@ std::vector<Piece> Board::getPiecesByTeam(TEAM team)
     return result;
 }
 
+void Board::initEvaluate(){
+    this->vlRed = this->vlBlack = 0;
+    for(int x = 0;x < 9;x++){
+        for(int y = 0;y < 10;y++){
+            PIECEID pid = this->pieceidMap[x][y];
+            if(pid > 0){
+                this->vlRed += pieceWeights[pid-1][x][y];
+            }else if(pid < 0){
+                this->vlBlack += pieceWeights[abs(pid)-1][x][size_t(9)-y];
+            }
+        }
+    }
+}
+
 /// @brief 步进
 /// @param x1
 /// @param y1
@@ -242,15 +260,19 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         int valNewPos = pieceWeights[attackStarter.pieceid][x2][y2];
         int valOldPos = pieceWeights[attackStarter.pieceid][x1][y1];
-        int valEaten = pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
-        this->eval += (valNewPos - valOldPos) + valEaten;
+        this->vlRed += (valNewPos - valOldPos);
+        if(eaten.pieceid != EMPTY_PIECEID){
+            this->vlRed += pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+        }
     }
     else
     {
         int valNewPos = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
         int valOldPos = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
-        int valEaten = pieceWeights[eaten.pieceid][x2][y2];
-        this->eval -= (valNewPos - valOldPos) + valEaten;
+        this->vlBlack += (valNewPos - valOldPos);
+        if(eaten.pieceid != EMPTY_PIECEID){
+            this->vlBlack += pieceWeights[eaten.pieceid][x2][y2];
+        }
     }
 
     this->team = -this->team;
@@ -302,15 +324,19 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     {
         int valPos1 = pieceWeights[attackStarter.pieceid][x1][y1];
         int valPos2 = pieceWeights[attackStarter.pieceid][x2][y2];
-        int valEaten = pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
-        this->eval -= (valPos2 - valPos1) + valEaten;
+        this->vlRed -= (valPos2 - valPos1);
+        if(eaten.pieceid != EMPTY_PIECEID){
+            this->vlRed -= pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+        }
     }
     else
     {
         int valPos1 = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
         int valPos2 = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
-        int valEaten = pieceWeights[eaten.pieceid][x2][y2];
-        this->eval += (valPos2 - valPos1) + valEaten;
+        this->vlBlack -= (valPos2 - valPos1);
+        if(eaten.pieceid != EMPTY_PIECEID){
+            this->vlBlack -= pieceWeights[eaten.pieceid][x2][y2];
+        }
     }
 }
 

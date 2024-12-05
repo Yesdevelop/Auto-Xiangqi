@@ -74,12 +74,13 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     {
         bestNode = searchRoot(board, depth);
 
-        std::cout << depth << std::endl;
+        //std::cout << depth << std::endl;
 
         if (clock() - start >= maxTime * 1000 / 3)
         {
             break;
         }
+        searchIterate();
     }
     return bestNode;
 }
@@ -110,7 +111,7 @@ Node Search::searchRoot(Board &board, int depth)
         }
         board.undoMove(move, eaten);
 
-        std::cout << vl << std::endl;
+        //std::cout << vl << std::endl;
         if (vl > vlBest)
         {
             vlBest = vl;
