@@ -73,14 +73,13 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(board, depth);
-
         //std::cout << depth << std::endl;
 
         if (clock() - start >= maxTime * 1000 / 3)
         {
             break;
         }
-        searchIterate();
+
     }
     return bestNode;
 }
@@ -128,6 +127,7 @@ Node Search::searchRoot(Board &board, int depth)
     {
         this->historyCache->add(*pBestMove, depth);
     }
+    searchIterate();
     return Node(!pBestMove ? Move{} : *pBestMove, vlBest);
 }
 
