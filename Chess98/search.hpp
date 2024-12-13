@@ -37,24 +37,21 @@ public:
             }
         }
     }
-    void searchIterate()
+    void sortRootMoves()
     {
-        std::sort(rootMoves.begin(), rootMoves.end(), vlMoveCompare);
+        std::sort(
+            rootMoves.begin(), rootMoves.end(),
+            [](Move &first, Move &second) -> bool
+            {
+                return first.val > second.val;
+            });
     }
 
-public:
     Node searchMain(Board &board, int maxDepth, int maxTime);
     Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta);
 
-public:
-    static bool vlMoveCompare(Move &first, Move &second)
-    {
-        return first.val > second.val;
-    }
-
-public:
     HistoryHeuristic *historyCache = new HistoryHeuristic();
     MOVES rootMoves;
 };
@@ -70,17 +67,23 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     this->rootMoves = Moves::getMoves(board);
     Node bestNode = Node(Move(), 0);
     clock_t start = clock();
-    for (int depth = 1; depth <= maxDepth; depth++)
+    int depth = 1;
+
+    std::cout << "search starts here!" << std::endl;
+    while (depth <= maxDepth)
     {
         bestNode = searchRoot(board, depth);
-        //std::cout << depth << std::endl;
 
         if (clock() - start >= maxTime * 1000 / 3)
         {
             break;
         }
-
+        depth++;
     }
+
+    std::cout << "\nsearch depth: " << depth << "\n" << std::endl;
+    std::cout << "\nsearch vl: " << bestNode.score << "\n" << std::endl;
+
     return bestNode;
 }
 
@@ -110,7 +113,6 @@ Node Search::searchRoot(Board &board, int depth)
         }
         board.undoMove(move, eaten);
 
-        //std::cout << vl << std::endl;
         if (vl > vlBest)
         {
             vlBest = vl;
@@ -127,8 +129,9 @@ Node Search::searchRoot(Board &board, int depth)
     {
         this->historyCache->add(*pBestMove, depth);
     }
-    searchIterate();
-    return Node(!pBestMove ? Move{} : *pBestMove, vlBest);
+    Node result{!pBestMove ? Move{} : *pBestMove, vlBest};
+    sortRootMoves();
+    return result;
 }
 
 /// @brief PV搜索
@@ -191,6 +194,11 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     return vlBest;
 }
 
+/// @brief 截断节点搜索
+/// @param board
+/// @param depth
+/// @param beta
+/// @return
 int Search::searchCut(Board &board, int depth, int beta)
 {
     if (depth <= 0)
