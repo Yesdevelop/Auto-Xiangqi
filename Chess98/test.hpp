@@ -1,17 +1,20 @@
 #pragma once
 
 #include "search.hpp"
+#include "ui.hpp"
+
+using std::cout;
+using std::endl;
 
 void standardTest(TEAM team = BLACK)
 {
     Board board = Board(DEFAULT_MAP, team);
 
-    Search s;
+    serverInit(board);
 
-    while (true)
-    {
-        Node n = s.searchMain(board, 10, 1);
-        board.doMove(n.move);
-        board.print();
-    }
+    std::cout << board.evaluate() << "\n\n" << std::endl;
+
+    board.print();
+
+    Search s;
 }

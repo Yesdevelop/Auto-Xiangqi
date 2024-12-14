@@ -126,65 +126,35 @@ using MOVES = std::vector<Move>;
 std::string getPieceName(PIECEID pieceid)
 {
     if (pieceid == R_KING)
-    {
         return "RK";
-    }
     else if (pieceid == R_GUARD)
-    {
         return "RG";
-    }
     else if (pieceid == R_ROOK)
-    {
         return "RR";
-    }
     else if (pieceid == R_BISHOP)
-    {
         return "RB";
-    }
     else if (pieceid == R_KNIGHT)
-    {
         return "RN";
-    }
     else if (pieceid == R_CANNON)
-    {
         return "RC";
-    }
     else if (pieceid == R_PAWN)
-    {
         return "RP";
-    }
     else if (pieceid == B_KING)
-    {
         return "BK";
-    }
     else if (pieceid == B_GUARD)
-    {
         return "BG";
-    }
     else if (pieceid == B_ROOK)
-    {
         return "BR";
-    }
     else if (pieceid == B_BISHOP)
-    {
         return "BB";
-    }
     else if (pieceid == B_KNIGHT)
-    {
         return "BN";
-    }
     else if (pieceid == B_CANNON)
-    {
         return "BC";
-    }
     else if (pieceid == B_PAWN)
-    {
         return "BP";
-    }
     else
-    {
         return "  ";
-    }
 }
 
 using TIME_T = long long;
