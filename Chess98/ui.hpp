@@ -71,13 +71,16 @@ const BOARD_CODE jsServerCode =
     const http = require('http');\n\
     const fs = require('fs')\n\
     \n\
-    let boardFile = fs.openSync('./_board_.txt', 'w+')\n\
-    let boardCode = 'empty'\n\
+    let boardCode = 'null'\n\
     let getBoardCode = () => boardCode\n\
     \n\
+    let file = fs.openSync('./_move_.txt', 'w+')\n\
+    fs.writeFileSync(file, '____')\n\
+    fs.closeSync(file)\n\
+    \n\
     http.createServer((request, response) => {\n\
-        const {url, method} = request\n\
-        console.log(method)\n\
+        const { method } = request\n\
+        \n\
         if (method === 'GET') { // 界面端获取当前棋盘局势图\n\
             response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
             response.end(getBoardCode() + '\\n')\n\
@@ -87,22 +90,23 @@ const BOARD_CODE jsServerCode =
             response.end('successful\\n')\n\
             boardCode = request.url.split('=')[1];\n\
         }\n\
-        else if (method == 'POST') { // 玩家方面做出决策更改服务器和C++代码部分棋盘局势图\n\
+        else if (method == 'POST') { // 玩家着法\n\
             response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
-            boardCode = request.url.split('=')[1];\n\
-            fs.writeFileSync(boardFile, boardCode)\n\
+            response.end('successful\\n')\n\
+            let move = request.url.split('=')[1];\n\
+            let file = fs.openSync('./_move_.txt', 'w+')\n\
+            fs.writeFileSync(file, move)\n\
+            fs.closeSync(file)\n\
         }\n\
     }).listen(9494)\n\
     \n\
     console.log('Server running at http://127.0.0.1:9494/')\n\
     ";
-
 void setBoardCode(Board board)
 {
     BOARD_CODE code = generateCode(board);
-    std::cout << code << std::endl;
 
-    const BOARD_CODE jsSetCode =
+    const BOARD_CODE jsPutCode =
         "\
         const http = require('http')\n\
         const options = {\n\
@@ -116,16 +120,16 @@ void setBoardCode(Board board)
     ";
 
     FILE *file = nullptr;
-    errno_t result = fopen_s(&file, "./_set_.js", "w+");
+    errno_t result = fopen_s(&file, "./_put_.js", "w+");
     if (result == 0)
     {
-        fprintf(file, jsSetCode.c_str());
+        fprintf(file, jsPutCode.c_str());
         std::fclose(file);
-        system("node _set_.js");
+        system("node _put_.js");
     }
     else
     {
-        std::cerr << "forqueue!" << std::endl;
+        std::cerr << "CANNOT OPEN FILE!" << std::endl;
     }
 }
 
@@ -138,7 +142,7 @@ void serverInit(Board board)
         fprintf(file, jsServerCode.c_str());
         std::fclose(file);
         system("start node _server_.js");
-        Sleep(500);
+        Sleep(700);
         setBoardCode(board);
     }
 }

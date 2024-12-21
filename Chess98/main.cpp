@@ -2,7 +2,7 @@
 
 int main()
 {
-    standardTest(RED);
+    test(RED);
 
     return 0;
 }

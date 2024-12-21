@@ -81,8 +81,8 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         depth++;
     }
 
-    std::cout << "\nsearch depth: " << depth << "\n" << std::endl;
-    std::cout << "\nsearch vl: " << bestNode.score << "\n" << std::endl;
+    std::cout << "search depth: " << depth << std::endl;
+    std::cout << "search vl: " << bestNode.score << "\n" << std::endl;
 
     return bestNode;
 }
