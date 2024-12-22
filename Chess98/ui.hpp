@@ -80,6 +80,9 @@ const BOARD_CODE jsServerCode =
     \n\
     http.createServer((request, response) => {\n\
         const { method } = request\n\
+        response.setHeader('Access-Control-Allow-Origin', '*');\n\
+        response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');\n\
+        response.setHeader('Access-Control-Allow-Headers', 'Content-Type');\n\
         \n\
         if (method === 'GET') { // 界面端获取当前棋盘局势图\n\
             response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
