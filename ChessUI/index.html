@@ -75,6 +75,8 @@
         const RED = "r"
         const BLACK = "b"
 
+        let moveLogs = []
+
         function parseBoardCode(code) {
             let result = []
             for (let i = 1; i <= 90; i++) {
@@ -157,8 +159,10 @@
                             let y1 = "" + this.selectedPiece.y
                             let x2 = "" + x
                             let y2 = "" + y
+                            let move = x1 + y1 + x2 + y2
+                            moveLogs.push(move)
                             const http = new XMLHttpRequest()
-                            http.open('POST', 'http://localhost:9494/?move=' + x1 + y1 + x2 + y2, false)
+                            http.open('POST', 'http://localhost:9494/?move=' + move, true)
                             http.send()
                             this.selectedPiece = null
                         }
