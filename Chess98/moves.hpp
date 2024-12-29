@@ -412,7 +412,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
 {
     if (team == RED)
     {
-        if (x >= 0 && x <= 8 || y >= 0 || y <= 4)
+        if (y >= 0 && y <= 4)
         {
             if (board.teamOn(x, y + 1) != team)
             {
@@ -424,14 +424,14 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
             MOVES result{};
             if (board.teamOn(x, y + 1) != team)
             {
-                if (x >= 0 && x <= 8 || y + 1 >= 0 || y + 1 <= 9)
+                if (y + 1 <= 9)
                 {
                     result.emplace_back(Move{x, y, x, y + 1});
                 }
             }
             if (board.teamOn(x + 1, y) != team)
             {
-                if (x + 1 >= 0 && x + 1 <= 8 || y >= 0 || y <= 9)
+                if (x + 1 <= 8)
                 {
 
                     result.emplace_back(Move{x, y, x + 1, y});
@@ -439,7 +439,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
             }
             if (board.teamOn(x - 1, y) != team)
             {
-                if (x - 1 >= 0 && x - 1 <= 8 || y >= 0 || y <= 9)
+                if (x - 1 >= 0)
                 {
                     result.emplace_back(Move{x, y, x - 1, y});
                 }
@@ -449,7 +449,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
     }
     else
     {
-        if (x >= 0 && x <= 8 || y >= 5 || y <= 9)
+        if (y >= 5 && y <= 9)
         {
             if (board.teamOn(x, y - 1) != team)
             {
@@ -461,14 +461,14 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
             MOVES result{};
             if (board.teamOn(x, y - 1) != team)
             {
-                if (x >= 0 && x <= 8 || y - 1 >= 0 || y - 1 <= 9)
+                if (y - 1 >= 0)
                 {
                     result.emplace_back(Move{x, y, x, y - 1});
                 }
             }
             if (board.teamOn(x + 1, y) != team)
             {
-                if (x + 1 >= 0 && x + 1 <= 8 || y >= 0 || y <= 9)
+                if (x + 1 <= 8)
                 {
 
                     result.emplace_back(Move{x, y, x + 1, y});
@@ -476,7 +476,7 @@ MOVES Moves::pawn(TEAM team, Board board, int x, int y)
             }
             if (board.teamOn(x - 1, y) != team)
             {
-                if (x - 1 >= 0 && x - 1 <= 8 || y >= 0 || y <= 9)
+                if (x - 1 >= 0)
                 {
                     result.emplace_back(Move{x, y, x - 1, y});
                 }

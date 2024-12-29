@@ -79,13 +79,14 @@ const BOARD_CODE jsServerCode =
     fs.closeSync(file)\n\
     \n\
     http.createServer((request, response) => {\n\
-        const { method } = request\n\
+        const { method, url } = request\n\
         response.setHeader('Access-Control-Allow-Origin', '*');\n\
-        response.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PUT, OPTIONS');\n\
+        response.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PATCH, OPTIONS');\n\
         response.setHeader('Access-Control-Allow-Headers', 'Content-Type');\n\
         console.log(method)\n\
+        console.log(url)\n\
         \n\
-        if (method === 'GET') { // 界面端获取当前棋盘局势图\n\
+        if (method === 'GET' && url === '/boardcode') { // 界面端获取当前棋盘局势图\n\
             response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
             response.end(getBoardCode() + '\\n')\n\
         }\n\
@@ -94,7 +95,7 @@ const BOARD_CODE jsServerCode =
             response.end('successful\\n')\n\
             boardCode = request.url.split('=')[1];\n\
         }\n\
-        else if (method == 'POST') { // 玩家着法\n\
+        else if (method == 'GET' && url.match('move')) { // 玩家着法\n\
             response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
             response.end('successful\\n')\n\
             let move = request.url.split('=')[1];\n\

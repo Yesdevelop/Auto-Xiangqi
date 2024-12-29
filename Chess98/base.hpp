@@ -38,7 +38,7 @@ const TEAM OVERFLOW_TEAM = 2;
 
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 PIECEID_MAP DEFAULT_MAP{
-    {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
+    {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, R_PAWN},
      {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
      {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
      {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
