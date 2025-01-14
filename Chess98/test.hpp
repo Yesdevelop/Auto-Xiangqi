@@ -3,7 +3,7 @@
 #include "search.hpp"
 #include "ui.hpp"
 
-void test(TEAM team = BLACK)
+void test(TEAM team = BLACK, int maxDepth = 10)
 {
     Board board = Board(DEFAULT_MAP, team);
     board.print();
@@ -18,7 +18,7 @@ void test(TEAM team = BLACK)
     {
         if (board.team == team)
         {
-            Node node = s.searchMain(board, 10, 1);
+            Node node = s.searchMain(board, maxDepth, 1);
             board.doMove(node.move);
             setBoardCode(board);
 

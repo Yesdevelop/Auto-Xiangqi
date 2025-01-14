@@ -23,6 +23,10 @@ public:
     static MOVES generateMoves(Board board, int x, int y);
 
     static MOVES getMoves(Board board);
+
+    static MOVES getCaptrueMoves(Board board);
+
+    static MOVES getGoodCaptures(Board board);
 };
 
 /// @brief 生成将帅的着法
@@ -528,7 +532,7 @@ MOVES Moves::generateMoves(Board board, int x, int y)
     }
 }
 
-/// @brief 获取一队的所有可行着法
+/// @brief 获取当前队伍所有可行着法
 /// @param team
 /// @return
 MOVES Moves::getMoves(Board board)
@@ -545,6 +549,66 @@ MOVES Moves::getMoves(Board board)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)
+        {
+            result.emplace_back(move);
+        }
+    }
+
+    return result;
+}
+
+/// @brief 获取当前队伍所有吃子着法（暂时写成这样，后续优化）
+/// @param board
+/// @return
+MOVES Moves::getCaptrueMoves(Board board)
+{
+    MOVES result{};
+    MOVES moves = Moves::getMoves(board);
+    for (const Move& move : moves)
+    {
+        if (board.pieceidOn(move.x2, move.y2) != EMPTY_PIECEID)
+        {
+            result.emplace_back(move);
+        }
+    }
+    return result;
+}
+
+/// @brief  获取当前队伍所有好的吃子着法（MVV/LVA）（暂时写成这样，后续优化）
+/// @param board
+/// @return
+MOVES Moves::getGoodCaptures(Board board)
+{
+    MOVES result{};
+    MOVES moves = Moves::getCaptrueMoves(board);
+
+    std::vector<int> moveWeights{};
+    std::map<int, MOVES> orderMap{};
+
+    for (const Move& move : moves)
+    {
+        const std::map<PIECEID, int> weightPairs{
+            { R_KING, 7 },
+            { R_ROOK, 6 },
+            { R_CANNON, 5 },
+            { R_KNIGHT, 4 },
+            { R_BISHOP, 3 },
+            { R_GUARD, 2 },
+            { R_PAWN, 1 },
+        };
+        PIECEID attacker = abs(board.pieceidOn(move.x2, move.y2));
+        PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
+        int moveWeight = 10 * (8 - weightPairs.at(attacker)) + weightPairs.at(captured);
+        moveWeights.emplace_back(moveWeight);
+        orderMap[moveWeight].emplace_back(move);
+    }
+
+    std::sort(moveWeights.begin(), moveWeights.end(), std::less<int>());
+    moveWeights.erase(std::unique(moveWeights.begin(), moveWeights.end()), moveWeights.end());
+    
+    for (int weight : moveWeights)
+    {
+        for (const Move& move : orderMap[weight])
         {
             result.emplace_back(move);
         }

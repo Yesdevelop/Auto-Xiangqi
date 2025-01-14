@@ -51,6 +51,7 @@ public:
     Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta);
+    int quies(Board &board, int alpha, int beta);
 
     HistoryHeuristic *historyCache = new HistoryHeuristic();
     MOVES rootMoves;
@@ -144,7 +145,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
     if (depth <= 0)
     {
-        return board.evaluate();
+        return Search::quies(board, -INF, INF);
     }
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
@@ -203,7 +204,7 @@ int Search::searchCut(Board &board, int depth, int beta)
 {
     if (depth <= 0)
     {
-        return board.evaluate();
+        return Search::quies(board, -INF, INF);
     }
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
@@ -235,4 +236,39 @@ int Search::searchCut(Board &board, int depth, int beta)
         this->historyCache->add(*pBestMove, depth);
     }
     return vlBest;
+}
+
+/// @brief 静态搜索函数
+/// @param board
+/// @param alpha
+/// @param beta
+/// @return
+int Search::quies(Board &board, int alpha, int beta)
+{
+    int vl = board.evaluate();
+    if (vl >= beta)
+    {
+        return beta;
+    }
+    if (vl > alpha)
+    {
+        alpha = vl;
+    }
+    MOVES availableMoves = Moves::getGoodCaptures(board);
+
+    for (auto &move : availableMoves)
+    {
+        Piece eaten = board.doMove(move);
+        int vl = -quies(board, -beta, -alpha);
+        board.undoMove(move, eaten);
+        if (vl >= beta)
+        {
+            return beta;
+        }
+        if (vl > alpha)
+        {
+            alpha = vl;
+        }
+    }
+    return alpha;
 }
