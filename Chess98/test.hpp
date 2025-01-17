@@ -1,5 +1,4 @@
 #pragma once
-
 #include "search.hpp"
 #include "ui.hpp"
 
@@ -15,15 +14,15 @@ void test(TEAM team = BLACK, int maxDepth = 10)
 void checkingTest()
 {
     PIECEID_MAP MAP{
-    {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
-     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-     {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-     {R_KING, 0, 0, 0, 0, 0, 0, 0, 0, B_KING},
-     {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-     {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}} };
+        {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
+         {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+         {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
+         {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
+         {R_KING, 0, 0, 0, 0, 0, 0, 0, 0, B_KING},
+         {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
+         {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
+         {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+         {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
     Board board = Board(MAP, RED);
     bool s = inCheck(board);
     std::cout << s << std::endl;
@@ -49,7 +48,7 @@ void testWithUI(TEAM team, int maxDepth)
             board.doMove(node.move);
             setBoardCode(board);
 
-            FILE* file = nullptr;
+            FILE *file = nullptr;
             errno_t result = fopen_s(&file, "./_move_.txt", "r");
             if (result == 0)
             {
@@ -66,8 +65,9 @@ void testWithUI(TEAM team, int maxDepth)
         }
         else
         {
-            while (true) {
-                FILE* file = nullptr;
+            while (true)
+            {
+                FILE *file = nullptr;
                 errno_t result = fopen_s(&file, "./_move_.txt", "r");
                 if (result == 0)
                 {
@@ -83,7 +83,7 @@ void testWithUI(TEAM team, int maxDepth)
                         int y1 = std::stoi(content.substr(1, 1));
                         int x2 = std::stoi(content.substr(2, 1));
                         int y2 = std::stoi(content.substr(3, 1));
-                        Move move{ x1, y1, x2, y2 };
+                        Move move{x1, y1, x2, y2};
                         board.doMove(move);
                         break;
                     }

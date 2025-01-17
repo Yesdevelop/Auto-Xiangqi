@@ -1,25 +1,19 @@
 #pragma once
-
 #include "base.hpp"
-#include <cstdlib>
-#include <cstring>
-#include <algorithm>
-
-/* ***** 历史启发 ***** */
 
 /// @brief 历史启发
 class HistoryHeuristic
 {
 public:
     void init();
-    void sort(MOVES& moves);
+    void sort(MOVES &moves);
     void add(Move move, int depth);
 
     static bool vlHisCompare(Move &first, Move &second)
     {
         return first.val > second.val;
     }
-    
+
     int historyTable[90][90];
 };
 
@@ -35,13 +29,13 @@ int toIndex(int x, int y)
 /// @brief 初始化
 void HistoryHeuristic::init()
 {
-    std::memset(historyTable, 0, sizeof(int) * 90 * 90);
+    std::memset(this->historyTable, 0, sizeof(int) * 90 * 90);
 }
 
 /// @brief 历史表排序
 /// @param moves
 /// @return
-void HistoryHeuristic::sort(MOVES& moves)
+void HistoryHeuristic::sort(MOVES &moves)
 {
     for (Move &move : moves)
     {

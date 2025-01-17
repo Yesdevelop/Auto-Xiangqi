@@ -1,4 +1,5 @@
 #pragma once
+#include <windows.h>
 #include <cstring>
 #include <iostream>
 #include <vector>
@@ -7,6 +8,7 @@
 #include <array>
 #include <chrono>
 #include <map>
+#include <cassert>
 
 using PIECE_INDEX = int;
 using U64 = unsigned long long;

@@ -1,10 +1,7 @@
 #pragma once
-
 #include "moves.hpp"
-#include "evaluate.hpp"
 #include "heuristic.hpp"
-#include <cassert>
-#include <windows.h>
+#include "utils.hpp"
 
 /// @brief 节点对象，存储分数 + 着法
 class Node
@@ -64,6 +61,14 @@ public:
 /// @return
 Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 {
+    if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
+    {
+        std::cout << "===========================" << std::endl;
+        std::cout << "     !!!!!SUCCESS!!!!!     " << std::endl;
+        std::cout << "===========================" << std::endl;
+        system("pause");
+        exit(0);
+    }
     searchInit();
     this->rootMoves = Moves::getMoves(board);
     Node bestNode = Node(Move(), 0);
@@ -83,7 +88,8 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     }
 
     std::cout << "search depth: " << depth << std::endl;
-    std::cout << "search vl: " << bestNode.score << "\n" << std::endl;
+    std::cout << "search vl: " << bestNode.score << "\n"
+              << std::endl;
 
     return bestNode;
 }

@@ -1,4 +1,4 @@
-#include <Windows.h>
+#pragma once
 #include "board.hpp"
 
 using BOARD_CODE = std::string;

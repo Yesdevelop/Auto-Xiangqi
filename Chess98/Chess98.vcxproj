@@ -138,6 +138,7 @@
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />
     <ClInclude Include="ui.hpp" />
+    <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

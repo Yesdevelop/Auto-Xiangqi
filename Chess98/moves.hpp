@@ -1,5 +1,4 @@
 #pragma once
-
 #include "board.hpp"
 
 /// @brief 着法生成
@@ -564,7 +563,7 @@ MOVES Moves::getCaptrueMoves(Board board)
 {
     MOVES result{};
     MOVES moves = Moves::getMoves(board);
-    for (const Move& move : moves)
+    for (const Move &move : moves)
     {
         if (board.pieceidOn(move.x2, move.y2) != EMPTY_PIECEID)
         {
@@ -585,16 +584,16 @@ MOVES Moves::getGoodCaptures(Board board)
     std::vector<int> moveWeights{};
     std::map<int, MOVES> orderMap{};
 
-    for (const Move& move : moves)
+    for (const Move &move : moves)
     {
         const std::map<PIECEID, int> weightPairs{
-            { R_KING, 7 },
-            { R_ROOK, 6 },
-            { R_CANNON, 5 },
-            { R_KNIGHT, 4 },
-            { R_BISHOP, 3 },
-            { R_GUARD, 2 },
-            { R_PAWN, 1 },
+            {R_KING, 7},
+            {R_ROOK, 6},
+            {R_CANNON, 5},
+            {R_KNIGHT, 4},
+            {R_BISHOP, 3},
+            {R_GUARD, 2},
+            {R_PAWN, 1},
         };
         PIECEID attacker = abs(board.pieceidOn(move.x2, move.y2));
         PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
@@ -605,10 +604,10 @@ MOVES Moves::getGoodCaptures(Board board)
 
     std::sort(moveWeights.begin(), moveWeights.end(), std::less<int>());
     moveWeights.erase(std::unique(moveWeights.begin(), moveWeights.end()), moveWeights.end());
-    
+
     for (int weight : moveWeights)
     {
-        for (const Move& move : orderMap[weight])
+        for (const Move &move : orderMap[weight])
         {
             result.emplace_back(move);
         }

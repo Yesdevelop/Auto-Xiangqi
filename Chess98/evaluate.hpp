@@ -1,5 +1,4 @@
 #pragma once
-
 #include "base.hpp"
 
 using WEIGHT_MAP = const std::array<std::array<int, 10>, 9>;
