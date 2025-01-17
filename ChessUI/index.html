@@ -51,7 +51,8 @@
         <div id="board">
             <div class="row" v-for="row, x in board">
                 <div class="square" v-for="pieceid, y in row" @click="pieceOnclick(x, y, pieceid)">
-                    <div class="piece" v-if="pieceid !== 0" :style="{ backgroundImage: `url('./res/${pieceid}.png')` }"></div>
+                    <div class="piece" v-if="pieceid !== 0" :style="{ backgroundImage: `url('./res/${pieceid}.png')` }">
+                    </div>
                 </div>
             </div>
         </div>
@@ -168,7 +169,9 @@
             },
 
             mounted() {
-                this.reloadBoardFromServer()
+                setInterval(() => {
+                    this.reloadBoardFromServer()
+                }, 200)
             }
         }).mount('#app')
     </script>

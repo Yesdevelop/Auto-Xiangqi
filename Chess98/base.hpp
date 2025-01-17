@@ -7,7 +7,6 @@
 #include <array>
 #include <chrono>
 #include <map>
-#include "board.hpp"
 
 using PIECE_INDEX = int;
 using U64 = unsigned long long;

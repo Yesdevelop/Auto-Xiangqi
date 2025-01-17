@@ -3,7 +3,34 @@
 #include "search.hpp"
 #include "ui.hpp"
 
+void testWithUI(TEAM team, int maxDepth);
+void checkingTest();
+
 void test(TEAM team = BLACK, int maxDepth = 10)
+{
+    testWithUI(team, maxDepth);
+}
+
+/// 测试将军检测函数
+void checkingTest()
+{
+    PIECEID_MAP MAP{
+    {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
+     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
+     {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
+     {R_KING, 0, 0, 0, 0, 0, 0, 0, 0, B_KING},
+     {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
+     {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
+     {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+     {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}} };
+    Board board = Board(MAP, RED);
+    bool s = inCheck(board);
+    std::cout << s << std::endl;
+}
+
+/// 带UI的测试
+void testWithUI(TEAM team, int maxDepth)
 {
     Board board = Board(DEFAULT_MAP, team);
     board.print();

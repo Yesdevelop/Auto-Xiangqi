@@ -145,7 +145,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
     if (depth <= 0)
     {
-        return Search::quies(board, -INF, INF);
+        return Search::quies(board, alpha, beta);
     }
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
@@ -204,7 +204,7 @@ int Search::searchCut(Board &board, int depth, int beta)
 {
     if (depth <= 0)
     {
-        return Search::quies(board, -INF, INF);
+        return Search::quies(board, beta - 1, beta);
     }
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
@@ -245,6 +245,32 @@ int Search::searchCut(Board &board, int depth, int beta)
 /// @return
 int Search::quies(Board &board, int alpha, int beta)
 {
+    if (inCheck(board))
+    {
+        // 返回一层深度的alpha beta搜索结果
+        MOVES availableMoves = Moves::getMoves(board);
+        int vlBest = -INF;
+        for (const Move &move : availableMoves)
+        {
+            Piece eaten = board.doMove(move);
+            int vl = -board.evaluate();
+            if (vl > vlBest)
+            {
+                vlBest = vl;
+            }
+            board.undoMove(move, eaten);
+            if (vl >= beta)
+            {
+                return beta;
+            }
+            if (vl > alpha)
+            {
+                alpha = vl;
+            }
+        }
+        return vlBest;
+    }
+
     int vl = board.evaluate();
     if (vl >= beta)
     {
@@ -254,21 +280,28 @@ int Search::quies(Board &board, int alpha, int beta)
     {
         alpha = vl;
     }
+
     MOVES availableMoves = Moves::getGoodCaptures(board);
+    int vlBest = -INF;
 
     for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -quies(board, -beta, -alpha);
+        vl = -quies(board, -beta, -alpha);
         board.undoMove(move, eaten);
-        if (vl >= beta)
+
+        if (vl > vlBest)
         {
-            return beta;
-        }
-        if (vl > alpha)
-        {
-            alpha = vl;
+            vlBest = vl;
+            if (vl >= beta)
+            {
+                break;
+            }
+            if (vl > alpha)
+            {
+                alpha = vl;
+            }
         }
     }
-    return alpha;
+    return vlBest;
 }
