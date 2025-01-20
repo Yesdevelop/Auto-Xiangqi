@@ -1,6 +1,8 @@
 #pragma once
 #include "base.hpp"
 
+/* ***** 历史启发 ***** */
+
 /// @brief 历史启发
 class HistoryHeuristic
 {
