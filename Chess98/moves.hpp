@@ -578,24 +578,26 @@ MOVES Moves::getCaptrueMoves(Board board)
 /// @return
 MOVES Moves::getGoodCaptures(Board board)
 {
+    // MVV / LVA
     MOVES result{};
     MOVES moves = Moves::getCaptrueMoves(board);
+    const std::map<PIECEID, int> weightPairs{
+            {R_ROOK, 4},
+            {R_CANNON, 3},
+            {R_KNIGHT, 3},
+            {R_BISHOP, 2},
+            {R_GUARD, 2},
+            {R_PAWN, 1},
+            {R_KING, 1}
+    };
 
     std::vector<int> moveWeights{};
     std::map<int, MOVES> orderMap{};
 
     for (const Move &move : moves)
     {
-        const std::map<PIECEID, int> weightPairs{
-            {R_KING, 7},
-            {R_ROOK, 6},
-            {R_CANNON, 5},
-            {R_KNIGHT, 4},
-            {R_BISHOP, 3},
-            {R_GUARD, 2},
-            {R_PAWN, 1},
-        };
-        PIECEID attacker = abs(board.pieceidOn(move.x2, move.y2));
+
+        PIECEID attacker = abs(board.pieceidOn(move.x1, move.y1));
         PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
         int moveWeight = 10 * (8 - weightPairs.at(attacker)) + weightPairs.at(captured);
         moveWeights.emplace_back(moveWeight);
@@ -614,4 +616,24 @@ MOVES Moves::getGoodCaptures(Board board)
     }
 
     return result;
+
+    // SEE
+    // MOVES result{};
+    // MOVES moves = Moves::getCaptrueMoves(board);
+    // const std::map<PIECEID, int> weightPairs{
+    //         {R_ROOK, 4},
+    //         {R_CANNON, 3},
+    //         {R_KNIGHT, 3},
+    //         {R_BISHOP, 2},
+    //         {R_GUARD, 2},
+    //         {R_PAWN, 1},
+    //         {R_KING, 1}
+    // };
+
+    // for (const Move &move : moves)
+    // {
+    //     Piece attacker = board.piecePosition(move.x1, move.y1);
+    //     Piece captured = board.piecePosition(move.x2, move.y2);
+
+    // }
 }

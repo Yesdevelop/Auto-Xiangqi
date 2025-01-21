@@ -81,7 +81,14 @@ bool inCheck(Board &board)
         }
         else if (pieceid != 0)
         {
-            barrierDetected = true;
+            if (barrierDetected == false)
+            {
+                barrierDetected = true;
+            }
+            else
+            {
+                break;
+            }
         }
     }
     barrierDetected = false;
@@ -103,7 +110,14 @@ bool inCheck(Board &board)
         }
         else if (pieceid != 0)
         {
-            barrierDetected = true;
+            if (barrierDetected == false)
+            {
+                barrierDetected = true;
+            }
+            else
+            {
+                break;
+            }
         }
     }
     barrierDetected = false;
@@ -128,7 +142,14 @@ bool inCheck(Board &board)
             }
             else if (pieceid != 0)
             {
-                barrierDetected = true;
+                if (barrierDetected == false)
+                {
+                    barrierDetected = true;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
     }
@@ -153,7 +174,14 @@ bool inCheck(Board &board)
             }
             else if (pieceid != 0)
             {
-                barrierDetected = true;
+                if (barrierDetected == false)
+                {
+                    barrierDetected = true;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
     }
@@ -333,7 +361,14 @@ std::vector<Piece> relationship_beAttacked(Board &board, Piece piece)
         }
         else if (pieceid != 0)
         {
-            barrierDetected = true;
+            if (barrierDetected == false)
+            {
+                barrierDetected = true;
+            }
+            else
+            {
+                break;
+            }
         }
     }
     barrierDetected = false;
@@ -356,7 +391,14 @@ std::vector<Piece> relationship_beAttacked(Board &board, Piece piece)
         }
         else if (pieceid != 0)
         {
-            barrierDetected = true;
+            if (barrierDetected == false)
+            {
+                barrierDetected = true;
+            }
+            else
+            {
+                break;
+            }
         }
     }
     barrierDetected = false;
@@ -379,7 +421,14 @@ std::vector<Piece> relationship_beAttacked(Board &board, Piece piece)
         }
         else if (pieceid != 0)
         {
-            barrierDetected = true;
+            if (barrierDetected == false)
+            {
+                barrierDetected = true;
+            }
+            else
+            {
+                break;
+            }
         }
     }
     barrierDetected = false;
@@ -403,7 +452,14 @@ std::vector<Piece> relationship_beAttacked(Board &board, Piece piece)
         }
         else if (pieceid != 0)
         {
-            barrierDetected = true;
+            if (barrierDetected == false)
+            {
+                barrierDetected = true;
+            }
+            else
+            {
+                break;
+            }
         }
     }
 
@@ -428,4 +484,28 @@ std::vector<Piece> relationship_beProtected(Board &board, Piece piece)
     // 相当于一个敌方的棋子被我方的棋子攻击
     Piece replacement{-1, piece.x, piece.y, -piece.getTeam()};
     return relationship_beAttacked(board, replacement);
+}
+
+bool relationship_hasProtector(Board &board, int x, int y)
+{
+    return relationship_beProtected(board, board.piecePosition(x, y)).size() > 0;
+}
+
+/// @brief 检查是否是过河卒
+/// @param board
+/// @param x
+/// @param y
+/// @return
+bool isGoodPawn(Board &board, int x, int y)
+{
+    PIECEID pieceid = board.pieceidOn(x, y);
+    if (pieceid == R_PAWN && y >= 5 && y <= 9)
+    {
+        return true;
+    }
+    if (pieceid == B_PAWN && y >= 0 && y <= 4)
+    {
+        return true;
+    }
+    return false;
 }

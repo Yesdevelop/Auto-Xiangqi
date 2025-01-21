@@ -16,10 +16,10 @@ void checkingTest()
 {
     PIECEID_MAP MAP{
         {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
-         {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
+         {B_CANNON, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
          {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
          {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-         {R_KING, 0, 0, 0, 0, 0, 0, 0, 0, B_KING},
+         {R_KING, 0, 0, 0, R_CANNON, 0, 0, 0, 0, B_KING},
          {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
          {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
          {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
