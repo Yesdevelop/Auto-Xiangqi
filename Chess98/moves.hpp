@@ -579,45 +579,6 @@ MOVES Moves::getCaptrueMoves(Board board)
 /// @return
 MOVES Moves::getGoodCaptures(Board board)
 {
-    // // MVV / LVA
-    // MOVES result{};
-    // MOVES moves = Moves::getCaptrueMoves(board);
-    // const std::map<PIECEID, int> weightPairs{
-    //         {R_ROOK, 4},
-    //         {R_CANNON, 3},
-    //         {R_KNIGHT, 3},
-    //         {R_BISHOP, 2},
-    //         {R_GUARD, 2},
-    //         {R_PAWN, 1},
-    //         {R_KING, 1}
-    // };
-
-    // std::vector<int> moveWeights{};
-    // std::map<int, MOVES> orderMap{};
-
-    // for (const Move &move : moves)
-    // {
-
-    //     PIECEID attacker = abs(board.pieceidOn(move.x1, move.y1));
-    //     PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
-    //     int moveWeight = 10 * (8 - weightPairs.at(attacker)) + weightPairs.at(captured);
-    //     moveWeights.emplace_back(moveWeight);
-    //     orderMap[moveWeight].emplace_back(move);
-    // }
-
-    // std::sort(moveWeights.begin(), moveWeights.end(), std::less<int>());
-    // moveWeights.erase(std::unique(moveWeights.begin(), moveWeights.end()), moveWeights.end());
-
-    // for (int weight : moveWeights)
-    // {
-    //     for (const Move &move : orderMap[weight])
-    //     {
-    //         result.emplace_back(move);
-    //     }
-    // }
-
-    // return result;
-
     // SEE
     MOVES result{};
     MOVES moves = Moves::getCaptrueMoves(board);
@@ -638,8 +599,8 @@ MOVES Moves::getGoodCaptures(Board board)
 
         Piece attacker = board.piecePosition(move.x1, move.y1);
         Piece captured = board.piecePosition(move.x2, move.y2);
-        int a = weightPairs.at(abs(attacker.pieceid));
-        int b = weightPairs.at(abs(captured.pieceid));
+        int a = weightPairs.at(abs(captured.pieceid));
+        int b = weightPairs.at(abs(attacker.pieceid));
         if (relationship_hasProtector(board, captured.x, captured.y))
         {
             score = a - b + 1;

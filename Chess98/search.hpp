@@ -287,7 +287,7 @@ int Search::quies(Board &board, int alpha, int beta)
     }
 
     MOVES availableMoves = Moves::getGoodCaptures(board);
-    int vlBest = -INF;
+    int vlBest = board.evaluate();
 
     for (auto &move : availableMoves)
     {
