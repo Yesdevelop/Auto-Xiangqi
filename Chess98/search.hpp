@@ -49,6 +49,8 @@ public:
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta);
     int quies(Board &board, int alpha, int beta);
+    Piece makeNullMove(Board &board, int x1, int y1, int x2, int y2);
+    void undoNullMove(Board &board, int x1, int y1, int x2, int y2, Piece eaten);
 
     HistoryHeuristic *historyCache = new HistoryHeuristic();
     MOVES rootMoves;
@@ -66,7 +68,6 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         std::cout << "===========================" << std::endl;
         std::cout << "     !!!!!SUCCESS!!!!!     " << std::endl;
         std::cout << "===========================" << std::endl;
-        system("pause");
         exit(0);
     }
     searchInit();
@@ -292,7 +293,7 @@ int Search::quies(Board &board, int alpha, int beta)
     for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        vl = -quies(board, -beta, -alpha);
+        vl = -Search::quies(board, -beta, -alpha);
         board.undoMove(move, eaten);
 
         if (vl > vlBest)
@@ -309,4 +310,14 @@ int Search::quies(Board &board, int alpha, int beta)
         }
     }
     return vlBest;
+}
+
+Piece Search::makeNullMove(Board &board, int x1, int y1, int x2, int y2)
+{
+    return Piece{OVERFLOW_PIECEID, -1, -1, -1};
+}
+
+void Search::undoNullMove(Board &board, int x1, int y1, int x2, int y2, Piece eaten)
+{
+    return;
 }
