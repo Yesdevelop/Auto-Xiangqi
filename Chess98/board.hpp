@@ -41,6 +41,9 @@ public:
 
     bool isChecking = false;
 
+    //和根节点的距离
+    int distance = 0;
+
 private:
     // 棋盘相关
     PIECEID_MAP pieceidMap{};
@@ -54,6 +57,7 @@ private:
     // 评估相关
     int vlRed = 0;
     int vlBlack = 0;
+
 };
 
 /// @brief 初始化棋盘
@@ -61,6 +65,7 @@ private:
 Board::Board(PIECEID_MAP pieceidMap, int initTeam)
 {
     initZobrist();
+    this->distance = 0;
     this->team = initTeam;
     this->pieceidMap = pieceidMap;
     for (int x = 0; x < 9; x++)
@@ -294,6 +299,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
 
     this->team = -this->team;
 
+    this->distance += 1;
     return eaten;
 }
 
@@ -313,6 +319,8 @@ Piece Board::doMove(Move move)
 /// @param eaten
 void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 {
+    this->distance -= 1;
+
     this->team = -this->team;
 
     Piece attackStarter = this->piecePosition(x2, y2);

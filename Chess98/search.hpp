@@ -15,10 +15,11 @@ public:
 class Search
 {
 public:
-    void searchInit()
+    void searchInit(Board &board)
     {
         rootMoves.resize(0);
         this->historyCache->init();
+        board.distance = 0;
     }
     void searchStep(Move &bestMove)
     {
@@ -48,7 +49,7 @@ public:
     Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta);
-    int quies(Board &board, int alpha, int beta);
+    int searchQ(Board &board, int alpha, int beta);
     Piece makeNullMove(Board &board, int x1, int y1, int x2, int y2);
     void undoNullMove(Board &board, int x1, int y1, int x2, int y2, Piece eaten);
 
@@ -70,7 +71,7 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         std::cout << "===========================" << std::endl;
         exit(0);
     }
-    searchInit();
+    searchInit(board);
     this->rootMoves = Moves::getMoves(board);
     Node bestNode = Node(Move(), 0);
     clock_t start = clock();
@@ -130,7 +131,7 @@ Node Search::searchRoot(Board &board, int depth)
 
     if (!pBestMove)
     {
-        vlBest += depth;
+        vlBest += board.distance;
     }
     else
     {
@@ -151,7 +152,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
     if (depth <= 0)
     {
-        return Search::quies(board, alpha, beta);
+        return Search::searchQ(board, alpha, beta);
     }
 
     const bool mChecking = inCheck(board);
@@ -210,7 +211,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     if (!pBestMove)
     {
-        vlBest += depth;
+        vlBest += board.distance;
     }
     else
     {
@@ -228,7 +229,7 @@ int Search::searchCut(Board &board, int depth, int beta)
 {
     if (depth <= 0)
     {
-        return Search::quies(board, beta - 1, beta);
+        return Search::searchQ(board, beta - 1, beta);
     }
 
     const bool mChecking = inCheck(board);
@@ -267,7 +268,7 @@ int Search::searchCut(Board &board, int depth, int beta)
 
     if (!pBestMove)
     {
-        vlBest += depth;
+        vlBest += board.distance;
     }
     else
     {
@@ -281,66 +282,49 @@ int Search::searchCut(Board &board, int depth, int beta)
 /// @param alpha
 /// @param beta
 /// @return
-int Search::quies(Board &board, int alpha, int beta)
+int Search::searchQ(Board &board, int alpha, int beta)
 {
-    if (inCheck(board))
-    {
-        // 返回一层深度的alpha beta搜索结果
-        MOVES availableMoves = Moves::getMoves(board);
-        int vlBest = -INF;
-        for (const Move &move : availableMoves)
+    if (board.distance >= 64) {
+        return board.evaluate();
+    }
+    
+    const bool mChecking = inCheck(board);
+    int vlBest = -INF;
+    if (!mChecking) {
+        int vl = board.evaluate();
+        vlBest = vl;
+        if (vl >= beta)
         {
-            Piece eaten = board.doMove(move);
-            int vl = -board.evaluate();
-            if (vl > vlBest)
-            {
-                vlBest = vl;
-            }
-            board.undoMove(move, eaten);
-            if (vl >= beta)
-            {
-                return beta;
-            }
-            if (vl > alpha)
-            {
-                alpha = vl;
-            }
+            return vl;
         }
-        return vlBest;
+        if (vl > alpha) {
+            alpha = vl;
+        }
     }
 
-    int vl = board.evaluate();
-    if (vl >= beta)
-    {
-        return beta;
-    }
-    if (vl > alpha)
-    {
-        alpha = vl;
-    }
+    MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getGoodCaptures(board);
 
-    MOVES availableMoves = Moves::getGoodCaptures(board);
-    int vlBest = board.evaluate();
-
-    for (auto &move : availableMoves)
+    for (const Move& move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        vl = -Search::quies(board, -beta, -alpha);
+        int vl = mChecking ? -board.evaluate() : -Search::searchQ(board, -beta, -alpha);
         board.undoMove(move, eaten);
-
-        if (vl > vlBest)
-        {
+        if (vl > vlBest) {
             vlBest = vl;
             if (vl >= beta)
             {
-                break;
+                return vl;
             }
-            if (vl > alpha)
-            {
+            if (vl > alpha) {
                 alpha = vl;
             }
         }
     }
+
+    if (vlBest == -INF) {
+        vlBest += board.distance;
+    }
+
     return vlBest;
 }
 

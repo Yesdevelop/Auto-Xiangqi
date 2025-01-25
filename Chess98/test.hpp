@@ -57,7 +57,7 @@ void testWithUI(TEAM team, int maxDepth)
     serverInit(board);
 
     Search s;
-    s.searchInit();
+    s.searchInit(board);
 
     std::string moveFileContent;
     while (true)
