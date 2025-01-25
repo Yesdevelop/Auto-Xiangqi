@@ -247,33 +247,37 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // probCut
     const bool mChecking = inCheck(board);
 
-    if (depth % 4 == 0 && !mChecking)
-    {
-        const float a = 3;
-        const float b = 7;
-        const float t = 1.5;
-        const float sigma = 25;
-        const int upperBound = (t * sigma + beta - b) / a;
-        if (searchCut(board, depth - 2, upperBound) >= upperBound)
+    if (!mChecking) {
+        if (!banNullMove) {
+            if (board.nullOkay()) {
+                board.doNullMove();
+                int vl = -searchCut(board, depth - 3, -beta + 1, true);
+                board.undoNullMove();
+                if (vl >= beta) {
+                    if (board.nullSafe()) {
+                        return vl;
+                    }
+                    else if (searchCut(board, depth - 2, beta, true) >= beta) {
+                        return vl;
+                    }
+                }
+            }
+        }
+        else if (depth % 4 == 0)
         {
-            return beta;
+            const float a = 3;
+            const float b = 7;
+            const float t = 1.5;
+            const float sigma = 25;
+            const int upperBound = (t * sigma + beta - b) / a;
+            if (searchCut(board, depth - 2, upperBound) >= upperBound)
+            {
+                return beta;
+            }
         }
     }
 
-    // 空着裁剪
-    std::vector<Piece> pieces = board.getAllLivePieces();
-    int currentVl = board.team == RED ? board.vlRed : board.vlBlack;
-    if ((!banNullMove) && inCheck(board) == false && currentVl - 10000 > 600)
-    {
-        int R = 2;
-        board.team = -board.team;
-        int val = -searchCut(board, depth - 1 - R, -beta, true);
-        board.team = -board.team;
-        if (val >= beta)
-        {
-            return beta;
-        }
-    }
+    
 
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
