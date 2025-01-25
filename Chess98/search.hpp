@@ -49,7 +49,7 @@ public:
     Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta);
-    int searchQ(Board &board, int alpha, int beta);
+    int searchQ(Board &board, int alpha, int beta, int maxDistance);
     Piece makeNullMove(Board &board, int x1, int y1, int x2, int y2);
     void undoNullMove(Board &board, int x1, int y1, int x2, int y2, Piece eaten);
 
@@ -150,9 +150,13 @@ Node Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
+    if (!board.isKingLive(RED) || !board.isKingLive(BLACK)) {
+        return board.evaluate();
+    }
+    
     if (depth <= 0)
     {
-        return Search::searchQ(board, alpha, beta);
+        return Search::searchQ(board, alpha, beta, 64);
     }
 
     const bool mChecking = inCheck(board);
@@ -227,9 +231,13 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta)
 {
+    if (!board.isKingLive(RED) || !board.isKingLive(BLACK)) {
+        return board.evaluate();
+    }
+    
     if (depth <= 0)
     {
-        return Search::searchQ(board, beta - 1, beta);
+        return Search::searchQ(board, beta - 1, beta, 64);
     }
 
     const bool mChecking = inCheck(board);
@@ -282,13 +290,14 @@ int Search::searchCut(Board &board, int depth, int beta)
 /// @param alpha
 /// @param beta
 /// @return
-int Search::searchQ(Board &board, int alpha, int beta)
+int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-    if (board.distance >= 64) {
+    if (board.distance >= maxDistance || !board.isKingLive(RED) || !board.isKingLive(BLACK)) {
         return board.evaluate();
     }
     
     const bool mChecking = inCheck(board);
+    int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
     int vlBest = -INF;
     if (!mChecking) {
         int vl = board.evaluate();
@@ -297,9 +306,7 @@ int Search::searchQ(Board &board, int alpha, int beta)
         {
             return vl;
         }
-        if (vl > alpha) {
-            alpha = vl;
-        }
+        alpha = std::max<int>(alpha, vl);
     }
 
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getGoodCaptures(board);
@@ -307,7 +314,7 @@ int Search::searchQ(Board &board, int alpha, int beta)
     for (const Move& move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = mChecking ? -board.evaluate() : -Search::searchQ(board, -beta, -alpha);
+        int vl = -Search::searchQ(board, -beta, -alpha, leftDistance);
         board.undoMove(move, eaten);
         if (vl > vlBest) {
             vlBest = vl;
@@ -315,9 +322,7 @@ int Search::searchQ(Board &board, int alpha, int beta)
             {
                 return vl;
             }
-            if (vl > alpha) {
-                alpha = vl;
-            }
+            alpha = std::max<int>(alpha, vl);
         }
     }
 

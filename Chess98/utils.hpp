@@ -6,7 +6,7 @@
 /// @return
 bool inCheck(Board &board)
 {
-    Piece *king = board.team == RED ? board.pieceRedKing : board.pieceRedKing;
+    Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
 
     // 判断敌方的兵是否在附近
     bool c1 = abs(board.pieceidOn(king->x + 1, king->y)) == R_PAWN;
