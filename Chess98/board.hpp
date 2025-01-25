@@ -43,6 +43,9 @@ public:
 
     //和根节点的距离
     int distance = 0;
+    // 评估相关
+    int vlRed = 0;
+    int vlBlack = 0;
 
 private:
     // 棋盘相关
@@ -53,11 +56,6 @@ private:
     std::vector<PIECE_INDEX> blackPieces{};
     bool isRedKingLive = false;
     bool isBlackKingLive = false;
-
-    // 评估相关
-    int vlRed = 0;
-    int vlBlack = 0;
-
 };
 
 /// @brief 初始化棋盘
