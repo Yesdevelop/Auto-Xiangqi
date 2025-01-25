@@ -153,6 +153,24 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         return Search::quies(board, alpha, beta);
     }
+
+    const bool mChecking = inCheck(board);
+
+    if (depth % 4 == 0 && !mChecking) {
+        const float a = 3;
+        const float b = 7;
+        const float t = 1.5;
+        const float sigma = 25;
+        const int upperBound = (t * sigma + beta - b) / a;
+        const int lowerBound = (-t * sigma + alpha - b) / a;
+        if (searchCut(board, depth - 2, upperBound) >= upperBound) {
+            return beta;
+        }
+        else if (searchCut(board, depth - 2, lowerBound + 1) <= lowerBound) {
+            return alpha;
+        }
+    }
+
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
@@ -212,6 +230,20 @@ int Search::searchCut(Board &board, int depth, int beta)
     {
         return Search::quies(board, beta - 1, beta);
     }
+
+    const bool mChecking = inCheck(board);
+
+    if (depth % 4 == 0 && !mChecking) {
+        const float a = 3;
+        const float b = 7;
+        const float t = 1.5;
+        const float sigma = 25;
+        const int upperBound = (t * sigma + beta - b) / a;
+        if (searchCut(board, depth - 2, upperBound) >= upperBound) {
+            return beta;
+        }
+    }
+
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
