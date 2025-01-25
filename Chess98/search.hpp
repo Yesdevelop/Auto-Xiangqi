@@ -261,7 +261,16 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
 
     // 空着裁剪
-    if (!banNullMove)
+    std::vector<Piece> pieces = board.getAllLivePieces();
+    int numOfRook = 0;
+    for (const Piece &piece : pieces)
+    {
+        if (piece.pieceid == R_ROOK)
+        {
+            numOfRook++;
+        }
+    }
+    if (!banNullMove && inCheck(board) == false && numOfRook > 0)
     {
         int R = 2;
         board.team = -board.team;
