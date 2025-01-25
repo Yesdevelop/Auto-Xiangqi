@@ -48,10 +48,8 @@ public:
     Node searchMain(Board &board, int maxDepth, int maxTime);
     Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
-    int searchCut(Board &board, int depth, int beta);
+    int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance);
-    Piece makeNullMove(Board &board, int x1, int y1, int x2, int y2);
-    void undoNullMove(Board &board, int x1, int y1, int x2, int y2, Piece eaten);
 
     HistoryHeuristic *historyCache = new HistoryHeuristic();
     MOVES rootMoves;
@@ -150,28 +148,33 @@ Node Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
-    if (!board.isKingLive(RED) || !board.isKingLive(BLACK)) {
+    if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
+    {
         return board.evaluate();
     }
-    
+
     if (depth <= 0)
     {
         return Search::searchQ(board, alpha, beta, 64);
     }
 
+    // probCut
     const bool mChecking = inCheck(board);
 
-    if (depth % 4 == 0 && !mChecking) {
+    if (depth % 4 == 0 && !mChecking)
+    {
         const float a = 3;
         const float b = 7;
         const float t = 1.5;
         const float sigma = 25;
         const int upperBound = (t * sigma + beta - b) / a;
         const int lowerBound = (-t * sigma + alpha - b) / a;
-        if (searchCut(board, depth - 2, upperBound) >= upperBound) {
+        if (searchCut(board, depth - 2, upperBound) >= upperBound)
+        {
             return beta;
         }
-        else if (searchCut(board, depth - 2, lowerBound + 1) <= lowerBound) {
+        else if (searchCut(board, depth - 2, lowerBound + 1) <= lowerBound)
+        {
             return alpha;
         }
     }
@@ -229,26 +232,43 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @param depth
 /// @param beta
 /// @return
-int Search::searchCut(Board &board, int depth, int beta)
+int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    if (!board.isKingLive(RED) || !board.isKingLive(BLACK)) {
+    if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
+    {
         return board.evaluate();
     }
-    
+
     if (depth <= 0)
     {
         return Search::searchQ(board, beta - 1, beta, 64);
     }
 
+    // probCut
     const bool mChecking = inCheck(board);
 
-    if (depth % 4 == 0 && !mChecking) {
+    if (depth % 4 == 0 && !mChecking)
+    {
         const float a = 3;
         const float b = 7;
         const float t = 1.5;
         const float sigma = 25;
         const int upperBound = (t * sigma + beta - b) / a;
-        if (searchCut(board, depth - 2, upperBound) >= upperBound) {
+        if (searchCut(board, depth - 2, upperBound) >= upperBound)
+        {
+            return beta;
+        }
+    }
+
+    // 空着裁剪
+    if (!banNullMove)
+    {
+        int R = 2;
+        board.team = -board.team;
+        int val = -searchCut(board, depth - 1 - R, -beta, true);
+        board.team = -board.team;
+        if (val >= beta)
+        {
             return beta;
         }
     }
@@ -292,14 +312,16 @@ int Search::searchCut(Board &board, int depth, int beta)
 /// @return
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-    if (board.distance >= maxDistance || !board.isKingLive(RED) || !board.isKingLive(BLACK)) {
+    if (board.distance >= maxDistance || !board.isKingLive(RED) || !board.isKingLive(BLACK))
+    {
         return board.evaluate();
     }
-    
+
     const bool mChecking = inCheck(board);
     int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
     int vlBest = -INF;
-    if (!mChecking) {
+    if (!mChecking)
+    {
         int vl = board.evaluate();
         vlBest = vl;
         if (vl >= beta)
@@ -311,12 +333,13 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getGoodCaptures(board);
 
-    for (const Move& move : availableMoves)
+    for (const Move &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
         int vl = -Search::searchQ(board, -beta, -alpha, leftDistance);
         board.undoMove(move, eaten);
-        if (vl > vlBest) {
+        if (vl > vlBest)
+        {
             vlBest = vl;
             if (vl >= beta)
             {
@@ -326,19 +349,10 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         }
     }
 
-    if (vlBest == -INF) {
+    if (vlBest == -INF)
+    {
         vlBest += board.distance;
     }
 
     return vlBest;
-}
-
-Piece Search::makeNullMove(Board &board, int x1, int y1, int x2, int y2)
-{
-    return Piece{OVERFLOW_PIECEID, -1, -1, -1};
-}
-
-void Search::undoNullMove(Board &board, int x1, int y1, int x2, int y2, Piece eaten)
-{
-    return;
 }
