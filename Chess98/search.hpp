@@ -167,9 +167,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
 
     // probCut
-    const bool mChecking = inCheck(board);
-
-    if (depth % 4 == 0 && !mChecking)
+    if (depth % 4 == 0 && !inCheck(board))
     {
         const float vlScale = (float)vlPawn / 100.0;
         const float a = 1.02 * vlScale;
@@ -260,9 +258,9 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // probCut
     const bool mChecking = inCheck(board);
 
+    // probCut and null pruning
     if (!mChecking) {
         if (!banNullMove) {
             if (board.nullOkay()) {
@@ -304,6 +302,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         Piece eaten = board.doMove(move);
         int vl = -INF;
+        // lmr pruning
         if (!mChecking &&
             eaten.pieceid == EMPTY_PIECEID &&
             depth >= 3 &&
@@ -365,7 +364,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         }
     }
  
-
+    // null pruning
     const bool mChecking = inCheck(board);
     int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
     int vlBest = -INF;
