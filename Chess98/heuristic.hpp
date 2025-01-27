@@ -67,3 +67,27 @@ void initZobrist()
 {
     memset(zobristMap, static_cast<U64>(0), sizeof(U64) * 7 * 2 * 9 * 10);
 }
+
+/* ***** 吃子启发 ***** */
+void eatenHeuristic(PIECEID_MAP pieceidMap, MOVES& moves)
+{
+    MOVES eatenMoves{};
+    MOVES result{};
+    for (Move& move : moves)
+    {
+        if (pieceidMap[move.x2][move.y2] != 0)
+        {
+            eatenMoves.emplace_back(move);
+            move.x1 = -1; // 标记一下move
+        }
+    }
+    
+    for (const Move& move : eatenMoves)
+        result.emplace_back(move);
+    for (const Move& move : moves)
+    {
+        if (move.x1 != -1)
+            result.emplace_back(move);
+    }
+    moves = result;
+}
