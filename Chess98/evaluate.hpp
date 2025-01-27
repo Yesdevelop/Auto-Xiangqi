@@ -183,6 +183,10 @@ const int TOTAL_ATTACK_VALUE = 8;
 const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 240;
 const int TOTAL_ADVISOR_LEAKAGE = 240;
 
+// 开局和残局时兵的基础分数
+const int OPEN_PAWN_VAL = 30;
+const int END_PAWN_VAL = 120;
+
 // 实时计算红方视角的估值权重
 
 std::map<PIECEID, WEIGHT_MAP> getBasicEvluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack) {
@@ -297,3 +301,5 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvluateWeights(int vlOpen, int vlRedAttack
 std::map<PIECEID, WEIGHT_MAP> pieceWeights;
 
 int vlAdvanced = 0;
+
+int vlPawn = 0;

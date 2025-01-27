@@ -161,8 +161,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     if (depth % 4 == 0 && !mChecking)
     {
-        const float vlPawn = 30.0;
-        const float vlScale = vlPawn / 100.0;
+        const float vlScale = (float)vlPawn / 100.0;
         const float a = 1.02 * vlScale;
         const float b = 2.36 * vlScale;
         const float sigma = 82.0 * vlScale;
@@ -261,8 +260,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
         else if (depth % 4 == 0)
         {
-            const float vlPawn = 30.0;
-            const float vlScale = vlPawn / 100.0;
+            const float vlScale = (float)vlPawn / 100.0;
             const float a = 1.02 * vlScale;
             const float b = 2.36 * vlScale;
             const float sigma = 82.0 * vlScale;
