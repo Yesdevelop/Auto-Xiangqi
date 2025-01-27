@@ -70,7 +70,7 @@ void initZobrist()
 }
 
 /* ***** 吃子启发 ***** */
-void eatenHeuristic(Board board, MOVES& moves)
+void eatenHeuristic(Board &board, MOVES& moves)
 {
     MOVES eatenMoves{};
     MOVES result{};
