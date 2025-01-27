@@ -499,10 +499,11 @@ MOVES Moves::getCaptrueMoves(Board &board)
 MOVES Moves::getGoodCaptures(Board &board)
 {
     // SEE
-    MOVES result{};
-    result.reserve(32);
-
     MOVES moves = Moves::getCaptrueMoves(board);
+
+    MOVES result{};
+    result.reserve(moves.size());
+
     const std::map<PIECEID, int> weightPairs{
         {R_KING, 5},
         {R_ROOK, 4},
@@ -541,7 +542,9 @@ MOVES Moves::getGoodCaptures(Board &board)
         {
             score = a + 1;
         }
-        orderMap[score].emplace_back(move);
+        if (score >= 1) {
+            orderMap[score].emplace_back(move);
+        }
     }
 
     for (int score = 8; score >= 1; score--)
