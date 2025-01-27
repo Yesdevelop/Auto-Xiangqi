@@ -480,10 +480,10 @@ MOVES Moves::getMoves(Board &board)
 /// @return
 MOVES Moves::getCaptrueMoves(Board &board)
 {
-    MOVES result{};
-    result.reserve(32);
-
     MOVES moves = Moves::getMoves(board);
+
+    MOVES result{};
+    result.reserve(moves.size());
     for (const Move &move : moves)
     {
         if (board.pieceidOn(move.x2, move.y2) != EMPTY_PIECEID)
