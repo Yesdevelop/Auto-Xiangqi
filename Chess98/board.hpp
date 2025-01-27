@@ -1,6 +1,5 @@
 #pragma once
 #include "evaluate.hpp"
-#include "heuristic.hpp"
 
 /// @brief 棋盘类
 class Board
@@ -86,7 +85,6 @@ private:
 /// @param pieceidMap 棋子id位置表，一般传DEFAULT_PIECEID_MAP
 Board::Board(PIECEID_MAP pieceidMap, int initTeam)
 {
-    initZobrist();
     this->distance = 0;
     this->team = initTeam;
     this->pieceidMap = pieceidMap;
