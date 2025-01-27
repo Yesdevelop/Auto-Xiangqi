@@ -376,81 +376,36 @@ MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
 /// @brief 生成兵的着法
 MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
 {
+    MOVES result{};
+
     if (team == RED)
     {
-        if (y >= 0 && y <= 4)
+        if (board.teamOn(x, y + 1) != team && board.teamOn(x, y + 1) != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x, y + 1});
+        // 如果过河了
+        if (y > 4)
         {
-            if (board.teamOn(x, y + 1) != team)
-            {
-                return MOVES{Move{x, y, x, y + 1}};
-            }
-        }
-        else
-        {
-            MOVES result{};
-            if (board.teamOn(x, y + 1) != team)
-            {
-                if (y + 1 <= 9)
-                {
-                    result.emplace_back(Move{x, y, x, y + 1});
-                }
-            }
-            if (board.teamOn(x + 1, y) != team)
-            {
-                if (x + 1 <= 8)
-                {
-
-                    result.emplace_back(Move{x, y, x + 1, y});
-                }
-            }
-            if (board.teamOn(x - 1, y) != team)
-            {
-                if (x - 1 >= 0)
-                {
-                    result.emplace_back(Move{x, y, x - 1, y});
-                }
-            }
-            return result;
+            if (board.teamOn(x - 1, y) != team && x - 1 >= 0)
+                result.emplace_back(Move{x, y, x - 1, y + 1});
+            if (board.teamOn(x + 1, y) != team && x + 1 <= 8)
+                result.emplace_back(Move{x, y, x + 1, y + 1});
         }
     }
     else
     {
-        if (y >= 5 && y <= 9)
+        if (board.teamOn(x, y - 1) != team && board.teamOn(x, y - 1) != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x, y - 1});
+        // 如果过河了
+        if (y < 5)
         {
-            if (board.teamOn(x, y - 1) != team)
-            {
-                return MOVES{Move{x, y, x, y - 1}};
-            }
-        }
-        else
-        {
-            MOVES result{};
-            if (board.teamOn(x, y - 1) != team)
-            {
-                if (y - 1 >= 0)
-                {
-                    result.emplace_back(Move{x, y, x, y - 1});
-                }
-            }
-            if (board.teamOn(x + 1, y) != team)
-            {
-                if (x + 1 <= 8)
-                {
-
-                    result.emplace_back(Move{x, y, x + 1, y});
-                }
-            }
-            if (board.teamOn(x - 1, y) != team)
-            {
-                if (x - 1 >= 0)
-                {
-                    result.emplace_back(Move{x, y, x - 1, y});
-                }
-            }
-            return result;
+            if (board.teamOn(x - 1, y) != team && x - 1 >= 0)
+                result.emplace_back(Move{x, y, x - 1, y - 1});
+            if (board.teamOn(x + 1, y) != team && x + 1 <= 8)
+                result.emplace_back(Move{x, y, x + 1, y - 1});
         }
     }
-    return MOVES{};
+
+    return result;
 }
 
 /// @brief 生成着法
@@ -499,9 +454,16 @@ MOVES Moves::generateMoves(Board &board, int x, int y)
 /// @return
 MOVES Moves::getMoves(Board &board)
 {
+    // 有无将
     if (!board.isKingLive(board.team))
-    {
         return MOVES{};
+    // 对面笑
+    for (int y = board.pieceRedKing->y; y <= 9; y++)
+    {
+        if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
+            return MOVES{};
+        if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
+            break;
     }
 
     MOVES result{};
@@ -511,9 +473,7 @@ MOVES Moves::getMoves(Board &board)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)
-        {
             result.emplace_back(move);
-        }
     }
 
     return result;
