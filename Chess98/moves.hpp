@@ -583,13 +583,13 @@ MOVES Moves::getGoodCaptures(Board board)
     MOVES result{};
     MOVES moves = Moves::getCaptrueMoves(board);
     const std::map<PIECEID, int> weightPairs{
+            {R_KING, 5},
             {R_ROOK, 4},
             {R_CANNON, 3},
             {R_KNIGHT, 3},
             {R_BISHOP, 2},
             {R_GUARD, 2},
             {R_PAWN, 1},
-            {R_KING, 1}
     };
     std::map<int, MOVES> orderMap{};
 
@@ -603,28 +603,30 @@ MOVES Moves::getGoodCaptures(Board board)
         int b = weightPairs.at(abs(attacker.pieceid));
         if (relationship_hasProtector(board, captured.x, captured.y))
         {
-            score = a - b + 1;
+            if (a == b)
+            {
+                PIECEID pieceid = abs(captured.pieceid);
+                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK)
+                {
+                    score = 1;
+                }
+                if (isGoodPawn(board, captured.x, captured.y))
+                {
+                    score = 1;
+                }
+            }
+            else {
+                score = a - b + 1;
+            }
         }
         else
         {
             score = a + 1;
         }
-        if (score < 0)
-        {
-            PIECEID pieceid = abs(captured.pieceid);
-            if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK)
-            {
-                score = 1;
-            }
-            if (isGoodPawn(board, captured.x, captured.y))
-            {
-                score = 1;
-            }
-        }
         orderMap[score].emplace_back(move);
     }
 
-    for (int score = 8; score > 1; score--)
+    for (int score = 8; score >= 1; score--)
     {
         for (const Move &move : orderMap[score])
         {
