@@ -299,7 +299,10 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvluateWeights(int vlOpen, int vlRedAttack
 }
 
 std::map<PIECEID, WEIGHT_MAP> pieceWeights;
-
 int vlAdvanced = 0;
-
 int vlPawn = 0;
+
+// 剪裁的子力边界
+
+const int deltaPruningMargin = 300;
+const int futilityPruningMargin = 400;

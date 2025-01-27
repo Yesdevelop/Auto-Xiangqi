@@ -171,7 +171,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // futility pruning
     if (depth == 1 && !mChecking) {
         int vl = board.evaluate();
-        if (vl <= alpha - 400) {
+        if (vl <= alpha - futilityPruningMargin) {
             return vl;
         }
     }
@@ -273,7 +273,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // futility pruning
     if (depth == 1 && !mChecking) {
         int vl = board.evaluate();
-        if (vl <= beta - 400) {
+        if (vl <= beta - futilityPruningMargin) {
             return vl;
         }
     }
@@ -394,7 +394,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
             return vl;
         }
         // delta pruning
-        if (vl <= alpha - 300) {
+        if (vl <= alpha - deltaPruningMargin) {
             return alpha;
         }
         
