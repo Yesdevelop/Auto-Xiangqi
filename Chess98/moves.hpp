@@ -397,9 +397,9 @@ MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
         if (y > 4)
         {
             if (board.teamOn(x - 1, y) != team && x - 1 >= 0)
-                result.emplace_back(Move{x, y, x - 1, y + 1});
+                result.emplace_back(Move{x, y, x - 1, y});
             if (board.teamOn(x + 1, y) != team && x + 1 <= 8)
-                result.emplace_back(Move{x, y, x + 1, y + 1});
+                result.emplace_back(Move{x, y, x + 1, y});
         }
     }
     else
@@ -410,9 +410,9 @@ MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
         if (y < 5)
         {
             if (board.teamOn(x - 1, y) != team && x - 1 >= 0)
-                result.emplace_back(Move{x, y, x - 1, y - 1});
+                result.emplace_back(Move{x, y, x - 1, y});
             if (board.teamOn(x + 1, y) != team && x + 1 <= 8)
-                result.emplace_back(Move{x, y, x + 1, y - 1});
+                result.emplace_back(Move{x, y, x + 1, y});
         }
     }
 

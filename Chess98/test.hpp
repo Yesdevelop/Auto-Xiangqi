@@ -4,7 +4,6 @@
 
 void testWithUI(TEAM team, int maxDepth);
 void checkingTest();
-void relationshipTest();
 
 void test(TEAM team = BLACK, int maxDepth = 10)
 {
