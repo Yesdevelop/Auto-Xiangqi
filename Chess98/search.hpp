@@ -189,7 +189,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
-    eatenHeuristic(board.pieceidMap, availableMoves);
+    eatenHeuristic(board, availableMoves);
     Move *pBestMove = nullptr;
     int vl = -INF;
     int vlBest = -INF;

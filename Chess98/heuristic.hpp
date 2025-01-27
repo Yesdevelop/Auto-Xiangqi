@@ -1,5 +1,6 @@
 #pragma once
 #include "base.hpp"
+#include "board.hpp"
 
 /* ***** 历史启发 ***** */
 
@@ -69,21 +70,50 @@ void initZobrist()
 }
 
 /* ***** 吃子启发 ***** */
-void eatenHeuristic(PIECEID_MAP pieceidMap, MOVES& moves)
+void eatenHeuristic(Board board, MOVES& moves)
 {
     MOVES eatenMoves{};
     MOVES result{};
     for (Move& move : moves)
     {
-        if (pieceidMap[move.x2][move.y2] != 0)
+        if (board.pieceidOn(move.x2, move.y2) != 0)
         {
             eatenMoves.emplace_back(move);
             move.x1 = -1; // 标记一下move
         }
     }
-    
+
+    std::vector<int> moveWeights{};
+    std::map<int, MOVES> orderMap{};
+
     for (const Move& move : eatenMoves)
-        result.emplace_back(move);
+    {
+        const std::map<PIECEID, int> weightPairs{
+            { R_KING, 7 },
+            { R_ROOK, 6 },
+            { R_CANNON, 5 },
+            { R_KNIGHT, 4 },
+            { R_BISHOP, 3 },
+            { R_GUARD, 2 },
+            { R_PAWN, 1 },
+        };
+        PIECEID attacker = abs(board.pieceidOn(move.x2, move.y2));
+        PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
+        int moveWeight = 10 * (8 - weightPairs.at(attacker)) + weightPairs.at(captured);
+        moveWeights.emplace_back(moveWeight);
+        orderMap[moveWeight].emplace_back(move);
+    }
+
+    std::sort(moveWeights.begin(), moveWeights.end(), std::less<int>());
+    moveWeights.erase(std::unique(moveWeights.begin(), moveWeights.end()), moveWeights.end());
+
+    for (int weight : moveWeights)
+    {
+        for (const Move& move : orderMap[weight])
+        {
+            result.emplace_back(move);
+        }
+    }
     for (const Move& move : moves)
     {
         if (move.x1 != -1)
