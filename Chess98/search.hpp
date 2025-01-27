@@ -20,6 +20,7 @@ public:
         rootMoves.resize(0);
         this->historyCache->init();
         board.distance = 0;
+        board.initEvaluate();
     }
     void searchStep(Move &bestMove)
     {
