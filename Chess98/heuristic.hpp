@@ -70,7 +70,7 @@ void initZobrist()
 }
 
 /* ***** 吃子启发 ***** */
-void eatenHeuristic(Board &board, MOVES& moves)
+void eatenHeuristic(Board board, MOVES& moves)
 {
     MOVES eatenMoves{};
     MOVES result{};
@@ -89,11 +89,11 @@ void eatenHeuristic(Board &board, MOVES& moves)
     for (const Move& move : eatenMoves)
     {
         const std::map<PIECEID, int> weightPairs{
-            { R_KING, 7 },
-            { R_ROOK, 6 },
-            { R_CANNON, 5 },
-            { R_KNIGHT, 4 },
-            { R_BISHOP, 3 },
+            { R_KING, 5 },
+            { R_ROOK, 4 },
+            { R_CANNON, 3 },
+            { R_KNIGHT, 3 },
+            { R_BISHOP, 2 },
             { R_GUARD, 2 },
             { R_PAWN, 1 },
         };
