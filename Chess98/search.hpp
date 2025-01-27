@@ -52,7 +52,7 @@ public:
     Node searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
-    int searchQ(Board &board, int alpha, int beta, int maxDistance);
+    int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
 
     HistoryHeuristic *historyCache = new HistoryHeuristic();
     MOVES rootMoves;
@@ -154,7 +154,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
     if (depth <= 0)
     {
-        return Search::searchQ(board, alpha, beta, 64);
+        return Search::searchQ(board, alpha, beta);
     }
 
     // mate distance pruning

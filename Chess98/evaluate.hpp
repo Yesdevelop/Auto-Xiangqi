@@ -302,7 +302,8 @@ std::map<PIECEID, WEIGHT_MAP> pieceWeights;
 int vlAdvanced = 0;
 int vlPawn = 0;
 
-// 剪裁的子力边界
+// 剪裁的边界参数
 
+const int maxSearchDistance = 64;
 const int deltaPruningMargin = 300;
 const int futilityPruningMargin = 400;
