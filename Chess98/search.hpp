@@ -2,6 +2,7 @@
 #include "moves.hpp"
 #include "heuristic.hpp"
 #include "utils.hpp"
+#include <windows.h>
 
 /// @brief 节点对象，存储分数 + 着法
 class Node
@@ -21,6 +22,7 @@ public:
         this->historyCache->init();
         board.distance = 0;
         board.initEvaluate();
+        SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
     void searchStep(Move &bestMove)
     {
@@ -323,11 +325,11 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     if (!mChecking)
     {
         int vl = board.evaluate();
-        vlBest = vl;
         if (vl >= beta)
         {
             return vl;
         }
+        vlBest = vl;
         alpha = std::max<int>(alpha, vl);
     }
 
@@ -340,11 +342,11 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         board.undoMove(move, eaten);
         if (vl > vlBest)
         {
-            vlBest = vl;
             if (vl >= beta)
             {
                 return vl;
             }
+            vlBest = vl;
             alpha = std::max<int>(alpha, vl);
         }
     }
