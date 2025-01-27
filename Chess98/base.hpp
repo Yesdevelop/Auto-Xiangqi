@@ -1,14 +1,13 @@
 #pragma once
 #include <windows.h>
-#include <cstring>
 #include <iostream>
-#include <vector>
 #include <algorithm>
+#include <ctime>
 #include <string>
+#include <vector>
+#include <cstring>
 #include <array>
-#include <chrono>
 #include <map>
-#include <cassert>
 
 using PIECE_INDEX = int;
 using U64 = unsigned long long;
@@ -156,21 +155,6 @@ std::string getPieceName(PIECEID pieceid)
         return "BP";
     else
         return "  ";
-}
-
-using TIME_T = long long;
-
-/// @brief 获取当前时间戳（毫秒）
-/// @return
-TIME_T getCurrentTimeWithMS()
-{
-    // 获取当前时间戳
-    auto now = std::chrono::system_clock::now();
-
-    // 将时间戳转换为毫秒数
-    auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-    auto value = now_ms.time_since_epoch().count();
-    return TIME_T(value);
 }
 
 /// @brief 获取一个64位的随机整数

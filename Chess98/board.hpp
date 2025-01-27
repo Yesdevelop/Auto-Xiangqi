@@ -59,6 +59,7 @@ public:
 
     //和根节点的距离
     int distance = 0;
+    
     // 评估相关
     int vlRed = 0;
     int vlBlack = 0;

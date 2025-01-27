@@ -277,8 +277,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    
-
     MOVES availableMoves = Moves::getMoves(board);
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
