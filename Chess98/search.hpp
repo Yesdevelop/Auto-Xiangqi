@@ -156,6 +156,15 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         return Search::searchQ(board, alpha, beta, 64);
     }
 
+    // mate distance pruning
+    const int vlDistanceMate = INF - board.distance;
+    if (vlDistanceMate < beta) {
+        beta = vlDistanceMate;
+        if (alpha >= vlDistanceMate) {
+            return vlDistanceMate;
+        }
+    }
+
     // probCut
     const bool mChecking = inCheck(board);
 
@@ -239,6 +248,16 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         return Search::searchQ(board, beta - 1, beta, 64);
     }
 
+    // mate distance pruning
+    const int vlDistanceMate = INF - board.distance;
+    const int vlOriginAlpha = beta - 1;
+    if (vlDistanceMate < beta) {
+        beta = vlDistanceMate;
+        if (vlOriginAlpha >= vlDistanceMate) {
+            return vlDistanceMate;
+        }
+    }
+
     // probCut
     const bool mChecking = inCheck(board);
 
@@ -316,6 +335,16 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     {
         return board.evaluate();
     }
+
+    // mate distance pruning
+    const int vlDistanceMate = INF - board.distance;
+    if (vlDistanceMate < beta) {
+        beta = vlDistanceMate;
+        if (alpha >= vlDistanceMate) {
+            return vlDistanceMate;
+        }
+    }
+ 
 
     const bool mChecking = inCheck(board);
     int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
