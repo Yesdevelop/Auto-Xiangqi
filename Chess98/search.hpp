@@ -176,7 +176,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
-    // probCut
+    // multi probCut
     if (depth % 4 == 0 && !mChecking)
     {
         const float vlScale = (float)vlPawn / 100.0;
@@ -278,7 +278,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // probCut and null pruning
+    // multi probCut and null pruning
     if (!mChecking) {
         if (!banNullMove) {
             if (board.nullOkay()) {
