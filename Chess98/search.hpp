@@ -20,6 +20,7 @@ public:
         rootMoves.resize(0);
         this->historyCache->init();
         board.distance = 0;
+        board.initEvaluate();
     }
     void searchStep(Move &bestMove)
     {
@@ -148,11 +149,6 @@ Node Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
-    if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
-    {
-        return board.evaluate();
-    }
-
     if (depth <= 0)
     {
         return Search::searchQ(board, alpha, beta, 64);
@@ -163,10 +159,12 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     if (depth % 4 == 0 && !mChecking)
     {
-        const float a = 3;
-        const float b = 7;
+        const float vlPawn = 30.0;
+        const float vlScale = vlPawn / 100.0;
+        const float a = 1.02 * vlScale;
+        const float b = 2.36 * vlScale;
+        const float sigma = 82.0 * vlScale;
         const float t = 1.5;
-        const float sigma = 25;
         const int upperBound = (t * sigma + beta - b) / a;
         const int lowerBound = (-t * sigma + alpha - b) / a;
         if (searchCut(board, depth - 2, upperBound) >= upperBound)
@@ -234,10 +232,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
-    {
-        return board.evaluate();
-    }
 
     if (depth <= 0)
     {
@@ -265,10 +259,12 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
         else if (depth % 4 == 0)
         {
-            const float a = 3;
-            const float b = 7;
+            const float vlPawn = 30.0;
+            const float vlScale = vlPawn / 100.0;
+            const float a = 1.02 * vlScale;
+            const float b = 2.36 * vlScale;
+            const float sigma = 82.0 * vlScale;
             const float t = 1.5;
-            const float sigma = 25;
             const int upperBound = (t * sigma + beta - b) / a;
             if (searchCut(board, depth - 2, upperBound) >= upperBound)
             {
@@ -316,7 +312,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 /// @return
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-    if (board.distance >= maxDistance || !board.isKingLive(RED) || !board.isKingLive(BLACK))
+    if (board.distance >= maxDistance)
     {
         return board.evaluate();
     }
