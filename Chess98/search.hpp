@@ -298,14 +298,29 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
     int vlBest = -INF;
+    int searchedCnt = 0;
     for (auto &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -searchCut(board, depth - 1, -beta + 1);
+        int vl = -INF;
+        if (!mChecking &&
+            eaten.pieceid == EMPTY_PIECEID &&
+            depth >= 3 &&
+            searchedCnt >= 4
+            ) {
+            vl = -searchCut(board, depth - 2, -beta + 1);
+            if (vl >= beta) {
+                vl = -searchCut(board, depth - 1, -beta + 1);
+            }
+        }
+        else {
+            vl = -searchCut(board, depth - 1, -beta + 1);
+        }
         board.undoMove(move, eaten);
 
         if (vl > vlBest)
         {
+
             vlBest = vl;
             pBestMove = &move;
             if (vl >= beta)
@@ -313,6 +328,8 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 break;
             }
         }
+
+        searchedCnt++;
     }
 
     if (!pBestMove)
@@ -358,6 +375,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         {
             return vl;
         }
+        
         vlBest = vl;
         alpha = std::max<int>(alpha, vl);
     }
