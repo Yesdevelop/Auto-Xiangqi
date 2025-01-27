@@ -44,7 +44,7 @@ void testWithUI(TEAM team, int maxDepth)
     {
         if (board.team == team)
         {
-            Node node = s.searchMain(board, maxDepth, 1);
+            Node node = s.searchMain(board, maxDepth, 3);
             board.doMove(node.move);
             setBoardCode(board);
 
