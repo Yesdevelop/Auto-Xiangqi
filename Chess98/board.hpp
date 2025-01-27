@@ -32,8 +32,6 @@ public:
 
     void print();
 
-    void initEvaluate();
-
     int evaluate() const
     {
         return this->team == RED ? (vlRed - vlBlack) : (vlBlack - vlRed);
@@ -117,7 +115,22 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
             }
         }
     }
-    initEvaluate();
+    // 初始化评估分
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            PIECEID pid = this->pieceidMap[x][y];
+            if (pid > 0)
+            {
+                this->vlRed += pieceWeights[pid - 1][x][y];
+            }
+            else if (pid < 0)
+            {
+                this->vlBlack += pieceWeights[abs(pid) - 1][x][size_t(9) - y];
+            }
+        }
+    }
     // 双方将帅的位置
     for (const Piece &piece : this->getAllLivePieces())
     {
@@ -239,26 +252,6 @@ std::vector<Piece> Board::getPiecesByTeam(TEAM team)
         }
     }
     return result;
-}
-
-void Board::initEvaluate()
-{
-    this->vlRed = this->vlBlack = 0;
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            PIECEID pid = this->pieceidMap[x][y];
-            if (pid > 0)
-            {
-                this->vlRed += pieceWeights[pid - 1][x][y];
-            }
-            else if (pid < 0)
-            {
-                this->vlBlack += pieceWeights[abs(pid) - 1][x][size_t(9) - y];
-            }
-        }
-    }
 }
 
 /// @brief 步进
