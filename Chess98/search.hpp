@@ -174,6 +174,9 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         if (vl <= alpha - futilityPruningMargin) {
             return vl;
         }
+        if (vl >= beta + futilityPruningMargin) {
+            return vl;
+        }
     }
 
     // multi probCut
@@ -274,6 +277,9 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (depth == 1 && !mChecking) {
         int vl = board.evaluate();
         if (vl <= beta - futilityPruningMargin) {
+            return vl;
+        }
+        if (vl >= beta + futilityPruningMargin) {
             return vl;
         }
     }
