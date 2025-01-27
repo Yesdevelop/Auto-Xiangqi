@@ -295,3 +295,5 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvluateWeights(int vlOpen, int vlRedAttack
 }
 
 std::map<PIECEID, WEIGHT_MAP> pieceWeights;
+
+int vlAdvanced = 0;

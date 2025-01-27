@@ -35,7 +35,7 @@ public:
 
     int evaluate() const
     {
-        return this->team == RED ? (vlRed - vlBlack) : (vlBlack - vlRed);
+        return this->team == RED ? (vlRed - vlBlack) + vlAdvanced : (vlBlack - vlRed) + vlAdvanced;
     }
 
     void doNullMove() {
@@ -489,7 +489,9 @@ void Board::initEvaluate()
     int vlBlackAttack = 0;
     this->vlOpenCalculator(vlOpen);
     this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
+    
     pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
+    vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
 
     //调整不受威胁方少掉的士象分
     this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
