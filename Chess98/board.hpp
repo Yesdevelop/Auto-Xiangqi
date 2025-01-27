@@ -1,5 +1,6 @@
 #pragma once
 #include "evaluate.hpp"
+#include "heuristic.hpp"
 
 /// @brief 棋盘类
 class Board

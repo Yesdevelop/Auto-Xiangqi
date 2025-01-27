@@ -29,25 +29,6 @@ void checkingTest()
     std::cout << s << std::endl;
 }
 
-
-void relationshipTest()
-{
-    PIECEID_MAP MAP{
-        {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
-         {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-         {R_BISHOP, 0, B_KNIGHT, R_PAWN, 0, 0, B_PAWN, R_KNIGHT, 0, B_BISHOP},
-         {R_GUARD, 0, B_ROOK, B_CANNON, 0, 0, 0, R_ROOK, 0, B_GUARD},
-         {R_KING, 0, 0, 0, 0, 0, 0, 0, 0, B_KING},
-         {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-         {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-         {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-         {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
-    Board board = Board(MAP, RED);
-    board.print();
-    std::vector<Piece> pieces = relationship_beProtected(board, board.piecePosition(3, 0));
-    system("pause");
-}
-
 /// 带UI的测试
 void testWithUI(TEAM team, int maxDepth)
 {

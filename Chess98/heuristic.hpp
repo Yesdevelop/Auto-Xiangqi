@@ -57,3 +57,13 @@ void HistoryHeuristic::add(Move move, int depth)
     int pos2 = toIndex(move.x2, move.y2);
     historyTable[pos1][pos2] += depth * depth;
 }
+
+/* ***** 置换表启发 ***** */
+
+U64 zobristMap[7][2][9][10]{};
+
+/// @brief 初始化zobrist哈希表
+void initZobrist()
+{
+    memset(zobristMap, static_cast<U64>(0), sizeof(U64) * 7 * 2 * 9 * 10);
+}

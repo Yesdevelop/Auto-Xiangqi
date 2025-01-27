@@ -164,10 +164,17 @@ U64 rand64()
     return rand() ^ ((U64)rand() << 15) ^ ((U64)rand() << 30) ^ ((U64)rand() << 45) ^ ((U64)rand() << 60);
 }
 
-U64 zobristMap[7][2][9][10]{};
-
-/// @brief 初始化
-void initZobrist()
+/// @brief Pieceid转Team
+/// @param pieceid
+/// @return
+TEAM pieceidToTeam(PIECEID pieceid)
 {
-    memset(zobristMap, static_cast<U64>(0), sizeof(U64) * 7 * 2 * 9 * 10);
+    if (pieceid == OVERFLOW_PIECEID)
+        return OVERFLOW_TEAM;
+    else if (pieceid > 0)
+        return RED;
+    else if (pieceid < 0)
+        return BLACK;
+    else
+        return EMPTY_TEAM;
 }
