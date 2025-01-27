@@ -70,10 +70,10 @@ public:
     int vlRed = 0;
     int vlBlack = 0;
 
+    PIECEID_MAP pieceidMap{};
 
 private:
     // 棋盘相关
-    PIECEID_MAP pieceidMap{};
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     std::vector<Piece> pieces{};
     std::vector<PIECE_INDEX> redPieces{};
