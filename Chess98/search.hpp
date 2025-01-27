@@ -376,6 +376,11 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
             return vl;
         }
         
+        // delta pruning
+        if (vl <= alpha - 300) {
+            return alpha;
+        }
+        
         vlBest = vl;
         alpha = std::max<int>(alpha, vl);
     }
