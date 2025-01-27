@@ -496,7 +496,7 @@ bool relationship_hasProtector(Board &board, int x, int y)
 /// @param x
 /// @param y
 /// @return
-bool isGoodPawn(Board &board, int x, int y)
+bool isRiveredPawn(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);
     if (pieceid == R_PAWN && y >= 5 && y <= 9)

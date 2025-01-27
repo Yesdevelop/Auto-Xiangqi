@@ -33,7 +33,7 @@ public:
 MOVES Moves::king(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(4);
+    result.reserve(8);
 
     // 横坐标应当在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
     const int left = x - 1;
@@ -67,7 +67,7 @@ MOVES Moves::king(TEAM team, Board &board, int x, int y)
 MOVES Moves::guard(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(4);
+    result.reserve(8);
 
     // 横坐标也应在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
     const int left = x - 1;
@@ -116,7 +116,7 @@ MOVES Moves::guard(TEAM team, Board &board, int x, int y)
 MOVES Moves::bishop(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(4);
+    result.reserve(8);
 
     // 横坐标应在0, 9之间，纵坐标的话，红方在0, 4之间，黑方在5, 9之间
     if (team == RED)
@@ -149,35 +149,43 @@ MOVES Moves::bishop(TEAM team, Board &board, int x, int y)
 MOVES Moves::knight(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    MOVES mayAvailableMoves{};
-    if (board.pieceidOn(x, y + 1) == EMPTY_PIECEID)
-    {
-        mayAvailableMoves.emplace_back(Move{x, y, x + 1, y + 2});
-        mayAvailableMoves.emplace_back(Move{x, y, x - 1, y + 2});
-    }
-    if (board.pieceidOn(x, y - 1) == EMPTY_PIECEID)
-    {
-        mayAvailableMoves.emplace_back(Move{x, y, x + 1, y - 2});
-        mayAvailableMoves.emplace_back(Move{x, y, x - 1, y - 2});
-    }
-    if (board.pieceidOn(x + 1, y) == EMPTY_PIECEID)
-    {
-        mayAvailableMoves.emplace_back(Move{x, y, x + 2, y + 1});
-        mayAvailableMoves.emplace_back(Move{x, y, x + 2, y - 1});
-    }
-    if (board.pieceidOn(x - 1, y) == EMPTY_PIECEID)
-    {
-        mayAvailableMoves.emplace_back(Move{x, y, x - 2, y + 1});
-        mayAvailableMoves.emplace_back(Move{x, y, x - 2, y - 1});
-    }
+    result.reserve(16);
 
-    for (Move v : mayAvailableMoves)
+    if (board.teamOn(x - 1, y) == EMPTY_TEAM)
     {
-        TEAM targetTeam = board.teamOn(v.x2, v.y2);
-        if (targetTeam != team && targetTeam != OVERFLOW_TEAM)
-        {
-            result.emplace_back(v);
-        }
+        TEAM t1 = board.teamOn(x - 2, y + 1);
+        TEAM t2 = board.teamOn(x - 2, y - 1);
+        if (t1 != team && t1 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x - 2, y + 1});
+        if (t2 != team && t2 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x - 2, y - 1});
+    }
+    if (board.teamOn(x + 1, y) == EMPTY_TEAM)
+    {
+        TEAM t1 = board.teamOn(x + 2, y + 1);
+        TEAM t2 = board.teamOn(x + 2, y - 1);
+        if (t1 != team && t1 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x + 2, y + 1});
+        if (t2 != team && t2 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x + 2, y - 1});
+    }
+    if (board.teamOn(x, y - 1) == EMPTY_TEAM)
+    {
+        TEAM t1 = board.teamOn(x - 1, y - 2);
+        TEAM t2 = board.teamOn(x + 1, y - 2);
+        if (t1 != team && t1 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x - 1, y - 2});
+        if (t2 != team && t2 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x + 1, y - 2});
+    }
+    if (board.teamOn(x, y + 1) == EMPTY_TEAM)
+    {
+        TEAM t1 = board.teamOn(x - 1, y + 2);
+        TEAM t2 = board.teamOn(x + 1, y + 2);
+        if (t1 != team && t1 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x - 1, y + 2});
+        if (t2 != team && t2 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x + 1, y + 2});
     }
 
     return result;
@@ -187,6 +195,7 @@ MOVES Moves::knight(TEAM team, Board &board, int x, int y)
 MOVES Moves::rook(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
+    result.reserve(64);
 
     for (int _y = y + 1; _y <= 9; _y++)
     {
@@ -260,6 +269,7 @@ MOVES Moves::rook(TEAM team, Board &board, int x, int y)
 MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
+    result.reserve(64);
 
     for (int _x = x + 1; _x <= 8; _x++)
     {
@@ -377,6 +387,7 @@ MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
 MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
+    result.reserve(8);
 
     if (team == RED)
     {
@@ -411,42 +422,25 @@ MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
 /// @brief 生成着法
 MOVES Moves::generateMoves(Board &board, int x, int y)
 {
-    PIECEID chessid = board.pieceidOn(x, y);
+    PIECEID pieceid = board.pieceidOn(x, y);
     TEAM team = board.teamOn(x, y);
 
-    if (chessid == R_KING || chessid == B_KING)
-    {
+    if (pieceid == R_KING || pieceid == B_KING)
         return Moves::king(team, board, x, y);
-    }
-    else if (chessid == R_GUARD || chessid == B_GUARD)
-    {
+    else if (pieceid == R_GUARD || pieceid == B_GUARD)
         return Moves::guard(team, board, x, y);
-    }
-    else if (chessid == R_BISHOP || chessid == B_BISHOP)
-    {
+    else if (pieceid == R_BISHOP || pieceid == B_BISHOP)
         return Moves::bishop(team, board, x, y);
-    }
-    else if (chessid == R_KNIGHT || chessid == B_KNIGHT)
-    {
+    else if (pieceid == R_KNIGHT || pieceid == B_KNIGHT)
         return Moves::knight(team, board, x, y);
-    }
-    else if (chessid == R_ROOK || chessid == B_ROOK)
-    {
+    else if (pieceid == R_ROOK || pieceid == B_ROOK)
         return Moves::rook(team, board, x, y);
-    }
-    else if (chessid == R_CANNON || chessid == B_CANNON)
-    {
+    else if (pieceid == R_CANNON || pieceid == B_CANNON)
         return Moves::cannon(team, board, x, y);
-    }
-    else if (chessid == R_PAWN || chessid == B_PAWN)
-    {
+    else if (pieceid == R_PAWN || pieceid == B_PAWN)
         return Moves::pawn(team, board, x, y);
-    }
     else
-    {
-        std::cerr << "Invalid chess id: " + std::to_string(chessid) << std::endl;
         return MOVES{};
-    }
 }
 
 /// @brief 获取当前队伍所有可行着法
@@ -457,6 +451,7 @@ MOVES Moves::getMoves(Board &board)
     // 有无将
     if (!board.isKingLive(board.team))
         return MOVES{};
+
     // 对面笑
     for (int y = board.pieceRedKing->y; y <= 9; y++)
     {
@@ -467,6 +462,7 @@ MOVES Moves::getMoves(Board &board)
     }
 
     MOVES result{};
+    result.reserve(64);
 
     std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
     for (const Piece &piece : pieces)
@@ -485,14 +481,15 @@ MOVES Moves::getMoves(Board &board)
 MOVES Moves::getCaptrueMoves(Board &board)
 {
     MOVES result{};
+    result.reserve(32);
+
     MOVES moves = Moves::getMoves(board);
     for (const Move &move : moves)
     {
         if (board.pieceidOn(move.x2, move.y2) != EMPTY_PIECEID)
-        {
             result.emplace_back(move);
-        }
     }
+
     return result;
 }
 
@@ -503,15 +500,17 @@ MOVES Moves::getGoodCaptures(Board &board)
 {
     // SEE
     MOVES result{};
+    result.reserve(32);
+
     MOVES moves = Moves::getCaptrueMoves(board);
     const std::map<PIECEID, int> weightPairs{
-            {R_KING, 5},
-            {R_ROOK, 4},
-            {R_CANNON, 3},
-            {R_KNIGHT, 3},
-            {R_BISHOP, 2},
-            {R_GUARD, 2},
-            {R_PAWN, 1},
+        {R_KING, 5},
+        {R_ROOK, 4},
+        {R_CANNON, 3},
+        {R_KNIGHT, 3},
+        {R_BISHOP, 2},
+        {R_GUARD, 2},
+        {R_PAWN, 1},
     };
     std::map<int, MOVES> orderMap{};
 
@@ -529,15 +528,12 @@ MOVES Moves::getGoodCaptures(Board &board)
             {
                 PIECEID pieceid = abs(captured.pieceid);
                 if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK)
-                {
                     score = 1;
-                }
-                if (isGoodPawn(board, captured.x, captured.y))
-                {
+                if (isRiveredPawn(board, captured.x, captured.y))
                     score = 1;
-                }
             }
-            else {
+            else
+            {
                 score = a - b + 1;
             }
         }
