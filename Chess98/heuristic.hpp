@@ -109,10 +109,7 @@ void eatenHeuristic(Board board, MOVES& moves)
 
     for (int weight : moveWeights)
     {
-        for (const Move& move : orderMap[weight])
-        {
-            result.emplace_back(move);
-        }
+        result.insert(result.end(), orderMap[weight].begin(), orderMap[weight].end());
     }
     for (const Move& move : moves)
     {
