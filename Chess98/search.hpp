@@ -189,8 +189,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
 
     MOVES availableMoves = Moves::getMoves(board);
+    captureHeuristic(board, availableMoves);
     this->historyCache->sort(availableMoves);
-    eatenHeuristic(board, availableMoves);
     Move *pBestMove = nullptr;
     int vl = -INF;
     int vlBest = -INF;
@@ -295,6 +295,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
 
     MOVES availableMoves = Moves::getMoves(board);
+    captureHeuristic(board, availableMoves);
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
     int vlBest = -INF;
