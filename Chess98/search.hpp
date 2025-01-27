@@ -166,8 +166,18 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
+    const bool mChecking = inCheck(board);
+
+    // futility pruning
+    if (depth == 1 && !mChecking) {
+        int vl = board.evaluate();
+        if (vl <= alpha - 400) {
+            return vl;
+        }
+    }
+
     // probCut
-    if (depth % 4 == 0 && !inCheck(board))
+    if (depth % 4 == 0 && !mChecking)
     {
         const float vlScale = (float)vlPawn / 100.0;
         const float a = 1.02 * vlScale;
@@ -259,6 +269,14 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
 
     const bool mChecking = inCheck(board);
+
+    // futility pruning
+    if (depth == 1 && !mChecking) {
+        int vl = board.evaluate();
+        if (vl <= beta - 400) {
+            return vl;
+        }
+    }
 
     // probCut and null pruning
     if (!mChecking) {
@@ -364,7 +382,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         }
     }
  
-    // null pruning
+    // null and delta pruning
     const bool mChecking = inCheck(board);
     int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
     int vlBest = -INF;
@@ -375,7 +393,6 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         {
             return vl;
         }
-        
         // delta pruning
         if (vl <= alpha - 300) {
             return alpha;
