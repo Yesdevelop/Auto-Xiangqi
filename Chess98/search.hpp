@@ -168,34 +168,36 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     const bool mChecking = inCheck(board);
 
-    // futility pruning
-    if (depth == 1 && !mChecking) {
-        int vl = board.evaluate();
-        if (vl <= alpha - futilityPruningMargin) {
-            return vl;
+    if (!mChecking) {
+        // futility pruning
+        if (depth == 1) {
+            int vl = board.evaluate();
+            if (vl <= alpha - futilityPruningMargin) {
+                return vl;
+            }
+            if (vl >= beta + futilityPruningMargin) {
+                return vl;
+            }
         }
-        if (vl >= beta + futilityPruningMargin) {
-            return vl;
-        }
-    }
 
-    // multi probCut
-    if (depth % 4 == 0 && !mChecking)
-    {
-        const float vlScale = (float)vlPawn / 100.0;
-        const float a = 1.02 * vlScale;
-        const float b = 2.36 * vlScale;
-        const float sigma = 82.0 * vlScale;
-        const float t = 1.5;
-        const int upperBound = (t * sigma + beta - b) / a;
-        const int lowerBound = (-t * sigma + alpha - b) / a;
-        if (searchCut(board, depth - 2, upperBound) >= upperBound)
+        // multi probCut
+        if (depth % 4 == 0)
         {
-            return beta;
-        }
-        else if (searchCut(board, depth - 2, lowerBound + 1) <= lowerBound)
-        {
-            return alpha;
+            const float vlScale = (float)vlPawn / 100.0;
+            const float a = 1.02 * vlScale;
+            const float b = 2.36 * vlScale;
+            const float sigma = 82.0 * vlScale;
+            const float t = 1.5;
+            const int upperBound = (t * sigma + beta - b) / a;
+            const int lowerBound = (-t * sigma + alpha - b) / a;
+            if (searchCut(board, depth - 2, upperBound) >= upperBound)
+            {
+                return beta;
+            }
+            else if (searchCut(board, depth - 2, lowerBound + 1) <= lowerBound)
+            {
+                return alpha;
+            }
         }
     }
 
@@ -273,19 +275,19 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
     const bool mChecking = inCheck(board);
 
-    // futility pruning
-    if (depth == 1 && !mChecking) {
-        int vl = board.evaluate();
-        if (vl <= beta - futilityPruningMargin) {
-            return vl;
-        }
-        if (vl >= beta + futilityPruningMargin) {
-            return vl;
-        }
-    }
-
     // multi probCut and null pruning
     if (!mChecking) {
+        // futility pruning
+        if (depth == 1) {
+            int vl = board.evaluate();
+            if (vl <= beta - futilityPruningMargin) {
+                return vl;
+            }
+            if (vl >= beta + futilityPruningMargin) {
+                return vl;
+            }
+        }
+
         if (!banNullMove) {
             if (board.nullOkay()) {
                 board.doNullMove();
