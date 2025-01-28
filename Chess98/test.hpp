@@ -5,7 +5,7 @@
 void testWithUI(TEAM team, int maxDepth);
 void checkingTest();
 
-void test(TEAM team = BLACK, int maxDepth = 10)
+void test(TEAM team = BLACK, int maxDepth = 16)
 {
     testWithUI(team, maxDepth);
 }
