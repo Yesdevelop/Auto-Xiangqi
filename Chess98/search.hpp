@@ -275,7 +275,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
     const bool mChecking = inCheck(board);
 
-    // multi probCut and null pruning
     if (!mChecking) {
         // futility pruning
         if (depth == 1) {
@@ -288,6 +287,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
 
+        // multi probCut and null pruning
         if (!banNullMove) {
             if (board.nullOkay()) {
                 board.doNullMove();
