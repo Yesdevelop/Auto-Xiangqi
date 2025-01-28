@@ -31,7 +31,17 @@ void checkingTest()
 /// 带UI的测试
 void testWithUI(TEAM team, int maxDepth)
 {
-    Board board = Board(DEFAULT_MAP, team);
+    Board board = Board({{
+        {0, 0, 0, R_PAWN, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, B_KNIGHT, 0, 0, 0, 0, 0},
+        {0, 0, 0, B_ROOK, R_CANNON, 0, 0, 0, 0, 0},
+        {0, R_GUARD, R_KING, R_KNIGHT, R_ROOK, 0, 0, 0, B_GUARD, B_KING},
+        {R_GUARD, 0, 0, 0, 0, B_ROOK, 0, 0, 0, B_GUARD},
+        {0, 0, 0, 0, R_BISHOP, 0, 0, R_PAWN, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    }}, team);
     board.print();
 
     serverInit(board);
@@ -47,6 +57,7 @@ void testWithUI(TEAM team, int maxDepth)
             Node node = s.searchMain(board, maxDepth, 3);
             board.doMove(node.move);
             setBoardCode(board);
+            MOVES _ = Moves::getMoves(board);
 
             FILE *file = nullptr;
             errno_t result = fopen_s(&file, "./_move_.txt", "r");

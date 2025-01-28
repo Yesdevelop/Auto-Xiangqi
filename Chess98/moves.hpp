@@ -60,6 +60,24 @@ MOVES Moves::king(TEAM team, Board &board, int x, int y)
             result.emplace_back(Move{x, y, x, down});
     }
 
+    // 对面笑
+    for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
+    {
+        if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
+        {
+            if (team == RED)
+                return MOVES{
+                    Move{board.pieceRedKing->x, board.pieceRedKing->y,
+                         board.pieceBlackKing->x, board.pieceBlackKing->y}};
+            else
+                return MOVES{
+                    Move{board.pieceBlackKing->x, board.pieceBlackKing->y,
+                         board.pieceRedKing->x, board.pieceRedKing->y}};
+        }
+        if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
+            break;
+    }
+
     return result;
 }
 
@@ -452,15 +470,6 @@ MOVES Moves::getMoves(Board &board)
     if (!board.isKingLive(board.team))
         return MOVES{};
 
-    // 对面笑
-    for (int y = board.pieceRedKing->y; y <= 9; y++)
-    {
-        if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
-            return MOVES{};
-        if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
-            break;
-    }
-
     MOVES result{};
     result.reserve(64);
 
@@ -542,7 +551,8 @@ MOVES Moves::getGoodCaptures(Board &board)
         {
             score = a + 1;
         }
-        if (score >= 1) {
+        if (score >= 1)
+        {
             orderMap[score].emplace_back(move);
         }
     }
