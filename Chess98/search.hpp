@@ -16,10 +16,19 @@ public:
 class Search
 {
 public:
+    Search() {
+        
+    }
     void searchInit(Board &board)
     {
         rootMoves.resize(0);
         this->historyCache->init();
+        if (this->pHashTable->initDone()) {
+            this->pHashTable->reset();
+        }
+        else {
+            this->pHashTable->init(25);
+        }
         board.distance = 0;
         board.initEvaluate();
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
@@ -53,12 +62,11 @@ public:
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
-
     Move searchOpenBook(Board& board);
-
-    HistoryHeuristic *historyCache = new HistoryHeuristic();
+public:
     MOVES rootMoves;
-
+    HistoryHeuristic *historyCache = new HistoryHeuristic();
+    tt* pHashTable = new tt();
     BookFileStruct *pBookFileStruct = new BookFileStruct;
 };
 
@@ -255,6 +263,9 @@ Node Search::searchRoot(Board &board, int depth)
     {
         this->historyCache->add(*pBestMove, depth);
     }
+
+    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, -INF, INF, pBestMove ? exactType : alphaType, depth, false);
+
     Node result{!pBestMove ? Move{} : *pBestMove, vlBest};
     sortRootMoves();
     return result;
@@ -268,6 +279,13 @@ Node Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
+    // probHash
+    int vlHash = -INF;
+    this->pHashTable->get(board.hashKey, board.hashLock, vlHash, alpha, beta, depth, board.distance);
+    if (vlHash != -INF) {
+        return vlHash;
+    }
+    
     if (depth <= 0)
     {
         return Search::searchQ(board, alpha, beta);
@@ -317,6 +335,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
+    nodeType type = alphaType;
+
     MOVES availableMoves = Moves::getMoves(board);
     captureHeuristic(board, availableMoves);
     this->historyCache->sort(availableMoves);
@@ -346,10 +366,12 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             pBestMove = &move;
             if (vl >= beta)
             {
+                type = betaType;
                 break;
             }
             if (vl > alpha)
             {
+                type = exactType;
                 alpha = vl;
             }
         }
@@ -363,6 +385,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         this->historyCache->add(*pBestMove, depth);
     }
+    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, alpha, beta, type, depth, false);
     return vlBest;
 }
 
@@ -373,7 +396,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-
+    
     if (depth <= 0)
     {
         return Search::searchQ(board, beta - 1, beta, 64);
@@ -399,6 +422,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 return vl;
             }
             if (vl >= beta + futilityPruningMargin) {
+
                 return vl;
             }
         }
@@ -433,6 +457,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
+    nodeType type = alphaType;
 
     MOVES availableMoves = Moves::getMoves(board);
     captureHeuristic(board, availableMoves);
@@ -467,6 +492,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             pBestMove = &move;
             if (vl >= beta)
             {
+                type = betaType;
                 break;
             }
         }
@@ -482,6 +508,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         this->historyCache->add(*pBestMove, depth);
     }
+    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, beta - 1, beta, type, depth, false);
     return vlBest;
 }
 

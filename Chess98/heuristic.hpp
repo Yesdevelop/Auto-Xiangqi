@@ -1,5 +1,6 @@
 #pragma once
 #include "base.hpp"
+#include "hash.hpp"
 #include "board.hpp"
 
 enum moveType {
@@ -94,6 +95,116 @@ void captureHeuristic(Board& board, MOVES& moves)
 				move.moveType = capture;
 				move.val = weightPairs.at(captured) / weightPairs.at(attacker);
 			}
+		}
+	}
+}
+
+enum nodeType {
+	noneType = 0,
+	alphaType = 1,
+	betaType = 2,
+	exactType = 3,
+};
+
+/* ***** 置换启发 ***** */
+
+/// @brief 置换启发
+
+struct tItem {
+	nodeType type = noneType;
+	int vl = 0;
+	int alpha = 0;
+	int beta = 0;
+	int depth = 0;
+	int32 hashLock = 0;
+	bool risky = false;
+};
+
+class tt {
+public:
+	~tt();
+	void init(int hashLevel = 16);
+	bool initDone();
+	void reset();
+	void add(int32 hashKey,int32 hashLock,int vl,int vlApha,int vlBeta,nodeType type,int depth, bool risky);
+	void get(int32 hashKey, int32 hashLock, int& vl, int vlApha, int vlBeta, int depth, int nDistance);
+	int vlAdjust(int vl,int nDistance);
+private:
+	tItem* pList = nullptr;
+	int hashMask = 0;
+	int hashSize = 0;
+};
+
+void tt::init(int hashLevel) {
+	this->hashSize = (1 << hashLevel);
+	this->hashMask = this->hashSize - 1;
+	pList = new tItem[this->hashSize];
+}
+
+bool tt::initDone() {
+	return (this->pList != nullptr);
+}
+
+void tt::reset() {
+	memset(this->pList, 0, sizeof(tItem) * this->hashSize);
+}
+
+tt::~tt() {
+	if (pList != nullptr) {
+		delete[] pList;
+		pList = nullptr;
+	}
+}
+
+int tt::vlAdjust(int vl,int nDistance) {
+	if (std::abs(vl) >= BAN) {
+		if (vl < 0) {
+			return vl + nDistance;
+		}
+		if (vl > 0) {
+			return vl - nDistance;
+		}
+	}
+	return vl;
+}
+
+void tt::add(int32 hashKey, int32 hashLock, int vl, int vlApha, int vlBeta, nodeType type,int depth, bool risky) {
+	int pos = hashKey & this->hashMask;
+	tItem& t = this->pList[pos];
+	if (t.type == noneType) {
+		t.alpha = vlApha;
+		t.beta = vlBeta;
+		t.depth = depth;
+		t.hashLock = hashLock;
+		t.type = type;
+		t.risky = risky;
+	}
+	else if (depth >= t.depth) {
+		// 避免向前裁剪覆盖正常的搜索结果
+		bool riskyCoverage = (!t.risky && risky);
+		if (!riskyCoverage) {
+			t.alpha = vlApha;
+			t.beta = vlBeta;
+			t.depth = depth;
+			t.hashLock = hashLock;
+			t.type = type;
+			t.risky = risky;
+		}
+	}
+}
+
+void tt::get(int32 hashKey, int32 hashLock, int& vl, int vlApha, int vlBeta,int depth, int nDistance) {
+	int pos = hashKey & this->hashMask;
+	tItem& t = this->pList[pos];
+	if (t.type != noneType && t.hashLock == hashLock && t.depth >= depth) {
+		if (t.type == exactType) {
+			vl = this->vlAdjust(vl, nDistance);
+		}
+		else if (t.type == alphaType && t.vl <= vlApha) {
+			vl = vlApha;
+		}
+		else if (t.type == betaType && t.vl >= vlBeta) {
+			vl = vlBeta;
 		}
 	}
 }
