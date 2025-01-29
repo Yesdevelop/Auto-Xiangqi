@@ -71,14 +71,14 @@ public:
     int vlBlack = 0;
 
     // 哈希相关
-    int64 hashKey = 0;
-    int64 hashLock = 0;
+    int32 hashKey = 0;
+    int32 hashLock = 0;
 
-    std::vector<int64> hashKeyList;
-    std::vector<int64> hashLockList;
+    std::vector<int32> hashKeyList;
+    std::vector<int32> hashLockList;
 
     void initHashInfo();
-    void getMirrorHashinfo(int64 &mirrorHashKey,int64 &mirrorHashLock);
+    void getMirrorHashinfo(int32 &mirrorHashKey,int32 &mirrorHashLock);
 
     PIECEID_MAP pieceidMap{};
 
@@ -134,6 +134,8 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
     }
     // 初始化评估分
     initEvaluate();
+    // 初始化局面哈希
+    initHashInfo();
     // 双方将帅的位置
     for (const Piece &piece : this->getAllLivePieces())
     {
@@ -564,7 +566,7 @@ void Board::initHashInfo() {
     }
 }
 
-void Board::getMirrorHashinfo(int64& mirrorHashKey, int64& mirrorHashLock) {
+void Board::getMirrorHashinfo(int32& mirrorHashKey, int32& mirrorHashLock) {
     mirrorHashKey = 0;
     mirrorHashLock = 0;
     for (int x = 0; x < 9; x++)

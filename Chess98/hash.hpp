@@ -1,11 +1,11 @@
 #pragma once
 #include "base.hpp"
 
-using int64 = unsigned long long;
-using HASH_KEY_MAP = const std::array<std::array<int64, 10>, 9>;
+using int32 = int;
+using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
 
-int64 PLAYER_KEY = 1099503838;
-int64 PLAYER_LOCK = 1730021002;
+int32 PLAYER_KEY = 1099503838;
+int32 PLAYER_LOCK = 1730021002;
 
 // ºì·½
 
@@ -385,7 +385,7 @@ std::map<PIECEID, HASH_KEY_MAP> hashKeys{
 		{R_PAWN,RED_PAWN_KEY},
 		{B_KING, BLACK_KING_KEY},
 		{B_GUARD, BLACK_GUARD_KEY},
-		{B_BISHOP,BLACK_GUARD_KEY},
+		{B_BISHOP,BLACK_BISHOP_KEY},
 		{B_KNIGHT,BLACK_KNIGHT_KEY},
 		{B_ROOK,BLACK_ROOK_KEY},
 		{B_CANNON,BLACK_CANNON_KEY},
@@ -402,7 +402,7 @@ std::map<PIECEID, HASH_KEY_MAP> hashLocks{
 		{R_PAWN,RED_PAWN_LOCK},
 		{B_KING, BLACK_KING_LOCK},
 		{B_GUARD, BLACK_GUARD_LOCK},
-		{B_BISHOP,BLACK_GUARD_LOCK},
+		{B_BISHOP,BLACK_BISHOP_LOCK},
 		{B_KNIGHT,BLACK_KNIGHT_LOCK},
 		{B_ROOK,BLACK_ROOK_LOCK},
 		{B_CANNON,BLACK_CANNON_LOCK},

@@ -10,6 +10,18 @@ void test(TEAM team = BLACK, int maxDepth = 16)
     testWithUI(team, maxDepth);
 }
 
+void testOpenBook() {
+    Board board = Board(DEFAULT_MAP, RED);
+    board.print();
+
+    Search s;
+    s.searchInit(board);
+
+    Move bookMove = s.searchOpenBook(board);
+
+    std::cout << (int)board.hashKey << " " << (int)board.hashLock << std::endl;
+}
+
 /// 测试将军检测函数
 void checkingTest()
 {

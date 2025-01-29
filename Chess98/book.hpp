@@ -11,7 +11,7 @@ struct BookStruct {
     uint16_t wmv, wvl;
 }; // bk
 
-inline int BOOK_POS_CMP(const BookStruct& bk, const int64 hashLock) {
+inline int BOOK_POS_CMP(const BookStruct& bk, const int32 hashLock) {
     return bk.dwZobristLock < hashLock ? -1 : bk.dwZobristLock > hashLock ? 1 : 0;
 }
 
@@ -19,7 +19,8 @@ struct BookFileStruct {
     FILE* fp = nullptr;
     int nLen;
     bool Open(const char* szFileName, bool bEdit = false) {
-        fp = fopen(szFileName, bEdit ? "r+b" : "rb");
+        //fp = fopen(szFileName, bEdit ? "r+b" : "rb");
+        fopen_s(&fp, szFileName, bEdit ? "r+b" : "rb");
         if (fp == NULL) {
             return false;
         }
