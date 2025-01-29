@@ -11,4 +11,4 @@
 5. 编译Chess98/目录下的main.cpp
 6. 将开局库文件BOOK.DAT放到和编译出的exe文件同级目录下
 7. 双击运行exe文件
-8. 打开浏览器，输入http://localhost:5000
+8. 打开浏览器，跳转至http://localhost:5000
