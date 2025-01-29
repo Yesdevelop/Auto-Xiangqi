@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.hpp" />
+    <ClInclude Include="bitboard.hpp" />
     <ClInclude Include="board.hpp" />
     <ClInclude Include="book.hpp" />
     <ClInclude Include="evaluate.hpp" />
