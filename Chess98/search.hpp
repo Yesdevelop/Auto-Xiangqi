@@ -16,9 +16,22 @@ public:
 class Search
 {
 public:
-    Search() {
+    ~Search() {
+        if (historyCache) {
+            delete historyCache;
+            historyCache = nullptr;
+        }
+        if (pHashTable) {
+            delete pHashTable;
+            pHashTable = nullptr;
+        }
+        if (pBookFileStruct) {
+            delete pBookFileStruct;
+            pBookFileStruct = nullptr;
+        }
         
     }
+public:
     void searchInit(Board &board)
     {
         rootMoves.resize(0);
