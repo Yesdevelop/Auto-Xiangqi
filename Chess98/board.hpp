@@ -1,5 +1,6 @@
 #pragma once
 #include "evaluate.hpp"
+#include "hash.hpp"
 
 /// @brief 棋盘类
 class Board
@@ -69,6 +70,16 @@ public:
     int vlRed = 0;
     int vlBlack = 0;
 
+    // 哈希相关
+    int32 hashKey = 0;
+    int32 hashLock = 0;
+
+    std::vector<int32> hashKeyList;
+    std::vector<int32> hashLockList;
+
+    void initHashInfo();
+    void getMirrorHashinfo(int32 &mirrorHashKey,int32 &mirrorHashLock);
+
     PIECEID_MAP pieceidMap{};
 
 private:
@@ -123,6 +134,8 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
     }
     // 初始化评估分
     initEvaluate();
+    // 初始化局面哈希
+    initHashInfo();
     // 双方将帅的位置
     for (const Piece &piece : this->getAllLivePieces())
     {
@@ -297,9 +310,22 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
             this->vlRed -= pieceWeights[eaten.pieceid][x2][y2];
         }
     }
+    //记录旧哈希值
+    this->hashKeyList.emplace_back(this->hashKey);
+    this->hashLockList.emplace_back(this->hashLock);
+    // 更新哈希值
+    this->hashKey ^= hashKeys[attackStarter.pieceid][x1][y1];
+    this->hashKey ^= hashKeys[attackStarter.pieceid][x2][y2];
+    this->hashLock ^= hashLocks[attackStarter.pieceid][x1][y1];
+    this->hashLock ^= hashLocks[attackStarter.pieceid][x2][y2];
+    if (eaten.pieceid != EMPTY_PIECEID) {
+        this->hashKey ^= hashKeys[eaten.pieceid][x1][y1];
+        this->hashLock ^= hashLocks[eaten.pieceid][x2][y2];
+    }
+    this->hashKey ^= PLAYER_KEY;
+    this->hashLock ^= PLAYER_LOCK;
 
     this->team = -this->team;
-
     this->distance += 1;
     return eaten;
 }
@@ -366,6 +392,11 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
             this->vlRed += pieceWeights[eaten.pieceid][x2][y2];
         }
     }
+    // 回滚哈希值
+    this->hashKey = this->hashKeyList.back();
+    this->hashLock = this->hashLockList.back();
+    this->hashKeyList.pop_back();
+    this->hashLockList.pop_back();
 }
 
 /// @brief 撤销步进
@@ -514,6 +545,47 @@ void Board::initEvaluate()
     }
 
 }
+
+void Board::initHashInfo() {
+    this->hashKey = 0;
+    this->hashLock = 0;
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            PIECEID pid = this->pieceidMap[x][y];
+            if (pid != EMPTY_PIECEID) {
+                this->hashKey ^= hashKeys[pid][x][y];
+                this->hashLock ^= hashLocks[pid][x][y];
+            }
+        }
+    }
+    if (this->team == BLACK) {
+        this->hashKey ^= PLAYER_KEY;
+        this->hashLock ^= PLAYER_LOCK;
+    }
+}
+
+void Board::getMirrorHashinfo(int32& mirrorHashKey, int32& mirrorHashLock) {
+    mirrorHashKey = 0;
+    mirrorHashLock = 0;
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            PIECEID pid = this->pieceidMap[x][y];
+            if (pid != EMPTY_PIECEID) {
+                mirrorHashKey ^= hashKeys[pid][size_t(8) - x][y];
+                mirrorHashLock ^= hashLocks[pid][size_t(8) - x][y];
+            }
+        }
+    }
+    if (this->team == BLACK) {
+        mirrorHashKey ^= PLAYER_KEY;
+        mirrorHashLock ^= PLAYER_LOCK;
+    }
+}
+
 
 /// @brief 打印
 void Board::print()
