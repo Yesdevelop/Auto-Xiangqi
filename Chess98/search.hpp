@@ -2,7 +2,7 @@
 #include "moves.hpp"
 #include "heuristic.hpp"
 #include "utils.hpp"
-#include <windows.h>
+#include "book.hpp"
 
 /// @brief 节点对象，存储分数 + 着法
 class Node
@@ -54,9 +54,78 @@ public:
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
 
+    Move searchOpenBook(Board& board);
+
     HistoryHeuristic *historyCache = new HistoryHeuristic();
     MOVES rootMoves;
+
+    BookFileStruct *pBookFileStruct = new BookFileStruct;
 };
+
+/// @brief 搜索开局库
+/// @param board
+
+Move Search::searchOpenBook(Board& board) {
+    BookStruct bk;
+    if (!pBookFileStruct->Open("BOOK.DAT")) {
+        return Move();
+    }
+
+    // 二分法查找开局库
+    int nHigh = pBookFileStruct->nLen - 1;
+    int nMid = 0;
+    int nLow = 0;
+    int64 hashLock = board.hashLock;
+    int64 mirrorHashLock = 0;
+    int64 mirrorHashKey = 0;
+    board.getMirrorHashinfo(mirrorHashKey, mirrorHashLock);
+
+    int nScan = 0;
+    int64 nowHashLock = 0;
+    for (nScan = 0;nScan < 2;nScan++) {
+        nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
+        while (nLow <= nHigh) {
+            nMid = (nHigh + nMid) / 2;
+            pBookFileStruct->Read(bk, nMid);
+            if (BOOK_POS_CMP(bk, nowHashLock) < 0) {
+                nLow = nMid + 1;
+            }
+            else if (BOOK_POS_CMP(bk, nowHashLock) > 0) {
+                nHigh = nMid - 1;
+            }
+            else {
+                break;
+            }
+        }
+        if (nLow <= nHigh) {
+            break;
+        }
+    }
+
+    if (nScan == 2) {
+        pBookFileStruct->Close();
+        return Move();
+    }
+
+    // 如果找到局面，则向前查找第一个着法
+    for (nMid--;nMid >= 0;nMid--) {
+        pBookFileStruct->Read(bk, nMid);
+        if (BOOK_POS_CMP(bk, nowHashLock) < 0) {
+            break;
+        }
+    }
+
+    Move bookMove;
+    std::vector<Move> bookMoves;
+
+    // 向后依次读入属于该局面的每个着法
+    for (nMid++;nMid < pBookFileStruct->nLen;nMid++) {
+        
+    }
+
+
+    return bookMove;
+}
 
 /// @brief 迭代加深
 /// @param board
