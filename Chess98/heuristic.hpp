@@ -93,7 +93,7 @@ void captureHeuristic(Board& board, MOVES& moves)
 				PIECEID attacker = abs(board.pieceidOn(move.x2, move.y2));
 				PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
 				move.moveType = capture;
-				move.val = weightPairs.at(captured) / weightPairs.at(attacker);
+				move.val = weightPairs.at(captured) - weightPairs.at(attacker);
 			}
 		}
 	}
