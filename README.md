@@ -8,5 +8,7 @@
 2. Flask 库：`pip install Flask`。
 3. Node.js 环境 (记得勾选add to PATH)：https://nodejs.org/en/download
 4. 运行ChessUI/ui.py
-5. 编译Chess98/目录下的main.cpp，运行exe文件
-6. 打开浏览器，输入http://localhost:5000
+5. 编译Chess98/目录下的main.cpp
+6. 将开局库文件BOOK.DAT放到和编译出的exe文件同级目录下
+7. 双击运行exe文件
+8. 打开浏览器，输入http://localhost:5000
