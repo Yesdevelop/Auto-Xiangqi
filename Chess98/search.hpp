@@ -32,7 +32,7 @@ public:
         
     }
 public:
-    void searchInit(Board &board)
+    void searchInit(Board &board,int initHashLevel = 25)
     {
         rootMoves.resize(0);
         this->historyCache->init();
@@ -40,7 +40,7 @@ public:
             this->pHashTable->reset();
         }
         else {
-            this->pHashTable->init(25);
+            this->pHashTable->init(initHashLevel);
         }
         board.distance = 0;
         board.initEvaluate();
