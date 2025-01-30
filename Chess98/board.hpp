@@ -1,6 +1,7 @@
 #pragma once
 #include "evaluate.hpp"
 #include "hash.hpp"
+#include "bitboard.hpp"
 
 /// @brief 棋盘类
 class Board
@@ -94,6 +95,7 @@ private:
     std::vector<PIECE_INDEX> blackPieces{};
     bool isRedKingLive = false;
     bool isBlackKingLive = false;
+    BitBoard* bitboard = nullptr;
 };
 
 /// @brief 初始化棋盘
@@ -152,6 +154,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
             this->pieceBlackKing = &(this->pieces[piece.pieceIndex]);
         }
     }
+    this->bitboard = new BitBoard{ this->pieceidMap };
 }
 
 /// @brief 通过索引号查找piece
