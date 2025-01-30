@@ -7,7 +7,7 @@ using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
 const int32 PLAYER_KEY = 1099503838;
 const int32 PLAYER_LOCK = 1730021002;
 
-// ºì·½
+// çº¢æ–¹
 
 HASH_KEY_MAP RED_KING_KEY = {
     {
@@ -191,7 +191,7 @@ HASH_KEY_MAP RED_PAWN_LOCK = {
         {689000553, 828802957, -370099822, -1289449221, -1712014217, -2005989155, 2088256612, 867115890, -1381120693, -243041912},
     }};
 
-// ºÚ·½
+// ï¿½Ú·ï¿½
 
 HASH_KEY_MAP BLACK_KING_KEY = {
     {
