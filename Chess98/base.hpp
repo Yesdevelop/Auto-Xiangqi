@@ -161,25 +161,3 @@ std::string getPieceName(PIECEID pieceid)
     else
         return "  ";
 }
-
-/// @brief 获取一个64位的随机整数
-/// @return
-U64 rand64()
-{
-    return rand() ^ ((U64)rand() << 15) ^ ((U64)rand() << 30) ^ ((U64)rand() << 45) ^ ((U64)rand() << 60);
-}
-
-/// @brief Pieceid转Team
-/// @param pieceid
-/// @return
-TEAM pieceidToTeam(PIECEID pieceid)
-{
-    if (pieceid == OVERFLOW_PIECEID)
-        return OVERFLOW_TEAM;
-    else if (pieceid > 0)
-        return RED;
-    else if (pieceid < 0)
-        return BLACK;
-    else
-        return EMPTY_TEAM;
-}
