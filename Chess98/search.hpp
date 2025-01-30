@@ -239,18 +239,19 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     this->rootMoves = Moves::getMoves(board);
     Node bestNode = Node(Move(), 0);
     clock_t start = clock();
-    int depth = 1;
+    int depth = 0;
 
     std::cout << "search starts here!" << std::endl;
     while (depth <= maxDepth)
     {
+        depth++;
+        
         bestNode = searchRoot(board, depth);
 
         if (clock() - start >= maxTime * 1000 / 3)
         {
             break;
         }
-        depth++;
     }
 
     std::cout << "search depth: " << depth << std::endl;
