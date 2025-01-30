@@ -5,6 +5,7 @@
 #include <ctime>
 #include <fstream>
 #include <io.h>
+#include <omp.h>
 
 /* ***** ΕάΖΧΖχ ***** */
 
@@ -38,9 +39,8 @@ void traverse() {
     std::vector<std::string> filePaths;
     getFiles(rootPath, filePaths);
     std::cout << filePaths.size() << std::endl;
-    int cnt = 0;
-    for (const std::string& path : filePaths) {
-        cnt += 1;
+    for (int cnt = 0;cnt < filePaths.size();cnt++) {
+        std::string path = filePaths[cnt];
         // init status
         Board board = Board(DEFAULT_MAP, RED);
         Search s;
@@ -54,7 +54,7 @@ void traverse() {
             const int combinatePos = atoi(moveStr.c_str());
             std::string mv = std::to_string(combinatePos);
             // estimate the game status
-            Node BestNode = s.searchMain(board, 8, 1);
+            Node BestNode = s.searchMain(board, 6, 1);
             // recoard the move with assessment result
             std::string output = mv + " " + std::to_string(BestNode.score);
             dumps.push_back(output);
@@ -69,7 +69,7 @@ void traverse() {
             board.doMove(tMove);
         }
         std::string filename = std::to_string(cnt) + ".txt";
-        std::string filepath = "../assessment_result" + filename;
+        std::string filepath = "../assessment_result/" + filename;
         std::ofstream outfile;
         outfile.open(filepath);
         for (std::string& output : dumps) {
@@ -82,7 +82,6 @@ void traverse() {
 
 int main()
 {
-    
-
+    traverse();
     return 0;
 }
