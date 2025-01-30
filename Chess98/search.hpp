@@ -16,30 +16,36 @@ public:
 class Search
 {
 public:
-    ~Search() {
-        if (historyCache) {
+    ~Search()
+    {
+        if (historyCache)
+        {
             delete historyCache;
             historyCache = nullptr;
         }
-        if (pHashTable) {
+        if (pHashTable)
+        {
             delete pHashTable;
             pHashTable = nullptr;
         }
-        if (pBookFileStruct) {
+        if (pBookFileStruct)
+        {
             delete pBookFileStruct;
             pBookFileStruct = nullptr;
         }
-        
     }
+
 public:
-    void searchInit(Board &board,int initHashLevel = 25)
+    void searchInit(Board &board, int initHashLevel = 25)
     {
         rootMoves.resize(0);
         this->historyCache->init();
-        if (this->pHashTable->initDone()) {
+        if (this->pHashTable->initDone())
+        {
             this->pHashTable->reset();
         }
-        else {
+        else
+        {
             this->pHashTable->init(initHashLevel);
         }
         board.distance = 0;
@@ -75,20 +81,23 @@ public:
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
-    Move searchOpenBook(Board& board);
+    Move searchOpenBook(Board &board);
+
 public:
     MOVES rootMoves;
     HistoryHeuristic *historyCache = new HistoryHeuristic();
-    tt* pHashTable = new tt();
+    tt *pHashTable = new tt();
     BookFileStruct *pBookFileStruct = new BookFileStruct;
 };
 
 /// @brief 搜索开局库
 /// @param board
 
-Move Search::searchOpenBook(Board& board) {
+Move Search::searchOpenBook(Board &board)
+{
     BookStruct bk;
-    if (!pBookFileStruct->Open("BOOK.DAT")) {
+    if (!pBookFileStruct->Open("BOOK.DAT"))
+    {
         return Move();
     }
 
@@ -101,37 +110,46 @@ Move Search::searchOpenBook(Board& board) {
 
     int nScan = 0;
     int32 nowHashLock = 0;
-    for (nScan = 0;nScan < 2;nScan++) {
+    for (nScan = 0; nScan < 2; nScan++)
+    {
         int nHigh = pBookFileStruct->nLen - 1;
         int nLow = 0;
         nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
-        while (nLow <= nHigh) {
+        while (nLow <= nHigh)
+        {
             nMid = (nHigh + nLow) / 2;
             pBookFileStruct->Read(bk, nMid);
-            if (BOOK_POS_CMP(bk, nowHashLock) < 0) {
+            if (BOOK_POS_CMP(bk, nowHashLock) < 0)
+            {
                 nLow = nMid + 1;
             }
-            else if (BOOK_POS_CMP(bk, nowHashLock) > 0) {
+            else if (BOOK_POS_CMP(bk, nowHashLock) > 0)
+            {
                 nHigh = nMid - 1;
             }
-            else {
+            else
+            {
                 break;
             }
         }
-        if (nLow <= nHigh) {
+        if (nLow <= nHigh)
+        {
             break;
         }
     }
 
-    if (nScan == 2) {
+    if (nScan == 2)
+    {
         pBookFileStruct->Close();
         return Move();
     }
 
     // 如果找到局面，则向前查找第一个着法
-    for (nMid--;nMid >= 0;nMid--) {
+    for (nMid--; nMid >= 0; nMid--)
+    {
         pBookFileStruct->Read(bk, nMid);
-        if (BOOK_POS_CMP(bk, nowHashLock) < 0) {
+        if (BOOK_POS_CMP(bk, nowHashLock) < 0)
+        {
             break;
         }
     }
@@ -139,12 +157,15 @@ Move Search::searchOpenBook(Board& board) {
     std::vector<Move> bookMoves;
 
     // 向后依次读入属于该局面的每个着法
-    for (nMid++;nMid < pBookFileStruct->nLen;nMid++) {
+    for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
+    {
         pBookFileStruct->Read(bk, nMid);
-        if (BOOK_POS_CMP(bk, nowHashLock) > 0) {
+        if (BOOK_POS_CMP(bk, nowHashLock) > 0)
+        {
             break;
         }
-        else {
+        else
+        {
             int mv = bk.wmv;
             int src = mv & 255;
             int dst = mv >> 8;
@@ -152,7 +173,8 @@ Move Search::searchOpenBook(Board& board) {
             int ySrc = 12 - (src >> 4);
             int xDst = (dst & 15) - 3;
             int yDst = 12 - (dst >> 4);
-            if (nScan != 0) {
+            if (nScan != 0)
+            {
                 xSrc = 8 - xSrc;
                 xDst = 8 - xDst;
             }
@@ -162,23 +184,26 @@ Move Search::searchOpenBook(Board& board) {
         }
     }
 
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b) {
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
+              {
         // 这里定义比较规则：从大到小排序
-        return a.val > b.val;
-        });
+        return a.val > b.val; });
 
     std::srand(std::time(0));
 
     int vlSum = 0;
-    for (Move& move : bookMoves) {
+    for (Move &move : bookMoves)
+    {
         vlSum += move.val;
     }
     int vlRandom = std::rand() % vlSum;
-    
+
     Move bookMove;
-    for (Move& move : bookMoves) {
+    for (Move &move : bookMoves)
+    {
         vlRandom -= move.val;
-        if (vlRandom < 0) {
+        if (vlRandom < 0)
+        {
             bookMove = move;
             break;
         }
@@ -204,7 +229,8 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     Move openBookMove = Search::searchOpenBook(board);
 
-    if (openBookMove != Move()) {
+    if (openBookMove != Move())
+    {
         std::cout << "find a great move from open book!" << std::endl;
         return Node(openBookMove, 0);
     }
@@ -295,10 +321,11 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // probHash
     int vlHash = -INF;
     this->pHashTable->get(board.hashKey, board.hashLock, vlHash, alpha, beta, depth, board.distance);
-    if (vlHash != -INF) {
+    if (vlHash != -INF)
+    {
         return vlHash;
     }
-    
+
     if (depth <= 0)
     {
         return Search::searchQ(board, alpha, beta);
@@ -306,23 +333,29 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     // mate distance pruning
     const int vlDistanceMate = INF - board.distance;
-    if (vlDistanceMate < beta) {
+    if (vlDistanceMate < beta)
+    {
         beta = vlDistanceMate;
-        if (alpha >= vlDistanceMate) {
+        if (alpha >= vlDistanceMate)
+        {
             return vlDistanceMate;
         }
     }
 
     const bool mChecking = inCheck(board);
 
-    if (!mChecking) {
+    if (!mChecking)
+    {
         // futility pruning
-        if (depth == 1) {
+        if (depth == 1)
+        {
             int vl = board.evaluate();
-            if (vl <= alpha - futilityPruningMargin) {
+            if (vl <= alpha - futilityPruningMargin)
+            {
                 return vl;
             }
-            if (vl >= beta + futilityPruningMargin) {
+            if (vl >= beta + futilityPruningMargin)
+            {
                 return vl;
             }
         }
@@ -409,7 +442,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    
+
     if (depth <= 0)
     {
         return Search::searchQ(board, beta - 1, beta, 64);
@@ -418,39 +451,50 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // mate distance pruning
     const int vlDistanceMate = INF - board.distance;
     const int vlOriginAlpha = beta - 1;
-    if (vlDistanceMate < beta) {
+    if (vlDistanceMate < beta)
+    {
         beta = vlDistanceMate;
-        if (vlOriginAlpha >= vlDistanceMate) {
+        if (vlOriginAlpha >= vlDistanceMate)
+        {
             return vlDistanceMate;
         }
     }
 
     const bool mChecking = inCheck(board);
 
-    if (!mChecking) {
+    if (!mChecking)
+    {
         // futility pruning
-        if (depth == 1) {
+        if (depth == 1)
+        {
             int vl = board.evaluate();
-            if (vl <= beta - futilityPruningMargin) {
+            if (vl <= beta - futilityPruningMargin)
+            {
                 return vl;
             }
-            if (vl >= beta + futilityPruningMargin) {
+            if (vl >= beta + futilityPruningMargin)
+            {
 
                 return vl;
             }
         }
 
         // multi probCut and null pruning
-        if (!banNullMove) {
-            if (board.nullOkay()) {
+        if (!banNullMove)
+        {
+            if (board.nullOkay())
+            {
                 board.doNullMove();
                 int vl = -searchCut(board, depth - 3, -beta + 1, true);
                 board.undoNullMove();
-                if (vl >= beta) {
-                    if (board.nullSafe()) {
+                if (vl >= beta)
+                {
+                    if (board.nullSafe())
+                    {
                         return vl;
                     }
-                    else if (searchCut(board, depth - 2, beta, true) >= beta) {
+                    else if (searchCut(board, depth - 2, beta, true) >= beta)
+                    {
                         return vl;
                     }
                 }
@@ -486,14 +530,16 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         if (!mChecking &&
             eaten.pieceid == EMPTY_PIECEID &&
             depth >= 3 &&
-            searchedCnt >= 4
-            ) {
+            searchedCnt >= 4)
+        {
             vl = -searchCut(board, depth - 2, -beta + 1);
-            if (vl >= beta) {
+            if (vl >= beta)
+            {
                 vl = -searchCut(board, depth - 1, -beta + 1);
             }
         }
-        else {
+        else
+        {
             vl = -searchCut(board, depth - 1, -beta + 1);
         }
         board.undoMove(move, eaten);
@@ -539,13 +585,15 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
     // mate distance pruning
     const int vlDistanceMate = INF - board.distance;
-    if (vlDistanceMate < beta) {
+    if (vlDistanceMate < beta)
+    {
         beta = vlDistanceMate;
-        if (alpha >= vlDistanceMate) {
+        if (alpha >= vlDistanceMate)
+        {
             return vlDistanceMate;
         }
     }
- 
+
     // null and delta pruning
     const bool mChecking = inCheck(board);
     int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
@@ -558,10 +606,11 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
             return vl;
         }
         // delta pruning
-        if (vl <= alpha - deltaPruningMargin) {
+        if (vl <= alpha - deltaPruningMargin)
+        {
             return alpha;
         }
-        
+
         vlBest = vl;
         alpha = std::max<int>(alpha, vl);
     }

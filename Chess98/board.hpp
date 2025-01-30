@@ -38,32 +38,36 @@ public:
         return this->team == RED ? (vlRed - vlBlack) + vlAdvanced : (vlBlack - vlRed) + vlAdvanced;
     }
 
-    void doNullMove() {
+    void doNullMove()
+    {
         this->team = -this->team;
     }
 
-    void undoNullMove() {
+    void undoNullMove()
+    {
         this->team = -this->team;
     }
 
-    bool nullOkay() {
+    bool nullOkay()
+    {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 600);
     }
 
-    bool nullSafe() {
+    bool nullSafe()
+    {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 1200);
     }
 
     void initEvaluate();
 
-    void vlOpenCalculator(int& vlOpen);
-    void vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack);
+    void vlOpenCalculator(int &vlOpen);
+    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
 
     bool isChecking = false;
 
-    //和根节点的距离
+    // 和根节点的距离
     int distance = 0;
 
     // 评估相关
@@ -78,7 +82,7 @@ public:
     std::vector<int32> hashLockList;
 
     void initHashInfo();
-    void getMirrorHashinfo(int32 &mirrorHashKey,int32 &mirrorHashLock);
+    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 
     PIECEID_MAP pieceidMap{};
 
@@ -310,7 +314,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
             this->vlRed -= pieceWeights[eaten.pieceid][x2][y2];
         }
     }
-    //记录旧哈希值
+    // 记录旧哈希值
     this->hashKeyList.emplace_back(this->hashKey);
     this->hashLockList.emplace_back(this->hashLock);
     // 更新哈希值
@@ -318,7 +322,8 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->hashKey ^= hashKeys[attackStarter.pieceid][x2][y2];
     this->hashLock ^= hashLocks[attackStarter.pieceid][x1][y1];
     this->hashLock ^= hashLocks[attackStarter.pieceid][x2][y2];
-    if (eaten.pieceid != EMPTY_PIECEID) {
+    if (eaten.pieceid != EMPTY_PIECEID)
+    {
         this->hashKey ^= hashKeys[eaten.pieceid][x1][y1];
         this->hashLock ^= hashLocks[eaten.pieceid][x2][y2];
     }
@@ -407,21 +412,25 @@ void Board::undoMove(Move move, Piece eaten)
     this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
 }
 
-
-void Board::vlOpenCalculator(int& vlOpen) {
+void Board::vlOpenCalculator(int &vlOpen)
+{
     // 首先判断局势处于开中局还是残局阶段，方法是计算各种棋子的数量，按照车=6、马炮=3、其它=1相加
     int rookLiveSum = 0;
     int knightCannonLiveSum = 0;
     int otherLiveSum = 0;
-    for (const Piece& piece : this->getAllLivePieces()) {
+    for (const Piece &piece : this->getAllLivePieces())
+    {
         PIECEID pid = std::abs(piece.pieceid);
-        if (pid == R_ROOK) {
+        if (pid == R_ROOK)
+        {
             rookLiveSum++;
         }
-        else if (pid == R_KNIGHT || pid == R_CANNON) {
+        else if (pid == R_KNIGHT || pid == R_CANNON)
+        {
             knightCannonLiveSum++;
         }
-        else if (pid != R_KING) {
+        else if (pid != R_KING)
+        {
             otherLiveSum++;
         }
     }
@@ -431,7 +440,8 @@ void Board::vlOpenCalculator(int& vlOpen) {
     vlOpen /= TOTAL_MIDGAME_VALUE;
 }
 
-void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) {
+void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
+{
     // 然后判断各方是否处于进攻状态，方法是计算各种过河棋子的数量，按照车马2炮兵1相加
     int redAttackLiveRookSum = 0;
     int blackAttackLiveRookSum = 0;
@@ -441,47 +451,60 @@ void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) {
     int blackAttackLiveCannonSum = 0;
     int redAttackLivePawnSum = 0;
     int blackAttackLivePawnSum = 0;
-    for (const Piece& piece : this->getAllLivePieces()) {
+    for (const Piece &piece : this->getAllLivePieces())
+    {
         PIECEID pid = std::abs(piece.pieceid);
-        if (piece.getTeam() == RED) {
-            if (piece.y >= 5) {
-                if (pid == R_ROOK) {
+        if (piece.getTeam() == RED)
+        {
+            if (piece.y >= 5)
+            {
+                if (pid == R_ROOK)
+                {
                     redAttackLiveRookSum++;
                 }
-                else if (pid == R_CANNON) {
+                else if (pid == R_CANNON)
+                {
                     redAttackLiveCannonSum++;
                 }
-                else if (pid == R_KNIGHT) {
+                else if (pid == R_KNIGHT)
+                {
                     redAttackLiveKnightSum++;
                 }
-                else if (pid == R_PAWN) {
+                else if (pid == R_PAWN)
+                {
                     redAttackLivePawnSum++;
                 }
             }
         }
-        else if (piece.getTeam() == BLACK) {
-            if (piece.y <= 4) {
-                if (pid == R_ROOK) {
+        else if (piece.getTeam() == BLACK)
+        {
+            if (piece.y <= 4)
+            {
+                if (pid == R_ROOK)
+                {
                     blackAttackLiveRookSum++;
                 }
-                else if (pid == R_CANNON) {
+                else if (pid == R_CANNON)
+                {
                     blackAttackLiveCannonSum++;
                 }
-                else if (pid == R_KNIGHT) {
+                else if (pid == R_KNIGHT)
+                {
                     blackAttackLiveKnightSum++;
                 }
-                else if (pid == R_PAWN) {
+                else if (pid == R_PAWN)
+                {
                     blackAttackLivePawnSum++;
                 }
             }
         }
     }
-    //红
+    // 红
     vlRedAttack = redAttackLiveRookSum * 2;
     vlRedAttack += redAttackLiveKnightSum * 2;
     vlRedAttack += redAttackLiveCannonSum;
     vlRedAttack += redAttackLivePawnSum;
-    //黑
+    // 黑
     vlBlackAttack = blackAttackLiveRookSum * 2;
     vlBlackAttack += blackAttackLiveKnightSum * 2;
     vlBlackAttack += blackAttackLiveCannonSum;
@@ -489,21 +512,23 @@ void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) {
     // 如果本方轻子数比对方多，那么每多一个轻子(车算2个轻子)威胁值加2。威胁值最多不超过8
     int redSimpleValues = 0;
     int blackSimpleValues = 0;
-    //红
+    // 红
     redSimpleValues += redAttackLiveRookSum * 2;
     redSimpleValues += redAttackLiveKnightSum;
     redSimpleValues += redAttackLiveCannonSum;
     redSimpleValues += redAttackLivePawnSum;
-    //黑
+    // 黑
     blackSimpleValues += blackAttackLiveRookSum * 2;
     blackSimpleValues += blackAttackLiveKnightSum;
     blackSimpleValues += blackAttackLiveCannonSum;
     blackSimpleValues += blackAttackLivePawnSum;
     // 设置
-    if (redSimpleValues > blackSimpleValues) {
+    if (redSimpleValues > blackSimpleValues)
+    {
         vlRedAttack += (redSimpleValues - blackSimpleValues) * 2;
     }
-    else if (redSimpleValues < blackSimpleValues) {
+    else if (redSimpleValues < blackSimpleValues)
+    {
         vlBlackAttack += (blackSimpleValues - redSimpleValues) * 2;
     }
     vlRedAttack = std::min<int>(vlRedAttack, TOTAL_ATTACK_VALUE);
@@ -518,16 +543,16 @@ void Board::initEvaluate()
     int vlBlackAttack = 0;
     this->vlOpenCalculator(vlOpen);
     this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
-    
+
     pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
     vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
 
-    //调整不受威胁方少掉的士象分
+    // 调整不受威胁方少掉的士象分
     this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
     this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
 
-    //进一步重新计算分数
+    // 进一步重新计算分数
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -543,10 +568,10 @@ void Board::initEvaluate()
             }
         }
     }
-
 }
 
-void Board::initHashInfo() {
+void Board::initHashInfo()
+{
     this->hashKey = 0;
     this->hashLock = 0;
     for (int x = 0; x < 9; x++)
@@ -554,19 +579,22 @@ void Board::initHashInfo() {
         for (int y = 0; y < 10; y++)
         {
             PIECEID pid = this->pieceidMap[x][y];
-            if (pid != EMPTY_PIECEID) {
+            if (pid != EMPTY_PIECEID)
+            {
                 this->hashKey ^= hashKeys[pid][x][y];
                 this->hashLock ^= hashLocks[pid][x][y];
             }
         }
     }
-    if (this->team == BLACK) {
+    if (this->team == BLACK)
+    {
         this->hashKey ^= PLAYER_KEY;
         this->hashLock ^= PLAYER_LOCK;
     }
 }
 
-void Board::getMirrorHashinfo(int32& mirrorHashKey, int32& mirrorHashLock) {
+void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
+{
     mirrorHashKey = 0;
     mirrorHashLock = 0;
     for (int x = 0; x < 9; x++)
@@ -574,18 +602,19 @@ void Board::getMirrorHashinfo(int32& mirrorHashKey, int32& mirrorHashLock) {
         for (int y = 0; y < 10; y++)
         {
             PIECEID pid = this->pieceidMap[x][y];
-            if (pid != EMPTY_PIECEID) {
+            if (pid != EMPTY_PIECEID)
+            {
                 mirrorHashKey ^= hashKeys[pid][size_t(8) - x][y];
                 mirrorHashLock ^= hashLocks[pid][size_t(8) - x][y];
             }
         }
     }
-    if (this->team == BLACK) {
+    if (this->team == BLACK)
+    {
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
 }
-
 
 /// @brief 打印
 void Board::print()

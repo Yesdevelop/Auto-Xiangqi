@@ -10,7 +10,8 @@ void test(TEAM team = BLACK, int maxDepth = 16)
     testWithUI(team, maxDepth);
 }
 
-void testOpenBook() {
+void testOpenBook()
+{
     Board board = Board(DEFAULT_MAP, RED);
     board.print();
 

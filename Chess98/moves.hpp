@@ -451,7 +451,7 @@ MOVES Moves::getMoves(Board &board)
     // 有无将
     if (!board.isKingLive(board.team))
         return MOVES{};
-        // 对面笑
+    // 对面笑
     for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
     {
         if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
