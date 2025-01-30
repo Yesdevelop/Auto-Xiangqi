@@ -58,6 +58,15 @@ void traverse() {
             // recoard the move with assessment result
             std::string output = mv + " " + std::to_string(BestNode.score);
             dumps.push_back(output);
+            // next step
+            int src = combinatePos & 255;
+            int dst = combinatePos >> 8;
+            int xSrc = (src & 15) - 3;
+            int ySrc = 12 - (src >> 4);
+            int xDst = (dst & 15) - 3;
+            int yDst = 12 - (dst >> 4);
+            Move tMove = Move(xSrc, ySrc, xDst, yDst);
+            board.doMove(tMove);
         }
         std::string filename = std::to_string(cnt) + ".txt";
         std::string filepath = "../assessment_result" + filename;
