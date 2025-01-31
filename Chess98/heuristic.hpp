@@ -122,8 +122,6 @@ struct tItem
 {
     nodeType type = noneType;
     int vl = 0;
-    int alpha = 0;
-    int beta = 0;
     int depth = 0;
     int32 hashLock = 0;
     bool risky = false;
@@ -194,8 +192,6 @@ void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth, bo
     tItem &t = this->pList[pos];
     if (t.type == noneType)
     {
-        t.alpha = vlApha;
-        t.beta = vlBeta;
         t.depth = depth;
         t.hashLock = hashLock;
         t.type = type;
