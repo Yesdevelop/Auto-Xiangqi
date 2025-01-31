@@ -45,7 +45,7 @@ def train():
             vls = vls.view(-1)  # Ensure vls is 1D
             policies_loss = cross_loss(policies, policy_labels)
             vl_loss = mse_loss(vls, vl_labels)
-            loss = vl_loss + policies_loss
+            loss = vl_loss + policies_loss * 0.1
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -90,7 +90,7 @@ def train():
                 vls = vls.view(-1)  # Ensure vls is 1D
                 policies_loss = cross_loss(policies, policy_labels)
                 vl_loss = mse_loss(vls, vl_labels)
-                loss = vl_loss + policies_loss
+                loss = vl_loss + policies_loss * 0.1
                 test_loss += loss.item() * len(inputs)  # Accumulate loss for each sample
                 correct_policies += (policies.argmax(dim=1) == policy_labels).sum().item()
                 total_policies += policy_labels.size(0)
