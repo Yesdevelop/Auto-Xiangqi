@@ -146,11 +146,13 @@ private:
 
 void tt::init(int hashLevel)
 {
-    if (this->pList == nullptr) {
-        this->hashSize = (1 << hashLevel);
-        this->hashMask = this->hashSize - 1;
-        pList = new tItem[this->hashSize];
+    if (this->pList != nullptr) {
+        delete[] pList;
+        pList = nullptr;
     }
+    this->hashSize = (1 << hashLevel);
+    this->hashMask = this->hashSize - 1;
+    pList = new tItem[this->hashSize];
 }
 
 bool tt::initDone()
