@@ -42,8 +42,7 @@ class nnue(nn.Module):
                 elif p > 0:
                     inputs[(p - 1) * 90 + x * 10 + y] = 1
         inputs = torch.from_numpy(inputs)
-        inputs.to(public_device)
-        return inputs
+        return inputs.to(public_device)
 
 if __name__ == "__main__":
     board = copy.deepcopy(init_board)
