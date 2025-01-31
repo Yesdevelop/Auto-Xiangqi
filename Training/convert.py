@@ -132,5 +132,15 @@ def get_data(recoard_path : str):
     move_ids = np.asarray(move_ids,dtype=np.int32)
     return inputs,input_sides,vls,move_ids
 
+def clear():
+    filepaths = get_filepaths(r"D:\dump_3", "txt")
+    for path in filepaths:
+        try:
+            get_data(path)
+        except:
+            print(f"remove bad case {path}")
+            os.remove(path)
+
 if __name__ == "__main__":
-    get_data(r"D:\dump_3\split_1\0.txt")
+    #get_data(r"D:\dump_3\split_1\0.txt")
+    clear()
