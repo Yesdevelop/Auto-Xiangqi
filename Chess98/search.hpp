@@ -304,7 +304,7 @@ Node Search::searchRoot(Board &board, int depth)
         this->historyCache->add(*pBestMove, depth);
     }
 
-    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, -INF, INF, pBestMove ? exactType : alphaType, depth, false);
+    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, pBestMove ? exactType : alphaType, depth, false);
 
     Node result{!pBestMove ? Move{} : *pBestMove, vlBest};
     sortRootMoves();
@@ -432,7 +432,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         this->historyCache->add(*pBestMove, depth);
     }
-    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, alpha, beta, type, depth, false);
+    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, type, depth, false);
     return vlBest;
 }
 
@@ -568,7 +568,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         this->historyCache->add(*pBestMove, depth);
     }
-    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, beta - 1, beta, type, depth, false);
+    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, type, depth, false);
     return vlBest;
 }
 
