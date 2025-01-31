@@ -162,7 +162,9 @@ bool tt::initDone()
 
 void tt::reset()
 {
-    memset(this->pList, 0, sizeof(tItem) * this->hashSize);
+    if (this->pList != nullptr) {
+        memset(this->pList, 0, sizeof(tItem) * this->hashSize);
+    }
 }
 
 tt::~tt()
