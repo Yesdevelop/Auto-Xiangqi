@@ -37,9 +37,12 @@ def train():
             policy_labels = torch.from_numpy(move_ids).long().to(public_device)
             vl_labels = torch.from_numpy(vl_labels).float().to(public_device).view(-1)  # Ensure vl_labels is 1D
 
-            # Normalize inputs and labels if needed
+            # Normalize inputs if needed
             direct_inputs = (direct_inputs - direct_inputs.mean()) / direct_inputs.std()
-            vl_labels = (vl_labels - vl_labels.mean()) / vl_labels.std()
+
+            # Process vl_labels
+            vl_labels = vl_labels / 300
+            vl_labels = torch.clamp(vl_labels, min=-1.0, max=1.0)
 
             vls, policies = model(direct_inputs)
             vls = vls.view(-1)  # Ensure vls is 1D
@@ -82,9 +85,12 @@ def train():
                 policy_labels = torch.from_numpy(move_ids).long().to(public_device)
                 vl_labels = torch.from_numpy(vl_labels).float().to(public_device).view(-1)  # Ensure vl_labels is 1D
 
-                # Normalize inputs and labels if needed
+                # Normalize inputs if needed
                 direct_inputs = (direct_inputs - direct_inputs.mean()) / direct_inputs.std()
-                vl_labels = (vl_labels - vl_labels.mean()) / vl_labels.std()
+
+                # Process vl_labels
+                vl_labels = vl_labels / 300
+                vl_labels = torch.clamp(vl_labels, min=-1.0, max=1.0)
 
                 vls, policies = model(direct_inputs)
                 vls = vls.view(-1)  # Ensure vls is 1D
