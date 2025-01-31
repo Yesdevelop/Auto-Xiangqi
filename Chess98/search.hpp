@@ -209,6 +209,7 @@ Move Search::searchOpenBook(Board &board)
         }
     }
 
+    pBookFileStruct->Close();
     return bookMove;
 }
 
