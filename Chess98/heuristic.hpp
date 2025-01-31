@@ -3,6 +3,10 @@
 #include "hash.hpp"
 #include "board.hpp"
 
+/* ***** 历史启发 ***** */
+
+/// @brief 历史启发
+
 enum moveType
 {
     normal = 0,
@@ -10,12 +14,8 @@ enum moveType
     history = 2,
     killer = 3,
     hash = 4
-
 };
 
-/* ***** 历史启发 ***** */
-
-/// @brief 历史启发
 class HistoryHeuristic
 {
 public:
@@ -106,6 +106,10 @@ void captureHeuristic(Board &board, MOVES &moves)
     }
 }
 
+/* ***** 置换启发 ***** */
+
+/// @brief 置换启发
+
 enum nodeType
 {
     noneType = 0,
@@ -113,10 +117,6 @@ enum nodeType
     betaType = 2,
     exactType = 3,
 };
-
-/* ***** 置换启发 ***** */
-
-/// @brief 置换启发
 
 struct tItem
 {
@@ -146,9 +146,11 @@ private:
 
 void tt::init(int hashLevel)
 {
-    this->hashSize = (1 << hashLevel);
-    this->hashMask = this->hashSize - 1;
-    pList = new tItem[this->hashSize];
+    if (this->pList == nullptr) {
+        this->hashSize = (1 << hashLevel);
+        this->hashMask = this->hashSize - 1;
+        pList = new tItem[this->hashSize];
+    }
 }
 
 bool tt::initDone()
