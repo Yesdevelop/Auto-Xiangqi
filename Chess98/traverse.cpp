@@ -5,7 +5,6 @@
 #include <ctime>
 #include <fstream>
 #include <io.h>
-#include <omp.h>
 
 /* ***** 跑谱器 ***** */
 
@@ -79,9 +78,76 @@ void traverse() {
     }
 }
 
+void randomTraverse() {
+    std::string outputPath = "../dump/";
+    for (int i = 0;i < 1000000;i++) {
+        Board board = Board(DEFAULT_MAP, RED);
+        Search s;
+        s.searchInit(board, 20);
+        std::vector<std::string> dumps;
+        std::srand(time(0));
+        for (int a = 0;a < 200;a++) {
+            int vlRandom = rand() % 100;
+            std::string mv;
+            std::string vl;
+            std::string flag;
+            Move tMove;
+            if (vlRandom <= 10) {
+                MOVES mvs = Moves::getMoves(board);
+                MOVES valid_mvs;
+                for (const Move& move : mvs) {
+                    Piece eaten = board.doMove(move);
+                    board.team = -board.team;
+                    bool bCheck = inCheck(board);
+                    board.team = -board.team;
+                    board.undoMove(move, eaten);
+                    if (!bCheck) {
+                        valid_mvs.emplace_back(move);
+                    }
+                }
+                if (valid_mvs.empty()) {
+                    break;
+                }
+                else {
+                    tMove = valid_mvs[rand() % (valid_mvs.size())];
+                    int src = (tMove.x1 + 3) + ((tMove.y1 + 3) << 4);
+                    int dst = (tMove.x2 + 3) + ((tMove.y2 + 3) << 4);
+                    mv = std::to_string(src + (dst << 8));
+                    vl = std::to_string(0);
+                    flag = "Random";
+                }
+            }
+            else {
+                Node BestNode = s.searchMain(board, 6, 1);
+                tMove = BestNode.move;
+                int src = (tMove.x1 + 3) + ((tMove.y1 + 3) << 4);
+                int dst = (tMove.x2 + 3) + ((tMove.y2 + 3) << 4);
+                mv = std::to_string(src + (dst << 8));
+                vl = std::to_string(BestNode.score);
+                flag = "Okay";
+            }
+            std::string output = mv + " " + vl + " " + flag;
+            dumps.emplace_back(output);
+            board.doMove(tMove);
+            // check end game
+            if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false) {
+                break;
+            }
+        }
+        std::ofstream outfile;
+        std::string filepath = outputPath + std::to_string(rand() * rand() * rand()) + ".txt";
+        outfile.open(filepath);
+        for (std::string& output : dumps) {
+            outfile << output << std::endl;
+        }
+        outfile.close();
+    }
+}
+
+
 
 int main()
 {
-    traverse();
+    randomTraverse();
     return 0;
 }
