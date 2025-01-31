@@ -49,7 +49,6 @@ class nnue(nn.Module):
         for i in range(len(boards)):
             inputs.append(self.convert_board_to_x(boards[i],sides[i]))
         inputs = torch.stack(inputs,dim=0)
-        print(inputs.shape)
         return inputs.to(public_device)
 
 if __name__ == "__main__":
