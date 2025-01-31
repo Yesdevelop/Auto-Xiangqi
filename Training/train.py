@@ -113,7 +113,8 @@ def train():
         print(f"Train Loss: {avg_train_loss:.4f}, Train Policy Accuracy: {train_policy_accuracy:.4f}, Train VL RMSE: {avg_train_vl_rmse:.4f}")
         print(f"Test Loss: {avg_test_loss:.4f}, Test Policy Accuracy: {test_policy_accuracy:.4f}, Test VL RMSE: {avg_test_vl_rmse:.4f}")
 
-        torch.save(model.state_dict(), f"epoch_{epoch}.pkl")
+        # Save model state dict with test loss in the filename
+        torch.save(model.state_dict(), f"epoch_{epoch}_test_loss_{avg_test_loss:.4f}.pkl")
 
 if __name__ == "__main__":
     train()
