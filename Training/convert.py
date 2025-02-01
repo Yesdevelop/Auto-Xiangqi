@@ -121,8 +121,8 @@ def get_data(recoard_path : str):
             #convert data
             if flag == "Okay":
                 inputs.append(copy.deepcopy(board))
-                input_sides.append(side)
-                vls.append(vl)
+                input_sides.append(copy.deepcopy(side))
+                vls.append(copy.deepcopy(vl))
                 move_ids.append(move_action2move_id[f"{ySrc}{xSrc}{yDst}{xDst}"])
                 #
                 inputs.append(flipUD(copy.deepcopy(board)))
@@ -131,12 +131,12 @@ def get_data(recoard_path : str):
                 move_ids.append(move_action2move_id[f"{ySrc}{8 - xSrc}{yDst}{8 - xDst}"])
                 #
                 inputs.append(flipLR(copy.deepcopy(board)))
-                input_sides.append(copy.deepcopy(-side))
+                input_sides.append(-side)
                 vls.append(-vl)
                 move_ids.append(move_action2move_id[f"{9 - ySrc}{xSrc}{9 - yDst}{xDst}"])
                 #
                 inputs.append(flipLRUD(copy.deepcopy(board)))
-                input_sides.append(copy.deepcopy(-side))
+                input_sides.append(-side)
                 vls.append(-vl)
                 move_ids.append(move_action2move_id[f"{9 - ySrc}{8 - xSrc}{9 - yDst}{8 - xDst}"])
             #next step
