@@ -199,6 +199,7 @@ void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth, bo
     if (t.type == noneType)
     {
         t.depth = depth;
+        t.vl = vl;
         t.hashLock = hashLock;
         t.type = type;
         t.risky = risky;
@@ -210,6 +211,7 @@ void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth, bo
         if (!riskyCoverage)
         {
             t.depth = depth;
+            t.vl = vl;
             t.hashLock = hashLock;
             t.type = type;
             t.risky = risky;
