@@ -340,6 +340,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         beta = vlDistanceMate;
         if (alpha >= vlDistanceMate)
         {
+            this->pHashTable->add(board.hashKey, board.hashLock, vlDistanceMate, exactType, depth, false);
             return vlDistanceMate;
         }
     }
@@ -458,6 +459,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         beta = vlDistanceMate;
         if (vlOriginAlpha >= vlDistanceMate)
         {
+            this->pHashTable->add(board.hashKey, board.hashLock, vlDistanceMate, exactType, depth, false);
             return vlDistanceMate;
         }
     }
