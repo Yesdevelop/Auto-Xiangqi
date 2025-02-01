@@ -64,7 +64,7 @@ def get_all_legal_moves():
 move_id2move_action, move_action2move_id = get_all_legal_moves()
 
 def flipLR(board : np.ndarray):
-    return -np.fliplr(init_board)
+    return -np.fliplr(board)
 
 def flipUD(board : np.ndarray):
     return np.flipud(board)
@@ -90,7 +90,7 @@ def get_data(recoard_path : str):
     board = copy.deepcopy(init_board)
     with open(recoard_path,"r",encoding="utf-8") as f:
         lines = f.readlines()
-        for line in lines:
+        for index,line in enumerate(lines):
             line = line.strip()
             split_items = line.split(" ")
             if len(split_items) == 2:
@@ -158,5 +158,5 @@ def clear():
             os.remove(path)
 
 if __name__ == "__main__":
-    get_data(r"../dump/-261584.txt")
+    get_data(r"../dump/2025020109140398_5617.txt")
     #clear()
