@@ -92,36 +92,52 @@ def get_data(recoard_path : str):
         lines = f.readlines()
         for line in lines:
             line = line.strip()
-            [mv,vl] = line.split(" ")
-            mv = int(mv)
-            vl = int(vl)
-            #
-            src = mv & 255
-            dst = mv >> 8
-            xSrc = (src & 15) - 3;
-            ySrc = 12 - (src >> 4);
-            xDst = (dst & 15) - 3;
-            yDst = 12 - (dst >> 4);
+            split_items = line.split(" ")
+            if len(split_items) == 2:
+                [mv,vl] = split_items
+                mv = int(mv)
+                vl = int(vl)
+                #
+                src = mv & 255
+                dst = mv >> 8
+                xSrc = (src & 15) - 3
+                ySrc = 12 - (src >> 4)
+                xDst = (dst & 15) - 3
+                yDst = 12 - (dst >> 4)
+            elif len(split_items) == 3:
+                [mv,vl,flag] = split_items
+                mv = int(mv)
+                vl = int(vl)
+                #
+                src = mv & 255
+                dst = mv >> 8
+                xSrc = (src & 15) - 3
+                ySrc = (src >> 4) - 3
+                xDst = (dst & 15) - 3
+                yDst = (dst >> 4) - 3
+            else:
+                raise Exception(f"The length of split_items should be equal to 2 or 3 but now is {split_items}")
             #convert data
-            inputs.append(copy.deepcopy(board))
-            input_sides.append(side)
-            vls.append(vl)
-            move_ids.append(move_action2move_id[f"{ySrc}{xSrc}{yDst}{xDst}"])
-            #
-            inputs.append(flipUD(copy.deepcopy(board)))
-            input_sides.append(copy.deepcopy(side))
-            vls.append(copy.deepcopy(vl))
-            move_ids.append(move_action2move_id[f"{ySrc}{8 - xSrc}{yDst}{8 - xDst}"])
-            #
-            inputs.append(flipLR(copy.deepcopy(board)))
-            input_sides.append(copy.deepcopy(-side))
-            vls.append(-vl)
-            move_ids.append(move_action2move_id[f"{9 - ySrc}{xSrc}{9 - yDst}{xDst}"])
-            #
-            inputs.append(flipLRUD(copy.deepcopy(board)))
-            input_sides.append(copy.deepcopy(-side))
-            vls.append(-vl)
-            move_ids.append(move_action2move_id[f"{9 - ySrc}{8 - xSrc}{9 - yDst}{8 - xDst}"])
+            if flag == "Okay":
+                inputs.append(copy.deepcopy(board))
+                input_sides.append(side)
+                vls.append(vl)
+                move_ids.append(move_action2move_id[f"{ySrc}{xSrc}{yDst}{xDst}"])
+                #
+                inputs.append(flipUD(copy.deepcopy(board)))
+                input_sides.append(copy.deepcopy(side))
+                vls.append(copy.deepcopy(vl))
+                move_ids.append(move_action2move_id[f"{ySrc}{8 - xSrc}{yDst}{8 - xDst}"])
+                #
+                inputs.append(flipLR(copy.deepcopy(board)))
+                input_sides.append(copy.deepcopy(-side))
+                vls.append(-vl)
+                move_ids.append(move_action2move_id[f"{9 - ySrc}{xSrc}{9 - yDst}{xDst}"])
+                #
+                inputs.append(flipLRUD(copy.deepcopy(board)))
+                input_sides.append(copy.deepcopy(-side))
+                vls.append(-vl)
+                move_ids.append(move_action2move_id[f"{9 - ySrc}{8 - xSrc}{9 - yDst}{8 - xDst}"])
             #next step
             board[xDst][yDst] = board[xSrc][ySrc]
             board[xSrc][ySrc] = 0
@@ -142,5 +158,5 @@ def clear():
             os.remove(path)
 
 if __name__ == "__main__":
-    #get_data(r"D:\dump_3\split_1\0.txt")
-    clear()
+    get_data(r"../dump/-261584.txt")
+    #clear()
