@@ -97,6 +97,7 @@ def get_data(recoard_path : str):
                 [mv,vl] = split_items
                 mv = int(mv)
                 vl = int(vl)
+                flag = "Okay"
                 #
                 src = mv & 255
                 dst = mv >> 8
