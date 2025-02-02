@@ -15,7 +15,15 @@ struct BookStruct
 
 inline int BOOK_POS_CMP(const BookStruct &bk, const int32 hashLock)
 {
-    return int(bk.dwZobristLock) < hashLock ? -1 : (int(bk.dwZobristLock) > hashLock ? 1 : 0);
+    uint32_t bookLock = bk.dwZobristLock;
+    uint32_t boardLock = (uint32_t)hashLock;
+    if (bookLock < boardLock) {
+        return -1;
+    }
+    else if (bookLock > boardLock) {
+        return 1;
+    }
+    return 0;
 }
 
 struct BookFileStruct
