@@ -58,8 +58,8 @@ public:
     void doMove(int x1, int y1, int x2, int y2)
     {
         bool ret = bool(this->getBit(x2, y2));
-        this->setBit(x2, y2);
         this->deleteBit(x1, y1);
+        this->setBit(x2, y2);
     }
 
     /// @brief 撤销步进
@@ -70,9 +70,10 @@ public:
     /// @param eaten
     void undoMove(int x1, int y1, int x2, int y2, bool eaten)
     {
-        if (eaten)
-            this->setBit(x1, y1);
-        this->deleteBit(x2, y2);
+        this->setBit(x1, y1);
+        if (!eaten) {
+            this->deleteBit(x2, y2);
+        }
     }
 
     TYPE_ROOK_CACHE rookCache{};
