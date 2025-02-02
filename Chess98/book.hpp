@@ -15,14 +15,13 @@ struct BookStruct
 
 inline int BOOK_POS_CMP(const BookStruct &bk, const int32 hashLock)
 {
-    return bk.dwZobristLock < hashLock ? -1 : bk.dwZobristLock > hashLock ? 1
-                                                                          : 0;
+    return int(bk.dwZobristLock) < hashLock ? -1 : (int(bk.dwZobristLock) > hashLock ? 1 : 0);
 }
 
 struct BookFileStruct
 {
     FILE *fp = nullptr;
-    int nLen;
+    int nLen = 0;
     bool Open(const char *szFileName, bool bEdit = false)
     {
         // fp = fopen(szFileName, bEdit ? "r+b" : "rb");
