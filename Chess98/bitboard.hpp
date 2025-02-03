@@ -33,16 +33,14 @@ public:
             for (int num = 0; num <= floor(log2(i)); num++)
             {
                 int index = -1;
-                for (int j = 0, count = 0; j <= 9; j++)
+                for (int j = -1; index < 10; index++)
                 {
-                    if (this->getBit(i, j) == 1)
-                    {
-                        if (count != num)
-                            count++;
-                        else
-                            index = count;
-                    }
+                    if (this->getBit(i, index) == 1)
+                        j++;
+                    if (j == num)
+                        break;
                 }
+                if (index == -1)throw;
                 this->rookCache[num][i] = this->generateRookRegion(i, index, i < pow(2, 9) ? 8 : 9);
                 this->cannonCache[num][i] = this->generateCannonRegion(i, index, i < pow(2, 9) ? 8 : 9);
             }
@@ -76,14 +74,7 @@ public:
         }
     }
 
-    TYPE_ROOK_CACHE rookCache{};
-    TYPE_CANNON_CACHE cannonCache{};
-
-    BITARRAY_X xBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0};
-    BITARRAY_Y yBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-private:
-    /// @brief 获取bitline二进制的第n位
+    /// @brief 获取bitline二进制的第n位(从右边到左边)
     /// @param bitline
     /// @param index
     /// @return
@@ -92,6 +83,13 @@ private:
         return (bitline >> index) & 1;
     }
 
+    TYPE_ROOK_CACHE rookCache{};
+    TYPE_CANNON_CACHE cannonCache{};
+
+    BITARRAY_X xBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0};
+    BITARRAY_Y yBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+private:
     /// @brief 设置棋盘上x, y的数为1
     /// @param x
     /// @param y

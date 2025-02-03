@@ -16,6 +16,8 @@ public:
 
     static MOVES rook(TEAM team, Board &board, int x, int y);
 
+    static MOVES rook_new(TEAM team, Board &board, int x, int y);
+
     static MOVES cannon(TEAM team, Board &board, int x, int y);
 
     static MOVES pawn(TEAM team, Board &board, int x, int y);
@@ -262,6 +264,46 @@ MOVES Moves::rook(TEAM team, Board &board, int x, int y)
         }
     }
 
+    return result;
+}
+
+MOVES Moves::rook_new(TEAM team, Board &board, int x, int y)
+{
+    MOVES result{};
+    result.reserve(64);
+
+    BITLINE bitline = board.getBitLineX(x);
+    int num = board.getNumOnLine(bitline, y);
+    REGION_ROOK region = board.getRookRegion(bitline, num);
+    for (int y2 = y + 1; y2 <= region[1]; y2++)
+    {
+        if (board.teamOn(x, y2) == team)
+        break;
+        result.emplace_back(Move{x, y, x, y2});
+    }
+    for (int y2 = y - 1; y2 >= region[0]; y2--)
+    {
+        if (board.teamOn(x, y2) == team)
+        break;
+        result.emplace_back(Move{x, y, x, y2});
+    }
+
+    bitline = board.getBitLineY(y);
+    num = board.getNumOnLine(bitline, x);
+    region = board.getRookRegion(bitline, num);
+    for (int x2 = x + 1; x2 <= region[1]; x2++)
+    {
+        if (board.teamOn(x2, y) == team)
+        break;
+        result.emplace_back(Move{x, y, x2, y});
+    }
+    for (int x2 = x - 1; x2 >= region[0]; x2--)
+    {
+        if (board.teamOn(x2, y) == team)
+        break;
+        result.emplace_back(Move{x, y, x2, y});
+    }
+    
     return result;
 }
 

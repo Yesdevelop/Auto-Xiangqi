@@ -49,13 +49,13 @@ public:
         this->team = -this->team;
     }
 
-    bool nullOkay()
+    bool nullOkay() const
     {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 600);
     }
 
-    bool nullSafe()
+    bool nullSafe() const
     {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 1200);
@@ -86,6 +86,40 @@ public:
     void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 
     PIECEID_MAP pieceidMap{};
+
+    // 位棋盘辅助着法生成相关
+    BITLINE getBitLineX(int x) const
+    {
+        return this->bitboard->xBitBoard[x];
+    }
+
+    BITLINE getBitLineY(int y) const
+    {
+        return this->bitboard->yBitBoard[y];
+    }
+
+    /// @brief 获取一个位行的第index个位置是第几个棋子
+    /// @param bitline
+    /// @param index
+    /// @return
+    int getNumOnLine(BITLINE bitline, int index)
+    {
+        int num = -1;
+        for (int i = 0; i < 10; i++)
+        {
+            if (this->bitboard->getBit(bitline, i) == 1)
+                num++;
+            if (i == index)
+                return num;
+        }
+        throw "Error: getNumOnLine";
+        return -1;
+    }
+
+    REGION_ROOK getRookRegion(BITLINE bitline, int num)
+    {
+        return this->bitboard->rookCache[num][bitline];
+    }
 
 private:
     // 棋盘相关
