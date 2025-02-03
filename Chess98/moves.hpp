@@ -16,8 +16,6 @@ public:
 
     static MOVES rook(TEAM team, Board &board, int x, int y);
 
-    static MOVES rook_new(TEAM team, Board &board, int x, int y);
-
     static MOVES cannon(TEAM team, Board &board, int x, int y);
 
     static MOVES pawn(TEAM team, Board &board, int x, int y);
@@ -193,81 +191,7 @@ MOVES Moves::knight(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-/// @brief 生成车的着法
 MOVES Moves::rook(TEAM team, Board &board, int x, int y)
-{
-    MOVES result{};
-    result.reserve(64);
-
-    for (int _y = y + 1; _y <= 9; _y++)
-    {
-        if (board.teamOn(x, _y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-        }
-        else if (board.teamOn(x, _y) != team)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (int _y = y - 1; _y >= 0; _y--)
-    {
-        if (board.teamOn(x, _y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-        }
-        else if (board.teamOn(x, _y) != team)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (int _x = x + 1; _x <= 8; _x++)
-    {
-        if (board.teamOn(_x, y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-        else if (board.teamOn(_x, y) != team)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (int _x = x - 1; _x >= 0; _x--)
-    {
-        if (board.teamOn(_x, y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-        else if (board.teamOn(_x, y) != team)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    return result;
-}
-
-MOVES Moves::rook_new(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
     result.reserve(64);
@@ -303,7 +227,7 @@ MOVES Moves::rook_new(TEAM team, Board &board, int x, int y)
         break;
         result.emplace_back(Move{x, y, x2, y});
     }
-    
+
     return result;
 }
 
