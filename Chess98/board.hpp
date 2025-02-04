@@ -98,29 +98,8 @@ public:
         return this->bitboard->yBitBoard[y];
     }
 
-    /// @brief 获取一个位行的第index个位置是第几个棋子
-    /// @param bitline
-    /// @param index
-    /// @return
-    int getNumOnLine(BITLINE bitline, int index)
-    {
-        int num = -1;
-        for (int i = 0; i < 10; i++)
-        {
-            if (this->bitboard->getBit(bitline, i) == 1)
-                num++;
-            if (i == index)
-                return num;
-        }
-        throw "Error: getNumOnLine";
-        return -1;
-    }
-
-    REGION_ROOK getRookRegion(BITLINE bitline, int num)
-    {
-        return this->bitboard->rookCache[num][bitline];
-    }
-
+    BitBoard* bitboard = nullptr;
+    
 private:
     // 棋盘相关
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
@@ -129,7 +108,6 @@ private:
     std::vector<PIECE_INDEX> blackPieces{};
     bool isRedKingLive = false;
     bool isBlackKingLive = false;
-    BitBoard* bitboard = nullptr;
 };
 
 /// @brief 初始化棋盘

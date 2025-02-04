@@ -16,7 +16,11 @@ public:
 
     static MOVES rook(TEAM team, Board &board, int x, int y);
 
+    static MOVES rook_new(TEAM team, Board &board, int x, int y);
+
     static MOVES cannon(TEAM team, Board &board, int x, int y);
+
+    static MOVES cannon_new(TEAM team, Board &board, int x, int y);
 
     static MOVES pawn(TEAM team, Board &board, int x, int y);
 
@@ -191,44 +195,83 @@ MOVES Moves::knight(TEAM team, Board &board, int x, int y)
     return result;
 }
 
+/// @brief 生成车的着法
 MOVES Moves::rook(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
     result.reserve(64);
 
-    BITLINE bitline = board.getBitLineX(x);
-    int num = board.getNumOnLine(bitline, y);
-    REGION_ROOK region = board.getRookRegion(bitline, num);
-    for (int y2 = y + 1; y2 <= region[1]; y2++)
+    for (int _y = y + 1; _y <= 9; _y++)
     {
-        if (board.teamOn(x, y2) == team)
-        break;
-        result.emplace_back(Move{x, y, x, y2});
+        if (board.teamOn(x, _y) == EMPTY_TEAM)
+        {
+            result.emplace_back(Move{x, y, x, _y});
+        }
+        else if (board.teamOn(x, _y) != team)
+        {
+            result.emplace_back(Move{x, y, x, _y});
+            break;
+        }
+        else
+        {
+            break;
+        }
     }
-    for (int y2 = y - 1; y2 >= region[0]; y2--)
+    for (int _y = y - 1; _y >= 0; _y--)
     {
-        if (board.teamOn(x, y2) == team)
-        break;
-        result.emplace_back(Move{x, y, x, y2});
+        if (board.teamOn(x, _y) == EMPTY_TEAM)
+        {
+            result.emplace_back(Move{x, y, x, _y});
+        }
+        else if (board.teamOn(x, _y) != team)
+        {
+            result.emplace_back(Move{x, y, x, _y});
+            break;
+        }
+        else
+        {
+            break;
+        }
     }
-
-    bitline = board.getBitLineY(y);
-    num = board.getNumOnLine(bitline, x);
-    region = board.getRookRegion(bitline, num);
-    for (int x2 = x + 1; x2 <= region[1]; x2++)
+    for (int _x = x + 1; _x <= 8; _x++)
     {
-        if (board.teamOn(x2, y) == team)
-        break;
-        result.emplace_back(Move{x, y, x2, y});
+        if (board.teamOn(_x, y) == EMPTY_TEAM)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+        }
+        else if (board.teamOn(_x, y) != team)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+            break;
+        }
+        else
+        {
+            break;
+        }
     }
-    for (int x2 = x - 1; x2 >= region[0]; x2--)
+    for (int _x = x - 1; _x >= 0; _x--)
     {
-        if (board.teamOn(x2, y) == team)
-        break;
-        result.emplace_back(Move{x, y, x2, y});
+        if (board.teamOn(_x, y) == EMPTY_TEAM)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+        }
+        else if (board.teamOn(_x, y) != team)
+        {
+            result.emplace_back(Move{x, y, _x, y});
+            break;
+        }
+        else
+        {
+            break;
+        }
     }
 
     return result;
+}
+
+MOVES Moves::rook_new(TEAM team, Board &board, int x, int y)
+{
+    return MOVES{};
 }
 
 /// @brief 生成炮的着法
@@ -349,6 +392,11 @@ MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
     return result;
 }
 
+MOVES Moves::cannon_new(TEAM team, Board &board, int x, int y)
+{
+    return MOVES{};
+}
+
 /// @brief 生成兵的着法
 MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
 {
@@ -467,7 +515,7 @@ MOVES Moves::getCaptrueMoves(Board &board)
     return result;
 }
 
-/// @brief  获取当前队伍所有好的吃子着法（MVV/LVA）（暂时写成这样，后续优化）
+/// @brief 获取当前队伍所有好的吃子着法（MVV/LVA）（暂时写成这样，后续优化）
 /// @param board
 /// @return
 MOVES Moves::getGoodCaptures(Board &board)

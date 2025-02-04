@@ -4,10 +4,10 @@
 using BITLINE = unsigned;
 using BITARRAY_X = std::array<BITLINE, 9>;
 using BITARRAY_Y = std::array<BITLINE, 10>;
-using REGION_ROOK = std::array<int, 2>;   // 车的着法起始点终结点
-using REGION_CANNON = std::array<int, 4>; // 炮的着法起始点终结点
-using TYPE_ROOK_CACHE = std::map<int, std::map<BITLINE, REGION_ROOK>>;
-using TYPE_CANNON_CACHE = std::map<int, std::map<BITLINE, REGION_CANNON>>;
+using REGION_ROOK = std::array<int, 2>;
+using REGION_CANNON = std::array<int, 4>;
+using TYPE_ROOK_CACHE = std::map<BITLINE, std::map<int, REGION_ROOK>>;
+using TYPE_CANNON_CACHE = std::map<BITLINE, std::map<int, REGION_CANNON>>;
 
 // 炮的四个值分别对应eaten1, start, end, eaten2，若没有eaten则eaten = 端点
 
@@ -27,22 +27,15 @@ public:
             }
         }
         // 初始化车、炮的着法缓存
-        for (BITLINE i = 1; i <= pow(2, 10); i++)
+        for (BITLINE bitline = 1; bitline <= pow(2, 10); bitline++)
         {
-            // num: 第几个1是车或炮的所在位置
-            for (int num = 0; num <= floor(log2(i)); num++)
+            for (int index = 0; index < 10; index++)
             {
-                int index = -1;
-                for (int j = -1; index < 10; index++)
+                if (this->getBit(bitline, index) == 1)
                 {
-                    if (this->getBit(i, index) == 1)
-                        j++;
-                    if (j == num)
-                        break;
+                    this->rookCache[bitline][index] = this->generateRookRegion(bitline, index);
+                    this->cannonCache[bitline][index] = this->generateCannonRegion(bitline, index);
                 }
-                if (index == -1)throw;
-                this->rookCache[num][i] = this->generateRookRegion(i, index, i < pow(2, 9) ? 8 : 9);
-                this->cannonCache[num][i] = this->generateCannonRegion(i, index, i < pow(2, 9) ? 8 : 9);
             }
         }
     }
@@ -83,6 +76,16 @@ public:
         return (bitline >> index) & 1;
     }
 
+    REGION_ROOK getRookRegion(BITLINE bitline, int index, int endpos)
+    {
+
+    }
+
+    REGION_CANNON getCannonReigon(BITLINE bitline, int index, int endpos)
+    {
+        
+    }
+
     TYPE_ROOK_CACHE rookCache{};
     TYPE_CANNON_CACHE cannonCache{};
 
@@ -113,10 +116,10 @@ private:
     /// @param index 车的所在位置
     /// @param end 截止点，接受8或9
     /// @return
-    REGION_ROOK generateRookRegion(BITLINE bitline, int index, int last)
+    REGION_ROOK generateRookRegion(BITLINE bitline, int index)
     {
         int beg = 0;
-        int end = last;
+        int end = 8;
         for (int pos = index - 1; pos >= 0; pos--)
         {
             if (this->getBit(bitline, pos) != 0)
@@ -125,7 +128,7 @@ private:
                 break;
             }
         }
-        for (int pos = index + 1; pos <= last; pos++)
+        for (int pos = index + 1; pos <= 8; pos++)
         {
             if (this->getBit(bitline, pos) != 0)
             {
@@ -142,12 +145,12 @@ private:
     /// @param index 炮的所在位置
     /// @param end 截止点，接受9或10
     /// @return
-    REGION_CANNON generateCannonRegion(BITLINE bitline, int index, int last)
+    REGION_CANNON generateCannonRegion(BITLINE bitline, int index)
     {
         int eaten1 = 0;
         int beg = 0;
-        int end = last;
-        int eaten2 = last;
+        int end = 8;
+        int eaten2 = 8;
         for (int pos = index - 1; pos >= 0; pos--)
         {
             if (this->getBit(bitline, pos) != 0)
@@ -165,13 +168,13 @@ private:
                 break;
             }
         }
-        for (int pos = index + 1; pos <= last; pos++)
+        for (int pos = index + 1; pos <= 8; pos++)
         {
             if (this->getBit(bitline, pos) != 0)
             {
                 end = pos;
                 eaten2 = pos;
-                for (int pos2 = pos + 1; pos2 <= last; pos2++)
+                for (int pos2 = pos + 1; pos2 <= 8; pos2++)
                 {
                     if (this->getBit(bitline, pos2) != 0)
                     {
