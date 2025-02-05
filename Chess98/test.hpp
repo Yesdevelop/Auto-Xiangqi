@@ -5,10 +5,12 @@
 void testWithUI(TEAM team, int maxDepth);
 void checkingTest();
 void testRook();
+void testCannon();
 
 void test(TEAM team = BLACK, int maxDepth = 16)
 {
-    testWithUI(team, maxDepth);
+    testRook();
+    //testWithUI(team, maxDepth);
 }
 
 void testRook()

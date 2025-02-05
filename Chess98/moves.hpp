@@ -271,7 +271,34 @@ MOVES Moves::rook(TEAM team, Board &board, int x, int y)
 
 MOVES Moves::rook_new(TEAM team, Board &board, int x, int y)
 {
-    return MOVES{};
+    MOVES result{};
+    result.reserve(64);
+
+    // 纵向着法
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
+    for (int y2 = y + 1; y2 < regionX[1]; y2++)
+        result.emplace_back(Move{x, y, x, y2});
+    if (board.teamOn(x, regionX[1]) != team)
+        result.emplace_back(Move{x, y, x, regionX[1]});
+    for (int y2 = y - 1; y2 > regionX[0]; y2--)
+        result.emplace_back(Move{x, y, x, y2});
+    if (board.teamOn(x, regionX[0]) != team)
+        result.emplace_back(Move{x, y, x, regionX[0]});
+
+    // 横向着法
+    BITLINE bitlineY = board.getBitLineY(y);
+    REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
+    for (int x2 = x + 1; x2 < regionY[1]; x2++)
+        result.emplace_back(Move{x, y, x2, y});
+    if (board.teamOn(regionY[1], y) != team)
+        result.emplace_back(Move{x, y,regionY[1], y});
+    for (int x2 = x - 1; x2 > regionY[0]; x2--)
+        result.emplace_back(Move{x, y, x2, y});
+    if (board.teamOn(regionY[0], y) != team)
+        result.emplace_back(Move{x, y,regionY[0], y});
+
+    return result;
 }
 
 /// @brief 生成炮的着法

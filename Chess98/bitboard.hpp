@@ -76,14 +76,39 @@ public:
         return (bitline >> index) & 1;
     }
 
+    /// @brief 获取车的着法缓存
+    /// @param bitline
+    /// @param index
+    /// @param endpos 只接受8或9
+    /// @return
     REGION_ROOK getRookRegion(BITLINE bitline, int index, int endpos)
     {
-
+        REGION_ROOK result = this->rookCache[bitline][index];
+        if (endpos == 8)
+            return result;
+        if (result[1] == 8 && this->getBit(bitline, 8) == 0)
+            result[1] = 9;
+        if (index == 8)
+            result[1] = 9;
+        return result;
     }
 
+    /// @brief 获取炮的着法缓存
+    /// @param bitline
+    /// @param index
+    /// @param endpos
+    /// @return
     REGION_CANNON getCannonReigon(BITLINE bitline, int index, int endpos)
     {
-        
+        REGION_CANNON result = this->cannonCache[bitline][index];
+        if (endpos == 8)
+            return result;
+        if (result[2] == 8 && this->getBit(bitline, 9) == 0)
+            result[2] = result[3] = 9;
+        if (result[3] == 8 && this->getBit(bitline, 9) == 1)
+            result[3] = 9;
+        if (index == 8) result[2] = result[3] = 9;
+        return result;
     }
 
     TYPE_ROOK_CACHE rookCache{};
