@@ -424,29 +424,29 @@ MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
     MOVES result{};
     result.reserve(64);
 
-    // 纵向着法
-    BITLINE bitlineX = board.getBitLineX(x);
-    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
-    for (int y2 = y + 1; y2 <= regionX[2]; y2++)
-        result.emplace_back(Move{ x, y, x, y2 });
-    if (board.teamOn(x, regionX[0]) == -team && regionX[0] != regionX[1])
-        result.emplace_back(Move{ x, y, x, regionX[0] });
-    for (int y2 = y - 1; y2 >= regionX[1]; y2--)
-        result.emplace_back(Move{ x, y, x, y2 });
-    if (board.teamOn(x, regionX[3]) == -team && regionX[3] != regionX[2])
-        result.emplace_back(Move{ x, y, x, regionX[3] });
-
     // 横向着法
     BITLINE bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     for (int x2 = x + 1; x2 <= regionY[2]; x2++)
         result.emplace_back(Move{ x, y, x2, y });
-    if (board.teamOn(regionY[0], y) == -team && regionY[0] != regionY[1])
-        result.emplace_back(Move{ x, y, regionY[0], y });
-    for (int x2 = x - 1; x2 >= regionY[1]; x2--)
-        result.emplace_back(Move{ x, y, x2, y });
     if (board.teamOn(regionY[3], y) == -team && regionY[3] != regionY[2])
         result.emplace_back(Move{ x, y, regionY[3], y });
+    for (int x2 = x - 1; x2 >= regionY[1]; x2--)
+        result.emplace_back(Move{ x, y, x2, y });
+    if (board.teamOn(regionY[0], y) == -team && regionY[0] != regionY[1])
+        result.emplace_back(Move{ x, y, regionY[0], y });
+
+    // 纵向着法
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
+    for (int y2 = y + 1; y2 <= regionX[2]; y2++)
+        result.emplace_back(Move{ x, y, x, y2 });
+    if (board.teamOn(x, regionX[3]) == -team && regionX[3] != regionX[2])
+        result.emplace_back(Move{ x, y, x, regionX[3] });
+    for (int y2 = y - 1; y2 >= regionX[1]; y2--)
+        result.emplace_back(Move{ x, y, x, y2 });
+    if (board.teamOn(x, regionX[0]) == -team && regionX[0] != regionX[1])
+        result.emplace_back(Move{ x, y, x, regionX[0] });
 
     return result;
 }

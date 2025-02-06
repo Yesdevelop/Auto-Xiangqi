@@ -10,8 +10,8 @@ void performanceTest();
 
 void test(TEAM team = BLACK, int maxDepth = 16)
 {
-    //testCannon();
-    //testWithUI(team, maxDepth);
+    //testRook();
+    testWithUI(team, maxDepth);
     performanceTest();
 }
 
@@ -28,11 +28,28 @@ void performanceTest()
                 if (x == 0 && y == 0) continue;
                 auto e = board.doMove(0, 0, x, y);
                 MOVES a = Moves::rook(RED, board, x, y);
+                
                 board.undoMove(0, 0, x, y, e);
             }
         }
     }
-    std::cout << clock() - a << std::endl;
+    auto b = clock(); 
+    for (int i = 0; i < 5000; i++)
+    {
+        for (int x = 0; x < 9; x++)
+        {
+            for (int y = 0; y < 10; y++)
+            {
+                if (x == 0 && y == 0) continue;
+                auto e = board.doMove(0, 0, x, y);
+                MOVES a = Moves::rook_old(RED, board, x, y);
+
+                board.undoMove(0, 0, x, y, e);
+            }
+        }
+    }
+    std::cout << b - a << std::endl;
+    std::cout << clock() - b << std::endl;
 }
 void testRook()
 {
@@ -46,7 +63,7 @@ void testRook()
             auto e = board.doMove(0, 0, x, y);
             MOVES a = Moves::rook(RED, board, x, y);
             MOVES b = Moves::rook_old(RED, board, x, y);
-            if (a.size() != b.size())
+            if (a != b)
             {
                 throw;
             }
@@ -67,9 +84,6 @@ void testCannon()
             auto e = board.doMove(0, 0, x, y);
             MOVES a = Moves::cannon(RED, board, x, y);
             MOVES b = Moves::cannon_old(RED, board, x, y);
-            auto func = [](Move a, Move b)->bool { return a.id > b.id; };
-            std::sort(a.begin(), a.end(), func);
-            std::sort(b.begin(), b.end(), func);
             if (a != b)
             {
                 throw;
@@ -126,7 +140,7 @@ void testWithUI(TEAM team = RED, int maxDepth = 16)
     {
         if (board.team == team)
         {
-            Node node = s.searchMain(board, maxDepth, 4);
+            Node node = s.searchMain(board, maxDepth, 3);
             board.doMove(node.move);
             setBoardCode(board);
             MOVES _ = Moves::getMoves(board);
