@@ -16,11 +16,11 @@ public:
 
     static MOVES rook(TEAM team, Board &board, int x, int y);
 
-    static MOVES rook_new(TEAM team, Board &board, int x, int y);
+    static MOVES rook_old(TEAM team, Board &board, int x, int y);
 
     static MOVES cannon(TEAM team, Board &board, int x, int y);
 
-    static MOVES cannon_new(TEAM team, Board &board, int x, int y);
+    static MOVES cannon_old(TEAM team, Board &board, int x, int y);
 
     static MOVES pawn(TEAM team, Board &board, int x, int y);
 
@@ -196,7 +196,7 @@ MOVES Moves::knight(TEAM team, Board &board, int x, int y)
 }
 
 /// @brief 生成车的着法
-MOVES Moves::rook_new(TEAM team, Board &board, int x, int y)
+MOVES Moves::rook_old(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
     result.reserve(64);
@@ -302,7 +302,7 @@ MOVES Moves::rook(TEAM team, Board &board, int x, int y)
 }
 
 /// @brief 生成炮的着法
-MOVES Moves::cannon_new(TEAM team, Board &board, int x, int y)
+MOVES Moves::cannon_old(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
     result.reserve(64);

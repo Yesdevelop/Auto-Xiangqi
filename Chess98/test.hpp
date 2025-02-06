@@ -24,7 +24,7 @@ void testRook()
             if (x == 0 && y == 0) continue;
             auto e = board.doMove(0, 0, x, y);
             MOVES a = Moves::rook(RED, board, x, y);
-            MOVES b = Moves::rook_new(RED, board, x, y);
+            MOVES b = Moves::rook_old(RED, board, x, y);
             if (a.size() != b.size())
             {
                 throw;
@@ -45,7 +45,7 @@ void testCannon()
             if (x == 0 && y == 0) continue;
             auto e = board.doMove(0, 0, x, y);
             MOVES a = Moves::cannon(RED, board, x, y);
-            MOVES b = Moves::cannon_new(RED, board, x, y);
+            MOVES b = Moves::cannon_old(RED, board, x, y);
             auto func = [](Move a, Move b)->bool { return a.id > b.id; };
             std::sort(a.begin(), a.end(), func);
             std::sort(b.begin(), b.end(), func);
