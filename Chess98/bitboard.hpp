@@ -98,16 +98,13 @@ public:
     /// @param index
     /// @param endpos
     /// @return
-    REGION_CANNON getCannonReigon(BITLINE bitline, int index, int endpos)
+    REGION_CANNON getCannonRegion(BITLINE bitline, int index, int endpos)
     {
         REGION_CANNON result = this->cannonCache[bitline][index];
         if (endpos == 8)
             return result;
         if (result[2] == 8 && this->getBit(bitline, 9) == 0)
             result[2] = result[3] = 9;
-        if (result[3] == 8 && this->getBit(bitline, 9) == 1)
-            result[3] = 9;
-        if (index == 8) result[2] = result[3] = 9;
         return result;
     }
 
@@ -180,8 +177,8 @@ private:
         {
             if (this->getBit(bitline, pos) != 0)
             {
-                beg = pos;
-                eaten1 = pos;
+                beg = pos + 1;
+                eaten1 = pos + 1;
                 for (int pos2 = pos - 1; pos2 >= 0; pos2--)
                 {
                     if (this->getBit(bitline, pos2) != 0)
@@ -197,9 +194,9 @@ private:
         {
             if (this->getBit(bitline, pos) != 0)
             {
-                end = pos;
-                eaten2 = pos;
-                for (int pos2 = pos + 1; pos2 <= 8; pos2++)
+                end = pos - 1;
+                eaten2 = pos - 1;
+                for (int pos2 = pos + 1; pos2 <= 9; pos2++)
                 {
                     if (this->getBit(bitline, pos2) != 0)
                     {

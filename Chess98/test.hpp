@@ -9,8 +9,8 @@ void testCannon();
 
 void test(TEAM team = BLACK, int maxDepth = 16)
 {
-    testRook();
-    //testWithUI(team, maxDepth);
+    //testCannon();
+    testWithUI(team, maxDepth);
 }
 
 void testRook()
@@ -27,7 +27,31 @@ void testRook()
             MOVES b = Moves::rook_new(RED, board, x, y);
             if (a.size() != b.size())
             {
-                system("pause");
+                throw;
+            }
+            board.undoMove(0, 0, x, y, e);
+        }
+    }
+}
+
+void testCannon()
+{
+    Board board = Board(DEFAULT_MAP, RED);
+    board.print();
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            if (x == 0 && y == 0) continue;
+            auto e = board.doMove(0, 0, x, y);
+            MOVES a = Moves::cannon(RED, board, x, y);
+            MOVES b = Moves::cannon_new(RED, board, x, y);
+            auto func = [](Move a, Move b)->bool { return a.id > b.id; };
+            std::sort(a.begin(), a.end(), func);
+            std::sort(b.begin(), b.end(), func);
+            if (a != b)
+            {
+                throw;
             }
             board.undoMove(0, 0, x, y, e);
         }
