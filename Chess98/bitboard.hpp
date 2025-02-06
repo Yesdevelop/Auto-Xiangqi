@@ -6,8 +6,8 @@ using BITARRAY_X = std::array<BITLINE, 9>;
 using BITARRAY_Y = std::array<BITLINE, 10>;
 using REGION_ROOK = std::array<int, 2>;
 using REGION_CANNON = std::array<int, 4>;
-using TYPE_ROOK_CACHE = std::map<BITLINE, std::map<int, REGION_ROOK>>;
-using TYPE_CANNON_CACHE = std::map<BITLINE, std::map<int, REGION_CANNON>>;
+using TYPE_ROOK_CACHE = std::array<std::array<REGION_ROOK, 10>, 1024>;
+using TYPE_CANNON_CACHE = std::array<std::array<REGION_CANNON, 10>, 1024>;
 
 // 炮的四个值分别对应eaten1, start, end, eaten2，若没有eaten则eaten = 端点
 
@@ -71,7 +71,7 @@ public:
     /// @param bitline
     /// @param index
     /// @return
-    int getBit(BITLINE bitline, int index)
+    int getBit(BITLINE bitline, int index) const
     {
         return (bitline >> index) & 1;
     }
@@ -138,7 +138,7 @@ private:
     /// @param index 车的所在位置
     /// @param end 截止点，接受8或9
     /// @return
-    REGION_ROOK generateRookRegion(BITLINE bitline, int index)
+    REGION_ROOK generateRookRegion(BITLINE bitline, int index) const
     {
         int beg = 0;
         int end = 8;
@@ -167,7 +167,7 @@ private:
     /// @param index 炮的所在位置
     /// @param end 截止点，接受9或10
     /// @return
-    REGION_CANNON generateCannonRegion(BITLINE bitline, int index)
+    REGION_CANNON generateCannonRegion(BITLINE bitline, int index) const
     {
         int eaten1 = 0;
         int beg = 0;

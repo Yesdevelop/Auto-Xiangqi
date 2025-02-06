@@ -6,13 +6,34 @@ void testWithUI(TEAM team, int maxDepth);
 void checkingTest();
 void testRook();
 void testCannon();
+void performanceTest();
 
 void test(TEAM team = BLACK, int maxDepth = 16)
 {
     //testCannon();
-    testWithUI(team, maxDepth);
+    //testWithUI(team, maxDepth);
+    performanceTest();
 }
 
+void performanceTest()
+{
+    Board board = Board(DEFAULT_MAP, RED);
+    auto a = clock();
+    for (int i = 0; i < 5000; i++)
+    {
+        for (int x = 0; x < 9; x++)
+        {
+            for (int y = 0; y < 10; y++)
+            {
+                if (x == 0 && y == 0) continue;
+                auto e = board.doMove(0, 0, x, y);
+                MOVES a = Moves::rook(RED, board, x, y);
+                board.undoMove(0, 0, x, y, e);
+            }
+        }
+    }
+    std::cout << clock() - a << std::endl;
+}
 void testRook()
 {
     Board board = Board(DEFAULT_MAP, RED);
@@ -105,7 +126,7 @@ void testWithUI(TEAM team = RED, int maxDepth = 16)
     {
         if (board.team == team)
         {
-            Node node = s.searchMain(board, maxDepth, 3);
+            Node node = s.searchMain(board, maxDepth, 4);
             board.doMove(node.move);
             setBoardCode(board);
             MOVES _ = Moves::getMoves(board);
