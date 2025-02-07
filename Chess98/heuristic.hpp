@@ -57,7 +57,7 @@ void HistoryHeuristic::sort(MOVES &moves)
 {
     for (Move &move : moves)
     {
-        if (move.moveType <= killer)
+        if (move.moveType <= history)
         {
             int pos1 = toIndex(move.x1, move.y1);
             int pos2 = toIndex(move.x2, move.y2);
@@ -79,6 +79,10 @@ void HistoryHeuristic::add(Move move, int depth)
 }
 
 /* ***** 吃子启发 ***** */
+
+/// @brief 根据MVV和LVA分排序
+/// @param board
+/// @param moves
 void captureHeuristic(Board &board, MOVES &moves)
 {
     const std::map<PIECEID, int> weightPairs{
