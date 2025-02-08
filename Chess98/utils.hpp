@@ -1,5 +1,5 @@
 #pragma once
-#include "board.hpp"
+#include "moves.hpp"
 
 /// @brief 判断当前一方是否被将军
 /// @param board
@@ -7,6 +7,9 @@
 bool inCheck(Board &board)
 {
     Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
+    int x = king->x;
+    int y = king->y;
+    int team = king->getTeam();
 
     // 判断敌方的兵是否在附近
     bool c1 = abs(board.pieceidOn(king->x + 1, king->y)) == R_PAWN;
@@ -62,652 +65,159 @@ bool inCheck(Board &board)
     }
 
     // 白脸将、车、炮
-    bool barrierDetected = false;
-    for (int x = king->x + 1; x < 9; x++)
-    {
-        PIECEID pieceid = board.pieceidOn(x, king->y);
-        TEAM team = board.teamOn(x, king->y);
-        if (abs(pieceid) == R_ROOK &&
-            team != board.team &&
-            barrierDetected == false)
-        {
-            return true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != board.team &&
-                 barrierDetected == true)
-        {
-            return true;
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int x = king->x - 1; x >= 0; x--)
-    {
-        PIECEID pieceid = board.pieceidOn(x, king->y);
-        TEAM team = board.teamOn(x, king->y);
-        if (abs(pieceid) == R_ROOK &&
-            team != board.team &&
-            barrierDetected == false)
-        {
-            return true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != board.team &&
-                 barrierDetected == true)
-        {
-            return true;
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    if (board.team == RED)
-    {
-        for (int y = king->y + 1; y < 10; y++)
-        {
-            PIECEID pieceid = board.pieceidOn(king->x, y);
-            TEAM team = board.teamOn(king->x, y);
-            if ((abs(pieceid) == R_ROOK ||
-                 abs(pieceid) == R_KING) &&
-                team != board.team &&
-                barrierDetected == false)
-            {
-                return true;
-            }
-            else if (abs(pieceid) == R_CANNON &&
-                     team != board.team &&
-                     barrierDetected == true)
-            {
-                return true;
-            }
-            else if (pieceid != 0)
-            {
-                if (barrierDetected == false)
-                {
-                    barrierDetected = true;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        for (int y = king->y - 1; y >= 0; y--)
-        {
-            PIECEID pieceid = board.pieceidOn(king->x, y);
-            TEAM team = board.teamOn(king->x, y);
-            if ((abs(pieceid) == R_ROOK ||
-                 abs(pieceid) == R_KING) &&
-                team != board.team &&
-                barrierDetected == false)
-            {
-                return true;
-            }
-            else if (abs(pieceid) == R_CANNON &&
-                     team != board.team &&
-                     barrierDetected == true)
-            {
-                return true;
-            }
-            else if (pieceid != 0)
-            {
-                if (barrierDetected == false)
-                {
-                    barrierDetected = true;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-    }
+    // 横向着法
+    BITLINE bitlineY = board.getBitLineY(king->y);
+    REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, king->x, 8);
+    if ((abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[1] - 1, y)) == R_KING) &&
+        board.teamOn(regionY[1] - 1, y) != king->getTeam())
+        return true;
+    if ((abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[2] + 1, y)) == R_KING) &&
+        board.teamOn(regionY[2] + 1, y) != king->getTeam())
+        return true;
+    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != king->getTeam())
+        return true;
+    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != king->getTeam())
+        return true;
+
+    // 纵向着法
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
+    if ((abs(board.pieceidOn(x, regionX[1] - 1)) == R_ROOK || abs(board.pieceidOn(x, regionX[1] - 1)) == R_KING) &&
+        board.teamOn(x, regionX[1] - 1) != team)
+        return true;
+    if ((abs(board.pieceidOn(x, regionX[2] + 1)) == R_ROOK || abs(board.pieceidOn(x, regionX[2] + 1)) == R_KING) &&
+        board.teamOn(x, regionX[2] + 1) != team)
+        return true;
+    if (abs(board.pieceidOn(x, regionX[0])) == R_CANNON && board.teamOn(x, regionX[0]) != team)
+        return true;
+    if (abs(board.pieceidOn(x, regionX[3])) == R_CANNON && board.teamOn(x, regionX[3]) != team)
+        return true;
+
     return false;
-}
-
-/// @brief 棋子关系函数 获取一个棋子被哪些棋子攻击（不获取将帅的情况）
-/// @param board
-/// @param piece
-/// @return
-std::vector<Piece> relationship_beAttacked(Board &board, Piece piece)
-{
-    std::vector<Piece> selected{};
-
-    // 兵、将
-    if ((abs(board.pieceidOn(piece.x + 1, piece.y)) == R_PAWN ||
-         abs(board.pieceidOn(piece.x + 1, piece.y) == R_KING)) &&
-        board.teamOn(piece.x + 1, piece.y) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x + 1, piece.y));
-    }
-    if ((abs(board.pieceidOn(piece.x - 1, piece.y)) == R_PAWN ||
-         abs(board.pieceidOn(piece.x - 1, piece.y) == R_KING)) &&
-        board.teamOn(piece.x - 1, piece.y) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x - 1, piece.y));
-    }
-    if (abs(board.pieceidOn(piece.x, (piece.getTeam() == RED) ? piece.y - 1 : piece.y + 1)) == R_PAWN &&
-        board.teamOn(piece.x, (piece.getTeam() == RED) ? piece.y - 1 : piece.y + 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x, (piece.getTeam() == RED) ? piece.y - 1 : piece.y + 1));
-    }
-    if (abs(board.pieceidOn(piece.x, piece.y + 1)) == R_KING && board.teamOn(piece.x, piece.y + 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x, piece.y + 1));
-    }
-    if (abs(board.pieceidOn(piece.x, piece.y - 1)) == R_KING && board.teamOn(piece.x, piece.y - 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x, piece.y - 1));
-    }
-
-    // 马
-    Piece knight1{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight2{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight3{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight4{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight5{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight6{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight7{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight8{OVERFLOW_PIECEID, -1, -1, -1};
-    if (board.pieceidOn(piece.x + 1, piece.y) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x + 2, piece.y + 1)) == R_KNIGHT &&
-            board.teamOn(piece.x + 2, piece.y + 1) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x + 2, piece.y + 1));
-        }
-        if (abs(board.pieceidOn(piece.x + 2, piece.y - 1)) == R_KNIGHT &&
-            board.teamOn(piece.x + 2, piece.y - 1) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x + 2, piece.y - 1));
-        }
-    }
-    if (board.pieceidOn(piece.x - 1, piece.y) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x - 2, piece.y + 1)) == R_KNIGHT &&
-            board.teamOn(piece.x - 2, piece.y + 1) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x - 2, piece.y + 1));
-        }
-        if (abs(board.pieceidOn(piece.x - 2, piece.y - 1)) == R_KNIGHT &&
-            board.teamOn(piece.x - 2, piece.y - 1) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x - 2, piece.y - 1));
-        }
-    }
-    if (board.pieceidOn(piece.x, piece.y + 1) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x + 1, piece.y + 2)) == R_KNIGHT &&
-            board.teamOn(piece.x + 1, piece.y + 2) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x + 1, piece.y + 2));
-        }
-        if (abs(board.pieceidOn(piece.x - 1, piece.y + 2)) == R_KNIGHT &&
-            board.teamOn(piece.x - 1, piece.y + 2) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x - 1, piece.y + 2));
-        }
-    }
-    if (board.pieceidOn(piece.x, piece.y - 1) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x + 1, piece.y - 2)) == R_KNIGHT &&
-            board.teamOn(piece.x + 1, piece.y - 2) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x + 1, piece.y - 2));
-        }
-        if (abs(board.pieceidOn(piece.x - 1, piece.y - 2)) == R_KNIGHT &&
-            board.teamOn(piece.x - 1, piece.y - 2) != piece.getTeam())
-        {
-            selected.emplace_back(board.piecePosition(piece.x - 1, piece.y - 2));
-        }
-    }
-
-    // 士、象
-    if (board.pieceidOn(piece.x + 1, piece.y + 1) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x + 2, piece.y + 2)) == R_BISHOP &&
-            board.teamOn(piece.x + 2, piece.y + 2) != piece.getTeam())
-            selected.emplace_back(board.piecePosition(piece.x + 2, piece.y + 2));
-    }
-    if (board.pieceidOn(piece.x - 1, piece.y + 1) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x - 2, piece.y + 2)) == R_BISHOP &&
-            board.teamOn(piece.x - 2, piece.y + 2) != piece.getTeam())
-            selected.emplace_back(board.piecePosition(piece.x - 2, piece.y + 2));
-    }
-    if (board.pieceidOn(piece.x + 1, piece.y - 1) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x + 2, piece.y - 2)) == R_BISHOP &&
-            board.teamOn(piece.x + 2, piece.y - 2) != piece.getTeam())
-            selected.emplace_back(board.piecePosition(piece.x + 2, piece.y - 2));
-    }
-    if (board.pieceidOn(piece.x - 1, piece.y - 1) == 0)
-    {
-        if (abs(board.pieceidOn(piece.x - 2, piece.y - 2)) == R_BISHOP &&
-            board.teamOn(piece.x - 2, piece.y - 2) != piece.getTeam())
-            selected.emplace_back(board.piecePosition(piece.x - 2, piece.y - 2));
-    }
-
-    if (abs(board.pieceidOn(piece.x + 1, piece.y + 1)) == R_GUARD &&
-        board.teamOn(piece.x + 1, piece.y + 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x + 1, piece.y + 1));
-    }
-    if (abs(board.pieceidOn(piece.x - 1, piece.y + 1)) == R_GUARD &&
-        board.teamOn(piece.x - 1, piece.y + 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x - 1, piece.y + 1));
-    }
-    if (abs(board.pieceidOn(piece.x + 1, piece.y - 1)) == R_GUARD &&
-        board.teamOn(piece.x + 1, piece.y - 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x + 1, piece.y - 1));
-    }
-    if (abs(board.pieceidOn(piece.x - 1, piece.y - 1)) == R_GUARD &&
-        board.teamOn(piece.x - 1, piece.y - 1) != piece.getTeam())
-    {
-        selected.emplace_back(board.piecePosition(piece.x - 1, piece.y - 1));
-    }
-
-    // 车、炮
-    Piece rook1{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece rook2{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece rook3{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece rook4{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon1{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon2{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon3{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon4{OVERFLOW_PIECEID, -1, -1, -1};
-    bool barrierDetected = false;
-    for (int x = piece.x + 1; x < 9; x++)
-    {
-        PIECEID pieceid = board.pieceidOn(x, piece.y);
-        TEAM team = board.teamOn(x, piece.y);
-        if (abs(pieceid) == R_ROOK &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            selected.emplace_back(board.piecePosition(x, piece.y));
-            barrierDetected = true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            selected.emplace_back(board.piecePosition(x, piece.y));
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int x = piece.x - 1; x >= 0; x--)
-    {
-        PIECEID pieceid = board.pieceidOn(x, piece.y);
-        TEAM team = board.teamOn(x, piece.y);
-        if (abs(pieceid) == R_ROOK &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            selected.emplace_back(board.piecePosition(x, piece.y));
-            barrierDetected = true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            selected.emplace_back(board.piecePosition(x, piece.y));
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int y = piece.y + 1; y < 10; y++)
-    {
-        PIECEID pieceid = board.pieceidOn(piece.x, y);
-        TEAM team = board.teamOn(piece.x, y);
-        if (abs(pieceid) == R_ROOK &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            selected.emplace_back(board.piecePosition(piece.x, y));
-            barrierDetected = true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            selected.emplace_back(board.piecePosition(piece.x, y));
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int y = piece.y - 1; y >= 0; y--)
-    {
-        PIECEID pieceid = board.pieceidOn(piece.x, y);
-        TEAM team = board.teamOn(piece.x, y);
-        if ((abs(pieceid) == R_ROOK ||
-             abs(pieceid) == R_KING) &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            selected.emplace_back(board.piecePosition(piece.x, y));
-            barrierDetected = true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            selected.emplace_back(board.piecePosition(piece.x, y));
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-
-    // 筛选
-    std::vector<Piece> result{};
-    for (const Piece &piece : selected)
-    {
-        if (piece.pieceIndex != -1)
-        {
-            result.emplace_back(piece);
-        }
-    }
-    return result;
 }
 
 bool relationship_hasProtector(Board &board, int x, int y)
 {
-    Piece piece{-board.teamOn(x, y), x, y, -1};
-    std::vector<Piece> selected{};
+    TEAM team = -board.teamOn(x, y);
 
     // 兵、将
-    if ((abs(board.pieceidOn(piece.x + 1, piece.y)) == R_PAWN ||
-         abs(board.pieceidOn(piece.x + 1, piece.y) == R_KING)) &&
-        board.teamOn(piece.x + 1, piece.y) != piece.getTeam())
+    if ((abs(board.pieceidOn(x + 1, y)) == R_PAWN ||
+         abs(board.pieceidOn(x + 1, y) == R_KING)) &&
+        board.teamOn(x + 1, y) != team)
         return true;
-    if ((abs(board.pieceidOn(piece.x - 1, piece.y)) == R_PAWN ||
-         abs(board.pieceidOn(piece.x - 1, piece.y) == R_KING)) &&
-        board.teamOn(piece.x - 1, piece.y) != piece.getTeam())
+    if ((abs(board.pieceidOn(x - 1, y)) == R_PAWN ||
+         abs(board.pieceidOn(x - 1, y) == R_KING)) &&
+        board.teamOn(x - 1, y) != team)
         return true;
-    if (abs(board.pieceidOn(piece.x, (piece.getTeam() == RED) ? piece.y - 1 : piece.y + 1)) == R_PAWN &&
-        board.teamOn(piece.x, (piece.getTeam() == RED) ? piece.y - 1 : piece.y + 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x, (team == RED) ? y - 1 : y + 1)) == R_PAWN &&
+        board.teamOn(x, (team == RED) ? y - 1 : y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(piece.x, piece.y + 1)) == R_KING && board.teamOn(piece.x, piece.y + 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x, y + 1)) == R_KING && board.teamOn(x, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(piece.x, piece.y - 1)) == R_KING && board.teamOn(piece.x, piece.y - 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x, y - 1)) == R_KING && board.teamOn(x, y - 1) != team)
         return true;
 
     // 马
-    Piece knight1{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight2{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight3{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight4{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight5{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight6{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight7{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece knight8{OVERFLOW_PIECEID, -1, -1, -1};
-    if (board.pieceidOn(piece.x + 1, piece.y) == 0)
+    if (board.pieceidOn(x + 1, y) == 0)
     {
-        if (abs(board.pieceidOn(piece.x + 2, piece.y + 1)) == R_KNIGHT &&
-            board.teamOn(piece.x + 2, piece.y + 1) != piece.getTeam())
+        if (abs(board.pieceidOn(x + 2, y + 1)) == R_KNIGHT &&
+            board.teamOn(x + 2, y + 1) != team)
             return true;
-        if (abs(board.pieceidOn(piece.x + 2, piece.y - 1)) == R_KNIGHT &&
-            board.teamOn(piece.x + 2, piece.y - 1) != piece.getTeam())
+        if (abs(board.pieceidOn(x + 2, y - 1)) == R_KNIGHT &&
+            board.teamOn(x + 2, y - 1) != team)
             return true;
     }
-    if (board.pieceidOn(piece.x - 1, piece.y) == 0)
+    if (board.pieceidOn(x - 1, y) == 0)
     {
-        if (abs(board.pieceidOn(piece.x - 2, piece.y + 1)) == R_KNIGHT &&
-            board.teamOn(piece.x - 2, piece.y + 1) != piece.getTeam())
+        if (abs(board.pieceidOn(x - 2, y + 1)) == R_KNIGHT &&
+            board.teamOn(x - 2, y + 1) != team)
             return true;
-        if (abs(board.pieceidOn(piece.x - 2, piece.y - 1)) == R_KNIGHT &&
-            board.teamOn(piece.x - 2, piece.y - 1) != piece.getTeam())
+        if (abs(board.pieceidOn(x - 2, y - 1)) == R_KNIGHT &&
+            board.teamOn(x - 2, y - 1) != team)
             return true;
     }
-    if (board.pieceidOn(piece.x, piece.y + 1) == 0)
+    if (board.pieceidOn(x, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(piece.x + 1, piece.y + 2)) == R_KNIGHT &&
-            board.teamOn(piece.x + 1, piece.y + 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x + 1, y + 2)) == R_KNIGHT &&
+            board.teamOn(x + 1, y + 2) != team)
             return true;
-        if (abs(board.pieceidOn(piece.x - 1, piece.y + 2)) == R_KNIGHT &&
-            board.teamOn(piece.x - 1, piece.y + 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x - 1, y + 2)) == R_KNIGHT &&
+            board.teamOn(x - 1, y + 2) != team)
             return true;
     }
-    if (board.pieceidOn(piece.x, piece.y - 1) == 0)
+    if (board.pieceidOn(x, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(piece.x + 1, piece.y - 2)) == R_KNIGHT &&
-            board.teamOn(piece.x + 1, piece.y - 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x + 1, y - 2)) == R_KNIGHT &&
+            board.teamOn(x + 1, y - 2) != team)
             return true;
-        if (abs(board.pieceidOn(piece.x - 1, piece.y - 2)) == R_KNIGHT &&
-            board.teamOn(piece.x - 1, piece.y - 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x - 1, y - 2)) == R_KNIGHT &&
+            board.teamOn(x - 1, y - 2) != team)
             return true;
     }
 
     // 士、象
-    if (board.pieceidOn(piece.x + 1, piece.y + 1) == 0)
+    if (board.pieceidOn(x + 1, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(piece.x + 2, piece.y + 2)) == R_BISHOP &&
-            board.teamOn(piece.x + 2, piece.y + 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x + 2, y + 2)) == R_BISHOP &&
+            board.teamOn(x + 2, y + 2) != team)
             return true;
     }
-    if (board.pieceidOn(piece.x - 1, piece.y + 1) == 0)
+    if (board.pieceidOn(x - 1, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(piece.x - 2, piece.y + 2)) == R_BISHOP &&
-            board.teamOn(piece.x - 2, piece.y + 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x - 2, y + 2)) == R_BISHOP &&
+            board.teamOn(x - 2, y + 2) != team)
             return true;
     }
-    if (board.pieceidOn(piece.x + 1, piece.y - 1) == 0)
+    if (board.pieceidOn(x + 1, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(piece.x + 2, piece.y - 2)) == R_BISHOP &&
-            board.teamOn(piece.x + 2, piece.y - 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x + 2, y - 2)) == R_BISHOP &&
+            board.teamOn(x + 2, y - 2) != team)
             return true;
     }
-    if (board.pieceidOn(piece.x - 1, piece.y - 1) == 0)
+    if (board.pieceidOn(x - 1, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(piece.x - 2, piece.y - 2)) == R_BISHOP &&
-            board.teamOn(piece.x - 2, piece.y - 2) != piece.getTeam())
+        if (abs(board.pieceidOn(x - 2, y - 2)) == R_BISHOP &&
+            board.teamOn(x - 2, y - 2) != team)
             return true;
     }
 
-    if (abs(board.pieceidOn(piece.x + 1, piece.y + 1)) == R_GUARD &&
-        board.teamOn(piece.x + 1, piece.y + 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x + 1, y + 1)) == R_GUARD &&
+        board.teamOn(x + 1, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(piece.x - 1, piece.y + 1)) == R_GUARD &&
-        board.teamOn(piece.x - 1, piece.y + 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x - 1, y + 1)) == R_GUARD &&
+        board.teamOn(x - 1, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(piece.x + 1, piece.y - 1)) == R_GUARD &&
-        board.teamOn(piece.x + 1, piece.y - 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x + 1, y - 1)) == R_GUARD &&
+        board.teamOn(x + 1, y - 1) != team)
         return true;
-    if (abs(board.pieceidOn(piece.x - 1, piece.y - 1)) == R_GUARD &&
-        board.teamOn(piece.x - 1, piece.y - 1) != piece.getTeam())
+    if (abs(board.pieceidOn(x - 1, y - 1)) == R_GUARD &&
+        board.teamOn(x - 1, y - 1) != team)
         return true;
 
     // 车、炮
-    Piece rook1{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece rook2{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece rook3{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece rook4{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon1{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon2{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon3{OVERFLOW_PIECEID, -1, -1, -1};
-    Piece cannon4{OVERFLOW_PIECEID, -1, -1, -1};
-    bool barrierDetected = false;
-    for (int x = piece.x + 1; x < 9; x++)
-    {
-        PIECEID pieceid = board.pieceidOn(x, piece.y);
-        TEAM team = board.teamOn(x, piece.y);
-        if (abs(pieceid) == R_ROOK &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            return true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            return true;
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int x = piece.x - 1; x >= 0; x--)
-    {
-        PIECEID pieceid = board.pieceidOn(x, piece.y);
-        TEAM team = board.teamOn(x, piece.y);
-        if (abs(pieceid) == R_ROOK &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            return true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            return true;
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int y = piece.y + 1; y < 10; y++)
-    {
-        PIECEID pieceid = board.pieceidOn(piece.x, y);
-        TEAM team = board.teamOn(piece.x, y);
-        if (abs(pieceid) == R_ROOK &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            return true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            return true;
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    barrierDetected = false;
-    for (int y = piece.y - 1; y >= 0; y--)
-    {
-        PIECEID pieceid = board.pieceidOn(piece.x, y);
-        TEAM team = board.teamOn(piece.x, y);
-        if ((abs(pieceid) == R_ROOK ||
-             abs(pieceid) == R_KING) &&
-            team != piece.getTeam() &&
-            barrierDetected == false)
-        {
-            return true;
-        }
-        else if (abs(pieceid) == R_CANNON &&
-                 team != piece.getTeam() &&
-                 barrierDetected == true)
-        {
-            return true;
-        }
-        else if (pieceid != 0)
-        {
-            if (barrierDetected == false)
-            {
-                barrierDetected = true;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
+    // 思路就是假装自己是车炮在攻击其它子，如果被攻击的子是对面车/炮就说明自己在被攻击
+    BITLINE bitlineY = board.getBitLineY(y);
+    REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
+    if (abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK && board.teamOn(regionY[1] - 1, y) != team)
+        return true;
+    if (abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK && board.teamOn(regionY[2] + 1, y) != team)
+        return true;
+    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != team)
+        return true;
+    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != team)
+        return true;
+
+    // 纵向着法
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
+    if (abs(board.pieceidOn(x, regionX[1] - 1)) == R_ROOK && board.teamOn(x, regionX[1] - 1) != team)
+        return true;
+    if (abs(board.pieceidOn(x, regionX[2] + 1)) == R_ROOK && board.teamOn(x, regionX[2] + 1) != team)
+        return true;
+    if (abs(board.pieceidOn(x, regionX[0])) == R_CANNON && board.teamOn(x, regionX[0]) != team)
+        return true;
+    if (abs(board.pieceidOn(x, regionX[3])) == R_CANNON && board.teamOn(x, regionX[3]) != team)
+        return true;
 
     return false;
 }
