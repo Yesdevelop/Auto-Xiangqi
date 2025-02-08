@@ -83,8 +83,6 @@ const BOARD_CODE jsServerCode =
         response.setHeader('Access-Control-Allow-Origin', '*');\n\
         response.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PATCH, OPTIONS');\n\
         response.setHeader('Access-Control-Allow-Headers', 'Content-Type');\n\
-        console.log(method)\n\
-        console.log(url)\n\
         \n\
         if (method === 'GET' && url === '/boardcode') { // 界面端获取当前棋盘局势图\n\
             response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
