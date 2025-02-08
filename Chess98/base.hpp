@@ -9,7 +9,6 @@
 #include <cstring>
 #include <array>
 #include <map>
-#include <unordered_map>
 
 using PIECE_INDEX = int;
 using U64 = unsigned long long;

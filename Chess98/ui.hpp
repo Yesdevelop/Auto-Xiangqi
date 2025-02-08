@@ -146,7 +146,7 @@ void serverInit(Board board)
     {
         fprintf(file, jsServerCode.c_str());
         std::fclose(file);
-        system("start node _server_.js");
+        system("start /min node _server_.js");
         Sleep(700);
         setBoardCode(board);
     }

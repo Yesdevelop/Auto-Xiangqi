@@ -28,12 +28,12 @@ void performanceTest()
                 if (x == 0 && y == 0) continue;
                 auto e = board.doMove(0, 0, x, y);
                 MOVES a = Moves::rook(RED, board, x, y);
-                
+
                 board.undoMove(0, 0, x, y, e);
             }
         }
     }
-    auto b = clock(); 
+    auto b = clock();
     for (int i = 0; i < 5000; i++)
     {
         for (int x = 0; x < 9; x++)
@@ -51,6 +51,7 @@ void performanceTest()
     std::cout << b - a << std::endl;
     std::cout << clock() - b << std::endl;
 }
+
 void testRook()
 {
     Board board = Board(DEFAULT_MAP, RED);
