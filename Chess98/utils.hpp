@@ -1,5 +1,5 @@
 #pragma once
-#include "moves.hpp"
+#include "board.hpp"
 
 /// @brief 判断当前一方是否被将军
 /// @param board
