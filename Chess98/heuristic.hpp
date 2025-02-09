@@ -128,7 +128,6 @@ struct tItem
     int vl = 0;
     int depth = 0;
     int32 hashLock = 0;
-    bool risky = false;
 };
 
 class tt
@@ -138,7 +137,7 @@ public:
     void init(int hashLevel = 16);
     bool initDone();
     void reset();
-    void add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth, bool risky);
+    void add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth);
     void get(int32 hashKey, int32 hashLock, int &vl, int vlApha, int vlBeta, int depth, int nDistance);
     int vlAdjust(int vl, int nDistance);
 
@@ -196,7 +195,7 @@ int tt::vlAdjust(int vl, int nDistance)
     return vl;
 }
 
-void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth, bool risky)
+void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth)
 {
     int pos = hashKey & this->hashMask;
     tItem &t = this->pList[pos];
@@ -206,20 +205,13 @@ void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth, bo
         t.vl = vl;
         t.hashLock = hashLock;
         t.type = type;
-        t.risky = risky;
     }
     else if (depth >= t.depth)
     {
-        // 避免向前裁剪覆盖正常的搜索结果
-        bool riskyCoverage = (!t.risky && risky);
-        if (!riskyCoverage)
-        {
-            t.depth = depth;
-            t.vl = vl;
-            t.hashLock = hashLock;
-            t.type = type;
-            t.risky = risky;
-        }
+        t.depth = depth;
+        t.vl = vl;
+        t.hashLock = hashLock;
+        t.type = type;
     }
 }
 
@@ -231,7 +223,7 @@ void tt::get(int32 hashKey, int32 hashLock, int &vl, int vlApha, int vlBeta, int
     {
         if (t.type == exactType)
         {
-            vl = this->vlAdjust(vl, nDistance);
+            vl = this->vlAdjust(t.vl, nDistance);
         }
         else if (t.type == alphaType && t.vl <= vlApha)
         {
