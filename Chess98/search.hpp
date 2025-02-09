@@ -249,8 +249,15 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         
         bestNode = searchRoot(board, depth);
 
-        if (clock() - start >= maxTime * 1000 / 3)
+        
+        if (std::abs(bestNode.score) >= BAN) 
         {
+            //found killing chess
+            break;
+        }
+        else if (clock() - start >= maxTime * 1000 / 3)
+        {
+            //iteration timeout
             break;
         }
     }
