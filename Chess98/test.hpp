@@ -3,95 +3,10 @@
 #include "ui.hpp"
 
 void testWithUI(TEAM team, int maxDepth);
-void checkingTest();
-void testRook();
-void testCannon();
-void performanceTest();
 
 void test(TEAM team = BLACK, int maxDepth = 16)
 {
-    //testRook();
     testWithUI(team, maxDepth);
-    performanceTest();
-}
-
-void performanceTest()
-{
-    Board board = Board(DEFAULT_MAP, RED);
-    auto a = clock();
-    for (int i = 0; i < 5000; i++)
-    {
-        for (int x = 0; x < 9; x++)
-        {
-            for (int y = 0; y < 10; y++)
-            {
-                if (x == 0 && y == 0) continue;
-                auto e = board.doMove(0, 0, x, y);
-                MOVES a = Moves::rook(RED, board, x, y);
-
-                board.undoMove(0, 0, x, y, e);
-            }
-        }
-    }
-    auto b = clock();
-    for (int i = 0; i < 5000; i++)
-    {
-        for (int x = 0; x < 9; x++)
-        {
-            for (int y = 0; y < 10; y++)
-            {
-                if (x == 0 && y == 0) continue;
-                auto e = board.doMove(0, 0, x, y);
-                MOVES a = Moves::rook_old(RED, board, x, y);
-
-                board.undoMove(0, 0, x, y, e);
-            }
-        }
-    }
-    std::cout << b - a << std::endl;
-    std::cout << clock() - b << std::endl;
-}
-
-void testRook()
-{
-    Board board = Board(DEFAULT_MAP, RED);
-    board.print();
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            if (x == 0 && y == 0) continue;
-            auto e = board.doMove(0, 0, x, y);
-            MOVES a = Moves::rook(RED, board, x, y);
-            MOVES b = Moves::rook_old(RED, board, x, y);
-            if (a != b)
-            {
-                throw;
-            }
-            board.undoMove(0, 0, x, y, e);
-        }
-    }
-}
-
-void testCannon()
-{
-    Board board = Board(DEFAULT_MAP, RED);
-    board.print();
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            if (x == 0 && y == 0) continue;
-            auto e = board.doMove(0, 0, x, y);
-            MOVES a = Moves::cannon(RED, board, x, y);
-            MOVES b = Moves::cannon_old(RED, board, x, y);
-            if (a != b)
-            {
-                throw;
-            }
-            board.undoMove(0, 0, x, y, e);
-        }
-    }
 }
 
 void testOpenBook()
@@ -105,24 +20,6 @@ void testOpenBook()
     Move bookMove = s.searchOpenBook(board);
 
     std::cout << (int)board.hashKey << " " << (int)board.hashLock << std::endl;
-}
-
-/// 测试将军检测函数
-void checkingTest()
-{
-    PIECEID_MAP MAP{
-        {{R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK},
-         {B_CANNON, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-         {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-         {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-         {R_KING, 0, 0, 0, R_CANNON, 0, 0, 0, 0, B_KING},
-         {R_GUARD, 0, 0, 0, 0, 0, 0, 0, 0, B_GUARD},
-         {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
-         {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
-         {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
-    Board board = Board(MAP, RED);
-    bool s = inCheck(board);
-    std::cout << s << std::endl;
 }
 
 /// 带UI的测试

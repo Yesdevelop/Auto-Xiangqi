@@ -33,7 +33,6 @@ public:
     static MOVES getGoodCaptures(Board &board);
 };
 
-/// @brief 生成将帅的着法
 MOVES Moves::king(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
@@ -67,7 +66,6 @@ MOVES Moves::king(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-/// @brief 生成士的着法
 MOVES Moves::guard(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
@@ -116,7 +114,6 @@ MOVES Moves::guard(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-/// @brief 生成象的着法
 MOVES Moves::bishop(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
@@ -136,43 +133,24 @@ MOVES Moves::bishop(TEAM team, Board &board, int x, int y)
     }
     else
     {
-        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) != team && y - 1 >= 5)
-            result.emplace_back(Move{x, y, x - 2, y - 2});
+        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && board.teamOn(x + 2, y + 2) != team)
+            result.emplace_back(Move{x, y, x + 2, y + 2});
         if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && board.teamOn(x + 2, y - 2) != team && y - 1 >= 5)
             result.emplace_back(Move{x, y, x + 2, y - 2});
         if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && board.teamOn(x - 2, y + 2) != team)
             result.emplace_back(Move{x, y, x - 2, y + 2});
-        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && board.teamOn(x + 2, y + 2) != team)
-            result.emplace_back(Move{x, y, x + 2, y + 2});
+        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) != team && y - 1 >= 5)
+            result.emplace_back(Move{x, y, x - 2, y - 2});
     }
 
     return result;
 }
 
-/// @brief 生成马的着法
 MOVES Moves::knight(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
     result.reserve(16);
 
-    if (board.teamOn(x - 1, y) == EMPTY_TEAM)
-    {
-        TEAM t1 = board.teamOn(x - 2, y + 1);
-        TEAM t2 = board.teamOn(x - 2, y - 1);
-        if (t1 != team && t1 != OVERFLOW_TEAM)
-            result.emplace_back(Move{x, y, x - 2, y + 1});
-        if (t2 != team && t2 != OVERFLOW_TEAM)
-            result.emplace_back(Move{x, y, x - 2, y - 1});
-    }
-    if (board.teamOn(x + 1, y) == EMPTY_TEAM)
-    {
-        TEAM t1 = board.teamOn(x + 2, y + 1);
-        TEAM t2 = board.teamOn(x + 2, y - 1);
-        if (t1 != team && t1 != OVERFLOW_TEAM)
-            result.emplace_back(Move{x, y, x + 2, y + 1});
-        if (t2 != team && t2 != OVERFLOW_TEAM)
-            result.emplace_back(Move{x, y, x + 2, y - 1});
-    }
     if (board.teamOn(x, y - 1) == EMPTY_TEAM)
     {
         TEAM t1 = board.teamOn(x - 1, y - 2);
@@ -191,79 +169,23 @@ MOVES Moves::knight(TEAM team, Board &board, int x, int y)
         if (t2 != team && t2 != OVERFLOW_TEAM)
             result.emplace_back(Move{x, y, x + 1, y + 2});
     }
-
-    return result;
-}
-
-/// @brief 生成车的着法
-MOVES Moves::rook_old(TEAM team, Board &board, int x, int y)
-{
-    MOVES result{};
-    result.reserve(64);
-
-    for (int _y = y + 1; _y <= 9; _y++)
+    if (board.teamOn(x - 1, y) == EMPTY_TEAM)
     {
-        if (board.teamOn(x, _y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-        }
-        else if (board.teamOn(x, _y) != team)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-            break;
-        }
-        else
-        {
-            break;
-        }
+        TEAM t1 = board.teamOn(x - 2, y + 1);
+        TEAM t2 = board.teamOn(x - 2, y - 1);
+        if (t1 != team && t1 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x - 2, y + 1});
+        if (t2 != team && t2 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x - 2, y - 1});
     }
-    for (int _y = y - 1; _y >= 0; _y--)
+    if (board.teamOn(x + 1, y) == EMPTY_TEAM)
     {
-        if (board.teamOn(x, _y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-        }
-        else if (board.teamOn(x, _y) != team)
-        {
-            result.emplace_back(Move{x, y, x, _y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (int _x = x + 1; _x <= 8; _x++)
-    {
-        if (board.teamOn(_x, y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-        else if (board.teamOn(_x, y) != team)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-            break;
-        }
-        else
-        {
-            break;
-        }
-    }
-    for (int _x = x - 1; _x >= 0; _x--)
-    {
-        if (board.teamOn(_x, y) == EMPTY_TEAM)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-        else if (board.teamOn(_x, y) != team)
-        {
-            result.emplace_back(Move{x, y, _x, y});
-            break;
-        }
-        else
-        {
-            break;
-        }
+        TEAM t1 = board.teamOn(x + 2, y + 1);
+        TEAM t2 = board.teamOn(x + 2, y - 1);
+        if (t1 != team && t1 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x + 2, y + 1});
+        if (t2 != team && t2 != OVERFLOW_TEAM)
+            result.emplace_back(Move{x, y, x + 2, y - 1});
     }
 
     return result;
@@ -301,124 +223,6 @@ MOVES Moves::rook(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-/// @brief 生成炮的着法
-MOVES Moves::cannon_old(TEAM team, Board &board, int x, int y)
-{
-    MOVES result{};
-    result.reserve(64);
-
-    for (int _x = x + 1; _x <= 8; _x++)
-    {
-        if (board.pieceidOn(_x, y) != EMPTY_PIECEID)
-        {
-            for (int _x2 = _x + 1; _x2 <= 8; _x2++)
-            {
-                if (board.teamOn(_x2, y) == EMPTY_PIECEID)
-                {
-                    continue;
-                }
-                else if (board.teamOn(_x2, y) != team)
-                {
-                    result.emplace_back(Move{x, y, _x2, y});
-                    break;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            break;
-        }
-        else
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-    }
-    for (int _x = x - 1; _x >= 0; _x--)
-    {
-        if (board.pieceidOn(_x, y) != EMPTY_PIECEID)
-        {
-            for (int _x2 = _x - 1; _x2 >= 0; _x2--)
-            {
-                if (board.teamOn(_x2, y) == EMPTY_PIECEID)
-                {
-                    continue;
-                }
-                else if (board.teamOn(_x2, y) != team)
-                {
-                    result.emplace_back(Move{x, y, _x2, y});
-                    break;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            break;
-        }
-        else
-        {
-            result.emplace_back(Move{x, y, _x, y});
-        }
-    }
-    for (int _y = y + 1; _y <= 9; _y++)
-    {
-        if (board.pieceidOn(x, _y) != EMPTY_PIECEID)
-        {
-            for (int _y2 = _y + 1; _y2 <= 9; _y2++)
-            {
-                if (board.teamOn(x, _y2) == EMPTY_PIECEID)
-                {
-                    continue;
-                }
-                else if (board.teamOn(x, _y2) != team)
-                {
-                    result.emplace_back(Move{x, y, x, _y2});
-                    break;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            break;
-        }
-        else
-        {
-            result.emplace_back(Move{x, y, x, _y});
-        }
-    }
-    for (int _y = y - 1; _y >= 0; _y--)
-    {
-        if (board.pieceidOn(x, _y) != EMPTY_PIECEID)
-        {
-            for (int _y2 = _y - 1; _y2 >= 0; _y2--)
-            {
-                if (board.teamOn(x, _y2) == EMPTY_PIECEID)
-                {
-                    continue;
-                }
-                else if (board.teamOn(x, _y2) != team)
-                {
-                    result.emplace_back(Move{x, y, x, _y2});
-                    break;
-                }
-                else
-                {
-                    break;
-                }
-            }
-            break;
-        }
-        else
-        {
-            result.emplace_back(Move{x, y, x, _y});
-        }
-    }
-
-    return result;
-}
-
 MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
@@ -451,7 +255,6 @@ MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-/// @brief 生成兵的着法
 MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
@@ -487,7 +290,6 @@ MOVES Moves::pawn(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-/// @brief 生成着法
 MOVES Moves::generateMoves(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);

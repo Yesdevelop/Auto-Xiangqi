@@ -99,7 +99,23 @@ public:
     }
 
     BitBoard* bitboard = nullptr;
-    
+
+    std::vector<PIECE_INDEX> redRooks{};
+    std::vector<PIECE_INDEX> redKnights{};
+    std::vector<PIECE_INDEX> redBishops{};
+    std::vector<PIECE_INDEX> redGuards{};
+    std::vector<PIECE_INDEX> redCannons{};
+    std::vector<PIECE_INDEX> redPawns{};
+
+    std::vector<PIECE_INDEX> blackRooks{};
+    std::vector<PIECE_INDEX> blackKnights{};
+    std::vector<PIECE_INDEX> blackBishops{};
+    std::vector<PIECE_INDEX> blackGuards{};
+    std::vector<PIECE_INDEX> blackCannons{};
+    std::vector<PIECE_INDEX> blackPawns{};
+
+    std::vector<Piece> getLivePieces(std::vector<PIECE_INDEX> pieceIndexes);
+
 private:
     // 棋盘相关
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
@@ -126,23 +142,40 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
             {
                 Piece piece{this->pieceidMap[x][y], x, y, (int)this->pieces.size()};
                 this->pieces.emplace_back(piece);
-                this->pieceIndexMap[x][y] = int(this->pieces.size()) - 1;
+                PIECE_INDEX index = int(this->pieces.size()) - 1;
+                this->pieceIndexMap[x][y] = index;
                 if (pieceid > 0)
-                {
-                    this->redPieces.emplace_back(int(this->pieces.size()) - 1);
-                }
+                    this->redPieces.emplace_back(index);
                 else
-                {
-                    this->blackPieces.emplace_back(int(this->pieces.size()) - 1);
-                }
+                    this->blackPieces.emplace_back(index);
                 if (pieceid == R_KING)
-                {
                     this->isRedKingLive = true;
-                }
                 if (pieceid == B_KING)
-                {
                     this->isBlackKingLive = true;
-                }
+                if (pieceid == R_ROOK)
+                    this->redRooks.emplace_back(index);
+                if (pieceid == B_ROOK)
+                    this->blackRooks.emplace_back(index);
+                if (pieceid == R_KNIGHT)
+                    this->redKnights.emplace_back(index);
+                if (pieceid == B_KNIGHT)
+                    this->blackKnights.emplace_back(index);
+                if (pieceid == R_BISHOP)
+                    this->redBishops.emplace_back(index);
+                if (pieceid == B_BISHOP)
+                    this->blackBishops.emplace_back(index);
+                if (pieceid == R_GUARD)
+                    this->redGuards.emplace_back(index);
+                if (pieceid == B_GUARD)
+                    this->blackGuards.emplace_back(index);
+                if (pieceid == R_CANNON)
+                    this->redCannons.emplace_back(index);
+                if (pieceid == B_CANNON)
+                    this->blackCannons.emplace_back(index);
+                if (pieceid == R_PAWN)
+                    this->redPawns.emplace_back(index);
+                if (pieceid == B_PAWN)
+                    this->blackPawns.emplace_back(index);
             }
             else
             {
@@ -635,6 +668,17 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
+}
+
+std::vector<Piece> Board::getLivePieces(std::vector<PIECE_INDEX> pieceIndexes)
+{
+    std::vector<Piece> result{};
+    for (const PIECE_INDEX i : pieceIndexes)
+    {
+        Piece piece = this->pieces[i];
+        if (piece.isLive) result.emplace_back(piece);
+    }
+    return result;
 }
 
 /// @brief 打印

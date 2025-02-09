@@ -96,6 +96,11 @@ bool inCheck(Board &board)
     return false;
 }
 
+/// @brief 是否被保护
+/// @param board
+/// @param x
+/// @param y
+/// @return
 bool relationship_hasProtector(Board &board, int x, int y)
 {
     TEAM team = -board.teamOn(x, y);
@@ -195,7 +200,6 @@ bool relationship_hasProtector(Board &board, int x, int y)
         return true;
 
     // 车、炮
-    // 思路就是假装自己是车炮在攻击其它子，如果被攻击的子是对面车/炮就说明自己在被攻击
     BITLINE bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     if (abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK && board.teamOn(regionY[1] - 1, y) != team)
