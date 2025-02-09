@@ -197,7 +197,7 @@ int tt::vlAdjust(int vl, int nDistance)
 
 void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth)
 {
-    int pos = hashKey & this->hashMask;
+    const int pos = static_cast<uint32_t>(hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList[pos];
     if (t.type == noneType)
     {
@@ -217,7 +217,7 @@ void tt::add(int32 hashKey, int32 hashLock, int vl, nodeType type, int depth)
 
 void tt::get(int32 hashKey, int32 hashLock, int &vl, int vlApha, int vlBeta, int depth, int nDistance)
 {
-    int pos = hashKey & this->hashMask;
+    const int pos = static_cast<uint32_t>(hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList[pos];
     if (t.type != noneType && t.hashLock == hashLock && t.depth >= depth)
     {
