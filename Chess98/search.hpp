@@ -92,7 +92,6 @@ public:
 
 /// @brief 搜索开局库
 /// @param board
-
 Move Search::searchOpenBook(Board &board)
 {
     BookStruct bk;
@@ -246,11 +245,11 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     while (depth <= maxDepth)
     {
         depth++;
-        
+
         bestNode = searchRoot(board, depth);
 
-        
-        if (std::abs(bestNode.score) >= BAN) 
+
+        if (std::abs(bestNode.score) >= BAN)
         {
             //found killing chess
             break;

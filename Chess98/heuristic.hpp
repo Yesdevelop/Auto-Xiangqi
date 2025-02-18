@@ -19,8 +19,8 @@ enum moveType
 class HistoryHeuristic
 {
 public:
-    void init();
-    void sort(MOVES &moves);
+    void init() const;
+    void sort(MOVES &moves) const;
     void add(Move move, int depth);
 
     static bool vlHisCompare(Move &first, Move &second)
@@ -32,7 +32,7 @@ public:
         return first.val > second.val;
     }
 
-    int historyTable[90][90];
+    mutable int historyTable[90][90];
 };
 
 /// @brief 二维坐标转索引
@@ -45,7 +45,7 @@ int toIndex(int x, int y)
 }
 
 /// @brief 初始化
-void HistoryHeuristic::init()
+void HistoryHeuristic::init() const
 {
     std::memset(this->historyTable, 0, sizeof(int) * 90 * 90);
 }
@@ -53,7 +53,7 @@ void HistoryHeuristic::init()
 /// @brief 历史表排序
 /// @param moves
 /// @return
-void HistoryHeuristic::sort(MOVES &moves)
+void HistoryHeuristic::sort(MOVES &moves) const
 {
     for (Move &move : moves)
     {
@@ -85,7 +85,7 @@ void HistoryHeuristic::add(Move move, int depth)
 /// @param moves
 void captureHeuristic(Board &board, MOVES &moves)
 {
-    const std::map<PIECEID, int> weightPairs{
+    /*const std::map<PIECEID, int> weightPairs{
         {R_KING, 31},
         {R_ROOK, 15},
         {R_CANNON, 7},
@@ -107,7 +107,7 @@ void captureHeuristic(Board &board, MOVES &moves)
                 move.val = weightPairs.at(captured) - weightPairs.at(attacker);
             }
         }
-    }
+    }*/
 }
 
 /* ***** 置换启发 ***** */
