@@ -9,6 +9,9 @@
     <script src="./vue.global.min.js"></script>
 
     <style>
+        body {
+            background-color: #333;
+        }
         #app {
             display: flex;
             flex-direction: column;
@@ -146,7 +149,7 @@
                             this.board = board
                         }
                     }
-                    http.open('GET', 'http://localhost:9494/boardcode', true)
+                    http.open('GET', 'http://localhost:9494/boardcode')
                     http.send()
                 },
 
