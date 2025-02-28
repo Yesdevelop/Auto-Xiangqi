@@ -32,6 +32,7 @@ void testWithUI(TEAM team = RED, int maxDepth = 16)
 
     Search s;
     s.searchInit(board);
+    system("cd ../ChessUI && index.html");
 
     std::string moveFileContent = "____";
     while (true)
