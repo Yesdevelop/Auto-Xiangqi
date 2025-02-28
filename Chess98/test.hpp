@@ -25,7 +25,7 @@ void testOpenBook()
 /// 带UI的测试
 void testWithUI(TEAM team = RED, int maxDepth = 16)
 {
-    Board board = Board(DEFAULT_MAP, team);
+    Board board = Board(DEFAULT_MAP, RED);
     board.print();
 
     serverInit(board);
@@ -33,7 +33,7 @@ void testWithUI(TEAM team = RED, int maxDepth = 16)
     Search s;
     s.searchInit(board);
 
-    std::string moveFileContent;
+    std::string moveFileContent = "____";
     while (true)
     {
         if (board.team == team)

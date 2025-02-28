@@ -2,7 +2,7 @@
 
 int main()
 {
-    test(RED, 16);
+    test(BLACK, 16);
 
     return 0;
 }

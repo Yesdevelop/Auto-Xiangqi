@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess98 - UI</title>
 
-    <script src="./vue.global.prod.min.js"></script>
+    <script src="./vue.global.min.js"></script>
 
     <style>
         #app {
@@ -26,7 +26,6 @@
 
         .row {
             display: flex;
-            flex-direction: column;
         }
 
         .square {
@@ -49,13 +48,14 @@
 <body>
     <div id="app">
         <div id="board">
-            <div class="row" v-for="row, x in board">
+            <div class="row" v-for="row, x in board" :style="{ flexDirection: playerTeam === 'r' ? 'column-reverse' : 'column' }">
                 <div class="square" v-for="pieceid, y in row" @click="pieceOnclick(x, y, pieceid)">
                     <div class="piece" v-if="pieceid !== 0" :style="{ backgroundImage: `url('./res/${pieceid}.png')` }">
                     </div>
                 </div>
             </div>
         </div>
+        <button @click="updatePlayerTeam">now team is: {{ playerTeam }}</button>
     </div>
 
     <script>
@@ -134,6 +134,10 @@
             },
 
             methods: {
+                updatePlayerTeam() {
+                    this.playerTeam = this.playerTeam == RED ? BLACK : RED
+                },
+
                 reloadBoardFromServer() {
                     const http = new XMLHttpRequest()
                     http.onreadystatechange = () => {
