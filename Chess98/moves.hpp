@@ -16,11 +16,7 @@ public:
 
     static MOVES rook(TEAM team, Board &board, int x, int y);
 
-    static MOVES rook_old(TEAM team, Board &board, int x, int y);
-
     static MOVES cannon(TEAM team, Board &board, int x, int y);
-
-    static MOVES cannon_old(TEAM team, Board &board, int x, int y);
 
     static MOVES pawn(TEAM team, Board &board, int x, int y);
 

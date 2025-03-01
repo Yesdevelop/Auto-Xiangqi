@@ -23,8 +23,9 @@ void testOpenBook()
 }
 
 /// 带UI的测试
-void testWithUI(TEAM team = RED, int maxDepth = 16)
+void testWithUI(TEAM team, int maxDepth)
 {
+    // PIECEID_MAP pieceidMap = *fenToPieceidMap("3akab2/9/4b1nr1/p5R1p/4p4/2Ncn1P2/PR2Nr2P/2C6/4A4/2B1KAB2 w - - 0 1");
     Board board = Board(DEFAULT_MAP, RED);
     board.print();
 
@@ -53,6 +54,7 @@ void testWithUI(TEAM team = RED, int maxDepth = 16)
                 fread(&buffer, 4, 1, file);
                 fclose(file);
                 moveFileContent = std::string(buffer).substr(0, 4);
+                board = Board(board.pieceidMap, board.team);
             }
             else
             {

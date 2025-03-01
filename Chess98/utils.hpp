@@ -244,3 +244,68 @@ bool isRiveredPawn(Board &board, int x, int y)
     }
     return false;
 }
+
+/// @brief 将fen转PIECEID_MAP
+/// @param fenCode
+/// @return
+PIECEID_MAP* fenToPieceidMap(std::string fenCode)
+{
+    PIECEID_MAP pieceidMap = PIECEID_MAP {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+    int colNum = 9;
+    int rowNum = 0;
+    for (int i = 0; i < fenCode.size(); i++)
+    {
+        if (fenCode[i] >= '1' && fenCode[i] <= '9')
+        {
+            rowNum += fenCode[i] - '0';
+            continue;
+        }
+        else if (fenCode[i] == 'R')
+            pieceidMap[rowNum][colNum] = R_ROOK;
+        else if (fenCode[i] == 'N' || fenCode[i] == 'H')
+            pieceidMap[rowNum][colNum] = R_KNIGHT;
+        else if (fenCode[i] == 'B' || fenCode[i] == 'E')
+            pieceidMap[rowNum][colNum] = R_BISHOP;
+        else if (fenCode[i] == 'G' || fenCode[i] == 'A')
+            pieceidMap[rowNum][colNum] = R_GUARD;
+        else if (fenCode[i] == 'K')
+            pieceidMap[rowNum][colNum] = R_KING;
+        else if (fenCode[i] == 'C')
+            pieceidMap[rowNum][colNum] = R_CANNON;
+        else if (fenCode[i] == 'P')
+            pieceidMap[rowNum][colNum] = R_PAWN;
+        else if (fenCode[i] == 'r')
+            pieceidMap[rowNum][colNum] = B_ROOK;
+        else if (fenCode[i] == 'n' || fenCode[i] == 'h')
+            pieceidMap[rowNum][colNum] = B_KNIGHT;
+        else if (fenCode[i] == 'b' || fenCode[i] == 'e')
+            pieceidMap[rowNum][colNum] = B_BISHOP;
+        else if (fenCode[i] == 'g' || fenCode[i] == 'a')
+            pieceidMap[rowNum][colNum] = B_GUARD;
+        else if (fenCode[i] == 'k')
+            pieceidMap[rowNum][colNum] = B_KING;
+        else if (fenCode[i] == 'c')
+            pieceidMap[rowNum][colNum] = B_CANNON;
+        else if (fenCode[i] == 'p')
+            pieceidMap[rowNum][colNum] = B_PAWN;
+        else if (fenCode[i] == '/')
+        {
+            rowNum = 0;
+            colNum--;
+            continue;
+        }
+        else if (fenCode[i] == ' ') break;
+        rowNum++;
+    }
+
+	PIECEID_MAP* pieceidMapPtr = new PIECEID_MAP(pieceidMap);
+    return pieceidMapPtr;
+}
