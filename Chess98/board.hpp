@@ -98,7 +98,7 @@ public:
         return this->bitboard->yBitBoard[y];
     }
 
-    BitBoard* bitboard = nullptr;
+    BitBoard *bitboard = nullptr;
 
 private:
     // 棋盘相关
@@ -160,7 +160,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
         }
     }
 
-    this->bitboard = new BitBoard{ this->pieceidMap };
+    this->bitboard = new BitBoard{this->pieceidMap};
 }
 
 /// @brief 通过索引号查找piece

@@ -66,45 +66,6 @@ PIECEID_MAP decode(BOARD_CODE code)
     return result;
 }
 
-const BOARD_CODE jsServerCode =
-    "\
-    const http = require('http');\n\
-    const fs = require('fs')\n\
-    \n\
-    let boardCode = 'null'\n\
-    let getBoardCode = () => boardCode\n\
-    \n\
-    let file = fs.openSync('./_move_.txt', 'w+')\n\
-    fs.writeFileSync(file, '____')\n\
-    fs.closeSync(file)\n\
-    \n\
-    http.createServer((request, response) => {\n\
-        const { method, url } = request\n\
-        response.setHeader('Access-Control-Allow-Origin', '*');\n\
-        response.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PATCH, OPTIONS');\n\
-        response.setHeader('Access-Control-Allow-Headers', 'Content-Type');\n\
-        \n\
-        if (method === 'GET' && url === '/boardcode') { // 界面端获取当前棋盘局势图\n\
-            response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
-            response.end(getBoardCode() + '\\n')\n\
-        }\n\
-        else if (method === 'PUT') { // 人机方面做出决策更改服务器棋盘局势图\n\
-            response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
-            response.end('successful\\n')\n\
-            boardCode = request.url.split('=')[1];\n\
-        }\n\
-        else if (method == 'GET' && url.match('move')) { // 玩家着法\n\
-            response.writeHead(200, { 'Content-Type': 'text/plain' });\n\
-            response.end('successful\\n')\n\
-            let move = request.url.split('=')[1];\n\
-            let file = fs.openSync('./_move_.txt', 'w+')\n\
-            fs.writeFileSync(file, move)\n\
-            fs.closeSync(file)\n\
-        }\n\
-    }).listen(9494)\n\
-    \n\
-    console.log('Server running at http://127.0.0.1:9494/')\n\
-    ";
 void setBoardCode(Board board)
 {
     BOARD_CODE code = generateCode(board);
@@ -138,14 +99,7 @@ void setBoardCode(Board board)
 
 void serverInit(Board board)
 {
-    FILE *file = nullptr;
-    errno_t result = fopen_s(&file, "./_server_.js", "w+");
-    if (result == 0)
-    {
-        fprintf(file, jsServerCode.c_str());
-        std::fclose(file);
-        system("start /min node _server_.js");
-        Sleep(700);
-        setBoardCode(board);
-    }
+    system("start /min node server.js");
+    Sleep(700);
+    setBoardCode(board);
 }

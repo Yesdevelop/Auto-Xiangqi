@@ -78,38 +78,6 @@ void HistoryHeuristic::add(Move move, int depth)
     historyTable[pos1][pos2] += depth * depth;
 }
 
-/* ***** 吃子启发 ***** */
-
-/// @brief 根据MVV和LVA分排序
-/// @param board
-/// @param moves
-void captureHeuristic(Board &board, MOVES &moves)
-{
-    /*const std::map<PIECEID, int> weightPairs{
-        {R_KING, 31},
-        {R_ROOK, 15},
-        {R_CANNON, 7},
-        {R_KNIGHT, 7},
-        {R_BISHOP, 3},
-        {R_GUARD, 3},
-        {R_PAWN, 1},
-    };
-
-    for (Move &move : moves)
-    {
-        if (move.moveType <= capture)
-        {
-            if (board.pieceidOn(move.x2, move.y2) != 0)
-            {
-                PIECEID attacker = abs(board.pieceidOn(move.x2, move.y2));
-                PIECEID captured = abs(board.pieceidOn(move.x2, move.y2));
-                move.moveType = capture;
-                move.val = weightPairs.at(captured) - weightPairs.at(attacker);
-            }
-        }
-    }*/
-}
-
 /* ***** 置换启发 ***** */
 
 /// @brief 置换启发
@@ -149,7 +117,8 @@ private:
 
 void tt::init(int hashLevel)
 {
-    if (this->pList != nullptr) {
+    if (this->pList != nullptr)
+    {
         delete[] pList;
         pList = nullptr;
     }
@@ -165,7 +134,8 @@ bool tt::initDone()
 
 void tt::reset()
 {
-    if (this->pList != nullptr) {
+    if (this->pList != nullptr)
+    {
         memset(this->pList, 0, sizeof(tItem) * this->hashSize);
     }
 }

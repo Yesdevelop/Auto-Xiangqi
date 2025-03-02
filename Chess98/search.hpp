@@ -4,11 +4,11 @@
 #include "utils.hpp"
 #include "book.hpp"
 
-/// @brief 节点对象，存储分数 + 着法
-class Node
+/// @brief 根节点
+class Root
 {
 public:
-    Node(Move move, int score) : move(move), score(score) {}
+    Root(Move move, int score) : move(move), score(score) {}
     Move move{};
     int score = 0;
 };
@@ -76,8 +76,8 @@ public:
             });
     }
 
-    Node searchMain(Board &board, int maxDepth, int maxTime);
-    Node searchRoot(Board &board, int depth);
+    Root searchMain(Board &board, int maxDepth, int maxTime);
+    Root searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
@@ -85,178 +85,56 @@ public:
 
 public:
     MOVES rootMoves;
-    HistoryHeuristic *historyCache = new HistoryHeuristic();
+    HistoryHeuristic *historyCache = new HistoryHeuristic;
     tt *pHashTable = new tt();
     BookFileStruct *pBookFileStruct = new BookFileStruct;
 };
-
-/// @brief 搜索开局库
-/// @param board
-Move Search::searchOpenBook(Board &board)
-{
-    BookStruct bk;
-    if (!pBookFileStruct->Open("BOOK.DAT"))
-    {
-        return Move();
-    }
-
-    // 二分法查找开局库
-    int nMid = 0;
-    int32 hashLock = board.hashLock;
-    int32 mirrorHashLock = 0;
-    int32 mirrorHashKey = 0;
-    board.getMirrorHashinfo(mirrorHashKey, mirrorHashLock);
-
-    int nScan = 0;
-    int32 nowHashLock = 0;
-    for (nScan = 0; nScan < 2; nScan++)
-    {
-        int nHigh = pBookFileStruct->nLen - 1;
-        int nLow = 0;
-        nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
-        while (nLow <= nHigh)
-        {
-            nMid = (nHigh + nLow) / 2;
-            pBookFileStruct->Read(bk, nMid);
-            if (BOOK_POS_CMP(bk, nowHashLock) < 0)
-            {
-                nLow = nMid + 1;
-            }
-            else if (BOOK_POS_CMP(bk, nowHashLock) > 0)
-            {
-                nHigh = nMid - 1;
-            }
-            else
-            {
-                break;
-            }
-        }
-        if (nLow <= nHigh)
-        {
-            break;
-        }
-    }
-
-    if (nScan == 2)
-    {
-        pBookFileStruct->Close();
-        return Move();
-    }
-
-    // 如果找到局面，则向前查找第一个着法
-    for (nMid--; nMid >= 0; nMid--)
-    {
-        pBookFileStruct->Read(bk, nMid);
-        if (BOOK_POS_CMP(bk, nowHashLock) < 0)
-        {
-            break;
-        }
-    }
-
-    std::vector<Move> bookMoves;
-
-    // 向后依次读入属于该局面的每个着法
-    for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
-    {
-        pBookFileStruct->Read(bk, nMid);
-        if (BOOK_POS_CMP(bk, nowHashLock) > 0)
-        {
-            break;
-        }
-        else
-        {
-            int mv = bk.wmv;
-            int src = mv & 255;
-            int dst = mv >> 8;
-            int xSrc = (src & 15) - 3;
-            int ySrc = 12 - (src >> 4);
-            int xDst = (dst & 15) - 3;
-            int yDst = 12 - (dst >> 4);
-            if (nScan != 0)
-            {
-                xSrc = 8 - xSrc;
-                xDst = 8 - xDst;
-            }
-            int vl = bk.wvl;
-            Move tMove = Move(xSrc, ySrc, xDst, yDst, vl);
-            bookMoves.emplace_back(tMove);
-        }
-    }
-
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
-              {
-        // 这里定义比较规则：从大到小排序
-        return a.val > b.val; });
-
-    std::srand(unsigned(std::time(0)));
-
-    int vlSum = 0;
-    for (Move &move : bookMoves)
-    {
-        vlSum += move.val;
-    }
-    int vlRandom = std::rand() % vlSum;
-
-    Move bookMove;
-    for (Move &move : bookMoves)
-    {
-        vlRandom -= move.val;
-        if (vlRandom < 0)
-        {
-            bookMove = move;
-            break;
-        }
-    }
-
-    pBookFileStruct->Close();
-    return bookMove;
-}
 
 /// @brief 迭代加深
 /// @param board
 /// @param maxDepth
 /// @param maxTime
 /// @return
-Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
+Root Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 {
     if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
     {
-        std::cout << "===========================" << std::endl;
+        std::cout << "---------------------------" << std::endl;
         std::cout << "     !!!!!SUCCESS!!!!!     " << std::endl;
-        std::cout << "===========================" << std::endl;
+        std::cout << "---------------------------" << std::endl;
+        system("pause");
         exit(0);
     }
 
-    Move openBookMove = Search::searchOpenBook(board);
+    std::cout << "---------------------" << std::endl;
 
-    if (openBookMove != Move())
+    Move openBookMove = Search::searchOpenBook(board);
+    if (openBookMove != Move{})
     {
-        std::cout << "find a great move from open book!" << std::endl;
-        return Node(openBookMove, 0);
+        std::cout << "Find a great move from OpenBook!" << std::endl;
+        return Root(openBookMove, 0);
     }
 
     searchInit(board);
     this->rootMoves = Moves::getMoves(board);
-    Node bestNode = Node(Move(), 0);
+    Root bestNode = Root(Move(), 0);
     clock_t start = clock();
     int depth = 0;
 
-    std::cout << "search starts here!" << std::endl;
     while (depth <= maxDepth)
     {
         depth++;
 
         bestNode = searchRoot(board, depth);
 
-
         if (std::abs(bestNode.score) >= BAN)
         {
-            //found killing chess
+            // found killing chess
             break;
         }
         else if (clock() - start >= maxTime * 1000 / 3)
         {
-            //iteration timeout
+            // iteration timeout
             break;
         }
     }
@@ -272,7 +150,7 @@ Node Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 /// @param board
 /// @param depth
 /// @return
-Node Search::searchRoot(Board &board, int depth)
+Root Search::searchRoot(Board &board, int depth)
 {
     Move *pBestMove = nullptr;
     int vl = -INF;
@@ -313,7 +191,7 @@ Node Search::searchRoot(Board &board, int depth)
 
     this->pHashTable->add(board.hashKey, board.hashLock, vlBest, pBestMove ? exactType : alphaType, depth);
 
-    Node result{!pBestMove ? Move{} : *pBestMove, vlBest};
+    Root result{!pBestMove ? Move{} : *pBestMove, vlBest};
     sortRootMoves();
     return result;
 }
@@ -393,7 +271,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     nodeType type = alphaType;
 
     MOVES availableMoves = Moves::getMoves(board);
-    captureHeuristic(board, availableMoves);
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
     int vl = -INF;
@@ -527,7 +404,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     nodeType type = alphaType;
 
     MOVES availableMoves = Moves::getMoves(board);
-    captureHeuristic(board, availableMoves);
     this->historyCache->sort(availableMoves);
     Move *pBestMove = nullptr;
     int vlBest = -INF;
@@ -649,4 +525,126 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     }
 
     return vlBest;
+}
+
+/// @brief 搜索开局库
+/// @param board
+Move Search::searchOpenBook(Board &board)
+{
+    BookStruct bk;
+    if (!pBookFileStruct->open("BOOK.DAT"))
+    {
+        return Move{};
+    }
+
+    // 二分法查找开局库
+    int nMid = 0;
+    int32 hashLock = board.hashLock;
+    int32 mirrorHashLock = 0;
+    int32 mirrorHashKey = 0;
+    board.getMirrorHashinfo(mirrorHashKey, mirrorHashLock);
+
+    int nScan = 0;
+    int32 nowHashLock = 0;
+    for (nScan = 0; nScan < 2; nScan++)
+    {
+        int nHigh = pBookFileStruct->nLen - 1;
+        int nLow = 0;
+        nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
+        while (nLow <= nHigh)
+        {
+            nMid = (nHigh + nLow) / 2;
+            pBookFileStruct->read(bk, nMid);
+            if (BOOK_POS_CMP(bk, nowHashLock) < 0)
+            {
+                nLow = nMid + 1;
+            }
+            else if (BOOK_POS_CMP(bk, nowHashLock) > 0)
+            {
+                nHigh = nMid - 1;
+            }
+            else
+            {
+                break;
+            }
+        }
+        if (nLow <= nHigh)
+        {
+            break;
+        }
+    }
+
+    if (nScan == 2)
+    {
+        pBookFileStruct->close();
+        return Move();
+    }
+
+    // 如果找到局面，则向前查找第一个着法
+    for (nMid--; nMid >= 0; nMid--)
+    {
+        pBookFileStruct->read(bk, nMid);
+        if (BOOK_POS_CMP(bk, nowHashLock) < 0)
+        {
+            break;
+        }
+    }
+
+    std::vector<Move> bookMoves;
+
+    // 向后依次读入属于该局面的每个着法
+    for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
+    {
+        pBookFileStruct->read(bk, nMid);
+        if (BOOK_POS_CMP(bk, nowHashLock) > 0)
+        {
+            break;
+        }
+        else
+        {
+            int mv = bk.wmv;
+            int src = mv & 255;
+            int dst = mv >> 8;
+            int xSrc = (src & 15) - 3;
+            int ySrc = 12 - (src >> 4);
+            int xDst = (dst & 15) - 3;
+            int yDst = 12 - (dst >> 4);
+            if (nScan != 0)
+            {
+                xSrc = 8 - xSrc;
+                xDst = 8 - xDst;
+            }
+            int vl = bk.wvl;
+            Move tMove = Move(xSrc, ySrc, xDst, yDst, vl);
+            bookMoves.emplace_back(tMove);
+        }
+    }
+
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
+              {
+        // 这里定义比较规则：从大到小排序
+        return a.val > b.val; });
+
+    std::srand(unsigned(std::time(0)));
+
+    int vlSum = 0;
+    for (Move &move : bookMoves)
+    {
+        vlSum += move.val;
+    }
+    int vlRandom = std::rand() % vlSum;
+
+    Move bookMove;
+    for (Move &move : bookMoves)
+    {
+        vlRandom -= move.val;
+        if (vlRandom < 0)
+        {
+            bookMove = move;
+            break;
+        }
+    }
+
+    pBookFileStruct->close();
+    return bookMove;
 }

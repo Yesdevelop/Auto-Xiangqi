@@ -25,6 +25,7 @@ void testOpenBook()
 /// 带UI的测试
 void testWithUI(TEAM team, int maxDepth)
 {
+    int count = 0;
     // PIECEID_MAP pieceidMap = *fenToPieceidMap("3akab2/9/4b1nr1/p5R1p/4p4/2Ncn1P2/PR2Nr2P/2C6/4A4/2B1KAB2 w - - 0 1");
     Board board = Board(DEFAULT_MAP, RED);
     board.print();
@@ -33,14 +34,16 @@ void testWithUI(TEAM team, int maxDepth)
 
     Search s;
     s.searchInit(board);
-    system("cd ../ChessUI && index.html");
+    system("cd ../UI && index.html");
 
     std::string moveFileContent = "____";
     while (true)
     {
         if (board.team == team)
         {
-            Node node = s.searchMain(board, maxDepth, 3);
+            count++;
+            std::cout << count;
+            Root node = s.searchMain(board, maxDepth, 3);
             board.doMove(node.move);
             setBoardCode(board);
             MOVES _ = Moves::getMoves(board);

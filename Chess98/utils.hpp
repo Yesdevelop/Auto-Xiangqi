@@ -248,17 +248,17 @@ bool isRiveredPawn(Board &board, int x, int y)
 /// @brief 将fen转PIECEID_MAP
 /// @param fenCode
 /// @return
-PIECEID_MAP* fenToPieceidMap(std::string fenCode)
+PIECEID_MAP *fenToPieceidMap(std::string fenCode)
 {
-    PIECEID_MAP pieceidMap = PIECEID_MAP {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+    PIECEID_MAP pieceidMap = PIECEID_MAP{{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}};
     int colNum = 9;
     int rowNum = 0;
     for (int i = 0; i < fenCode.size(); i++)
@@ -302,10 +302,11 @@ PIECEID_MAP* fenToPieceidMap(std::string fenCode)
             colNum--;
             continue;
         }
-        else if (fenCode[i] == ' ') break;
+        else if (fenCode[i] == ' ')
+            break;
         rowNum++;
     }
 
-	PIECEID_MAP* pieceidMapPtr = new PIECEID_MAP(pieceidMap);
+    PIECEID_MAP *pieceidMapPtr = new PIECEID_MAP(pieceidMap);
     return pieceidMapPtr;
 }

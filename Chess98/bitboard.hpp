@@ -62,7 +62,8 @@ public:
     void undoMove(int x1, int y1, int x2, int y2, bool eaten)
     {
         this->setBit(x1, y1);
-        if (!eaten) {
+        if (!eaten)
+        {
             this->deleteBit(x2, y2);
         }
     }

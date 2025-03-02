@@ -143,6 +143,10 @@
     <ClInclude Include="ui.hpp" />
     <ClInclude Include="utils.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="BOOK.DAT" />
+    <Text Include="server.js" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
