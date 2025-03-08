@@ -35,7 +35,6 @@ public:
         }
     }
 
-public:
     void searchInit(Board &board, int initHashLevel = 25)
     {
         rootMoves.resize(0);
@@ -52,6 +51,7 @@ public:
         board.initEvaluate();
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
+
     void searchStep(Move &bestMove)
     {
         for (auto &move : rootMoves)
@@ -66,6 +66,7 @@ public:
             }
         }
     }
+
     void sortRootMoves()
     {
         std::sort(
@@ -85,9 +86,9 @@ public:
 
 public:
     MOVES rootMoves;
-    HistoryHeuristic *historyCache = new HistoryHeuristic;
-    tt *pHashTable = new tt();
-    BookFileStruct *pBookFileStruct = new BookFileStruct;
+    HistoryHeuristic *historyCache = new HistoryHeuristic{};
+    tt *pHashTable = new tt{};
+    BookFileStruct *pBookFileStruct = new BookFileStruct{};
 };
 
 /// @brief 迭代加深
@@ -318,6 +319,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         this->historyCache->add(*pBestMove, depth);
     }
     this->pHashTable->add(board.hashKey, board.hashLock, vlBest, type, depth);
+
     return vlBest;
 }
 
@@ -454,6 +456,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         this->historyCache->add(*pBestMove, depth);
     }
     this->pHashTable->add(board.hashKey, board.hashLock, vlBest, type, depth);
+
     return vlBest;
 }
 
@@ -647,4 +650,17 @@ Move Search::searchOpenBook(Board &board)
 
     pBookFileStruct->close();
     return bookMove;
+}
+
+/// @brief 简易棋规
+/// @param board
+/// @param moves
+/// @return
+MOVES illegalFilter(Board& board, MOVES& moves)
+{
+    MOVES result{};
+    size_t size = board.historyMoves.size();
+    for (const Move& move : moves)
+    {
+    }
 }

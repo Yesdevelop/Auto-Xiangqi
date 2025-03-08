@@ -67,6 +67,7 @@ public:
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
 
     bool isChecking = false;
+    MOVES historyMoves{};
 
     // 和根节点的距离
     int distance = 0;
@@ -340,9 +341,10 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->hashKey ^= PLAYER_KEY;
     this->hashLock ^= PLAYER_LOCK;
 
+    // 其他
     this->team = -this->team;
     this->distance += 1;
-
+    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->bitboard->doMove(x1, y1, x2, y2);
 
     return eaten;
@@ -364,9 +366,11 @@ Piece Board::doMove(Move move)
 /// @param eaten
 void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 {
+    // 其他
     this->distance -= 1;
-
     this->team = -this->team;
+    this->historyMoves.pop_back();
+    this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
 
     Piece attackStarter = this->piecePosition(x2, y2);
 
@@ -415,8 +419,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
-
-    this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
 }
 
 /// @brief 撤销步进
