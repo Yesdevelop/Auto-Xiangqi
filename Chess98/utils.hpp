@@ -248,7 +248,7 @@ bool isRiveredPawn(Board &board, int x, int y)
 /// @brief 将fen转PIECEID_MAP
 /// @param fenCode
 /// @return
-PIECEID_MAP *fenToPieceidMap(std::string fenCode)
+PIECEID_MAP fenToPieceidMap(std::string fenCode)
 {
     PIECEID_MAP pieceidMap = PIECEID_MAP{{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -307,6 +307,5 @@ PIECEID_MAP *fenToPieceidMap(std::string fenCode)
         rowNum++;
     }
 
-    PIECEID_MAP *pieceidMapPtr = new PIECEID_MAP(pieceidMap);
-    return pieceidMapPtr;
+    return pieceidMap;
 }

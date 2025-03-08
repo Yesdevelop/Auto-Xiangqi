@@ -26,7 +26,9 @@ void testOpenBook()
 void testWithUI(TEAM team, int maxDepth)
 {
     int count = 0;
-    Board board = Board(DEFAULT_MAP, RED);
+    PIECEID_MAP pieceidMap = DEFAULT_MAP;
+    // pieceidMap = fenToPieceidMap("2P1k1P2/3P1P3/9/4P4/0/3r5/9/9/9/3AKA3 w - - 0 1"); // 调试局面时使用
+    Board board = Board(pieceidMap, RED);
     board.print();
 
     serverInit(board);

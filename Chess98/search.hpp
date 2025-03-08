@@ -268,6 +268,21 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
         }
     }
+    // 设置上一步的着法为将军着法
+    else
+    {
+        board.historyMoves.rbegin()->isCheckingMove = true;
+        // 若出现连续3次将军
+        if (board.historyMoves.size() > 5)
+        {
+            if (board.historyMoves[board.historyMoves.size() - 1].isCheckingMove &&
+                board.historyMoves[board.historyMoves.size() - 3].isCheckingMove &&
+                board.historyMoves[board.historyMoves.size() - 5].isCheckingMove)
+            {
+                return INF;
+            }
+        }
+    }
 
     nodeType type = alphaType;
 
@@ -330,7 +345,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-
     if (depth <= 0)
     {
         return Search::searchQ(board, beta - 1, beta, 64);
@@ -403,6 +417,22 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
+    // 设置上一步的着法为将军着法
+    else
+    {
+        board.historyMoves.rbegin()->isCheckingMove = true;
+        // 若出现连续3次将军
+        if (board.historyMoves.size() > 5)
+        {
+            if (board.historyMoves[board.historyMoves.size() - 1].isCheckingMove &&
+                board.historyMoves[board.historyMoves.size() - 3].isCheckingMove &&
+                board.historyMoves[board.historyMoves.size() - 5].isCheckingMove)
+            {
+                return INF * 2;
+            }
+        }
+    }
+
     nodeType type = alphaType;
 
     MOVES availableMoves = Moves::getMoves(board);
@@ -650,17 +680,4 @@ Move Search::searchOpenBook(Board &board)
 
     pBookFileStruct->close();
     return bookMove;
-}
-
-/// @brief 简易棋规
-/// @param board
-/// @param moves
-/// @return
-MOVES illegalFilter(Board& board, MOVES& moves)
-{
-    MOVES result{};
-    size_t size = board.historyMoves.size();
-    for (const Move& move : moves)
-    {
-    }
 }

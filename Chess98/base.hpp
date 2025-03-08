@@ -51,6 +51,7 @@ PIECEID_MAP DEFAULT_MAP{
      {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
 const int INF = 1000000;
 const int BAN = INF - 2000;
+const int ILLEGAL_VAL = INF * 2;
 
 /// @brief 棋子类
 class Piece
@@ -112,6 +113,7 @@ public:
     int y2 = -1;
     int val = 0;
     int moveType = 0;
+    bool isCheckingMove = false;
 
     constexpr bool operator==(const Move &move) const
     {
