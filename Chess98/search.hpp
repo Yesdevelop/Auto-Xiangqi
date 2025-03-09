@@ -118,6 +118,7 @@ Root Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     searchInit(board);
     this->rootMoves = Moves::getMoves(board);
+    clearRepeatings(board, this->rootMoves);
     Root bestNode = Root(Move(), 0);
     clock_t start = clock();
     int depth = 0;
@@ -272,7 +273,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     else
     {
         board.historyMoves.rbegin()->isCheckingMove = true;
-        // 若出现连续3次将军
+        // 若出现连续4次将军
         if (board.historyMoves.size() > 7)
         {
             if (board.historyMoves[board.historyMoves.size() - 1].isCheckingMove &&
@@ -422,7 +423,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     else
     {
         board.historyMoves.rbegin()->isCheckingMove = true;
-        // 若出现连续3次将军
+        // 若出现连续4次将军
         if (board.historyMoves.size() > 7)
         {
             if (board.historyMoves[board.historyMoves.size() - 1].isCheckingMove &&
