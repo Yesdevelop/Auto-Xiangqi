@@ -9,9 +9,49 @@
     <script src="./res/vue.global.min.js"></script>
 
     <style>
-        body {
-            background-color: #333;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #333, #333, #433, #333,  #333);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, #fff, #fff, #fffae0, #fff, #fff);;
+            }
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        .button {
+            background-color: #993535;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
         #app {
             display: flex;
             flex-direction: column;
@@ -50,15 +90,22 @@
 
 <body>
     <div id="app">
-        <div id="board">
-            <div class="row" v-for="row, x in board" :style="{ flexDirection: playerTeam === 'r' ? 'column-reverse' : 'column' }">
+        <div id="board"
+        :style="{ flexDirection: flippedLeftRight == false ? 'row' : 'row-reverse' }">
+            <div class="row" v-for="row, x in board"
+                :style="{ flexDirection: flipped == false ? 'column-reverse' : 'column' }">
                 <div class="square" v-for="pieceid, y in row" @click="pieceOnclick(x, y, pieceid)">
                     <div class="piece" v-if="pieceid !== 0" :style="{ backgroundImage: `url('./res/${pieceid}.png')` }">
                     </div>
                 </div>
             </div>
         </div>
-        <button @click="updatePlayerTeam">now team is: {{ playerTeam }}</button>
+        <div class="buttons">
+            <div class="button" @click="updatePlayerTeam">Team: {{ playerTeam }}</div>
+            <div class="button" @click="flip">Flip</div>
+            <div class="button" @click="flipLeftRight">Flip(left-right)</div>
+            <div class="button" @click="undo">Undo</div>
+        </div>
     </div>
 
     <script>
@@ -132,6 +179,8 @@
                 return {
                     board: [],
                     playerTeam: RED,
+                    flipped: false,
+                    flippedLeftRight: false,
                     selectedPiece: null
                 }
             },
@@ -153,6 +202,20 @@
                     http.send()
                 },
 
+                flip() {
+                    this.flipped = !this.flipped
+                },
+
+                flipLeftRight() {
+                    this.flippedLeftRight = !this.flippedLeftRight
+                },
+
+                undo() {
+                    const http = new XMLHttpRequest()
+                    http.open('GET', 'http://localhost:9494/undo')
+                    http.send()
+                },
+
                 pieceOnclick(x, y, pieceid) {
                     if (pieceid[0] == this.playerTeam) {
                         this.selectedPiece = { x, y }
@@ -167,7 +230,7 @@
                             let y2 = "" + y
                             let move = x1 + y1 + x2 + y2
                             const http = new XMLHttpRequest()
-                            http.open('GET', 'http://localhost:9494/move?playermove=' + move, true)
+                            http.open('GET', 'http://localhost:9494/move?playermove=' + move)
                             http.send()
                             this.selectedPiece = null
                         }
@@ -178,7 +241,7 @@
             mounted() {
                 setInterval(() => {
                     this.reloadBoardFromServer()
-                }, 200)
+                }, 50)
             }
         }).mount('#app')
     </script>
