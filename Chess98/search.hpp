@@ -273,11 +273,12 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         board.historyMoves.rbegin()->isCheckingMove = true;
         // 若出现连续3次将军
-        if (board.historyMoves.size() > 5)
+        if (board.historyMoves.size() > 7)
         {
             if (board.historyMoves[board.historyMoves.size() - 1].isCheckingMove &&
                 board.historyMoves[board.historyMoves.size() - 3].isCheckingMove &&
-                board.historyMoves[board.historyMoves.size() - 5].isCheckingMove)
+                board.historyMoves[board.historyMoves.size() - 5].isCheckingMove &&
+                board.historyMoves[board.historyMoves.size() - 7].isCheckingMove)
             {
                 return INF;
             }
@@ -422,11 +423,12 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         board.historyMoves.rbegin()->isCheckingMove = true;
         // 若出现连续3次将军
-        if (board.historyMoves.size() > 5)
+        if (board.historyMoves.size() > 7)
         {
             if (board.historyMoves[board.historyMoves.size() - 1].isCheckingMove &&
                 board.historyMoves[board.historyMoves.size() - 3].isCheckingMove &&
-                board.historyMoves[board.historyMoves.size() - 5].isCheckingMove)
+                board.historyMoves[board.historyMoves.size() - 5].isCheckingMove &&
+                board.historyMoves[board.historyMoves.size() - 7].isCheckingMove)
             {
                 return INF * 2;
             }
