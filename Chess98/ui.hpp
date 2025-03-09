@@ -99,7 +99,7 @@ void setBoardCode(Board board)
 
 void serverInit(Board board)
 {
-    system("start /min node server.js");
+    system("start /min node ../UI/server.js");
     Sleep(700);
     setBoardCode(board);
 }

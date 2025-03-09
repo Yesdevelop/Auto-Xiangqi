@@ -61,8 +61,5 @@
     <Text Include="BOOK.DAT">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="server.js">
-      <Filter>Resource Files</Filter>
-    </Text>
   </ItemGroup>
 </Project>
