@@ -31,6 +31,13 @@ http.createServer((request, response) => {
         fs.writeFileSync(file, move)
         fs.closeSync(file)
     }
+    else if (method == 'GET' && url.match('undo')) {
+        response.writeHead(200, { 'Content-Type': 'text/plain' });
+        response.end('successful\n')
+        let file = fs.openSync('./_move_.txt', 'w+')
+        fs.writeFileSync(file, 'undo')
+        fs.closeSync(file)
+    }
 }).listen(9494)
 
 console.log('Server running at http://127.0.0.1:9494/')

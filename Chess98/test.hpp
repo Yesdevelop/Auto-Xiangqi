@@ -38,6 +38,7 @@ void testWithUI(TEAM team, int maxDepth)
     system("cd ../UI && index.html");
 
     std::string moveFileContent = "____";
+    std::vector<Piece> eatens{};
     while (true)
     {
         if (board.team == team)
@@ -45,7 +46,7 @@ void testWithUI(TEAM team, int maxDepth)
             count++;
             std::cout << count;
             Root node = s.searchMain(board, maxDepth, 3);
-            board.doMove(node.move);
+            eatens.emplace_back(board.doMove(node.move));
             setBoardCode(board);
             MOVES _ = Moves::getMoves(board);
 
@@ -77,6 +78,28 @@ void testWithUI(TEAM team, int maxDepth)
                     fread(&buffer, 4, 1, file);
                     fclose(file);
                     std::string content = std::string(buffer).substr(0, 4);
+                    if (content == "undo")
+                    {
+                        if (eatens.size() > 1)
+                        {
+                            FILE *file = nullptr;
+                            errno_t result = fopen_s(&file, "./_move_.txt", "w+");
+                            if (result == 0)
+                            {
+                                board.undoMove(board.historyMoves.back(), eatens.back());
+                                eatens.pop_back();
+                                board.undoMove(board.historyMoves.back(), eatens.back());
+                                eatens.pop_back();
+                                setBoardCode(board);
+								moveFileContent = "____";
+                                fwrite("____", 4, 1, file);
+                                fclose(file);
+                                count--;
+								std::cout << "undo" << std::endl;
+                            }
+                        }
+                        break;
+                    }
                     if (content != moveFileContent)
                     {
                         moveFileContent = content;
@@ -85,7 +108,7 @@ void testWithUI(TEAM team, int maxDepth)
                         int x2 = std::stoi(content.substr(2, 1));
                         int y2 = std::stoi(content.substr(3, 1));
                         Move move{x1, y1, x2, y2};
-                        board.doMove(move);
+                        eatens.emplace_back(board.doMove(move));
                         break;
                     }
                 }
