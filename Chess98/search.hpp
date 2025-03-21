@@ -238,15 +238,15 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         // futility pruning
         if (depth == 1)
         {
-            int vl = board.evaluate();
-            if (vl <= alpha - futilityPruningMargin)
-            {
-                return vl;
-            }
-            if (vl >= beta + futilityPruningMargin)
-            {
-                return vl;
-            }
+            // int vl = board.evaluate();
+            // if (vl <= alpha - futilityPruningMargin)
+            // {
+            //     return vl;
+            // }
+            // if (vl >= beta + futilityPruningMargin)
+            // {
+            //     return vl;
+            // }
         }
 
         // multi probCut
@@ -361,16 +361,16 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         // futility pruning
         if (depth == 1)
         {
-            int vl = board.evaluate();
-            if (vl <= beta - futilityPruningMargin)
-            {
-                return vl;
-            }
-            if (vl >= beta + futilityPruningMargin)
-            {
+            // int vl = board.evaluate();
+            // if (vl <= beta - futilityPruningMargin)
+            // {
+            //     return vl;
+            // }
+            // if (vl >= beta + futilityPruningMargin)
+            // {
 
-                return vl;
-            }
+            //     return vl;
+            // }
         }
 
         // multi probCut and null pruning
