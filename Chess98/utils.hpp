@@ -310,7 +310,7 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
-void clearRepeatings(Board& board, MOVES& moves)
+void clearRepeatings(Board &board, MOVES &moves)
 {
     MOVES result{};
     if (board.historyMoves.size() > 7)
@@ -324,6 +324,7 @@ void clearRepeatings(Board& board, MOVES& moves)
             result.emplace_back(move);
         }
     }
-    else return;
+    else
+        return;
     moves = result;
 }

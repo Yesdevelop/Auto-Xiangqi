@@ -235,20 +235,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     if (!mChecking)
     {
-        // futility pruning
-        if (depth == 1)
-        {
-            // int vl = board.evaluate();
-            // if (vl <= alpha - futilityPruningMargin)
-            // {
-            //     return vl;
-            // }
-            // if (vl >= beta + futilityPruningMargin)
-            // {
-            //     return vl;
-            // }
-        }
-
         // multi probCut
         if (depth % 4 == 0)
         {
@@ -358,21 +344,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
     if (!mChecking)
     {
-        // futility pruning
-        if (depth == 1)
-        {
-            // int vl = board.evaluate();
-            // if (vl <= beta - futilityPruningMargin)
-            // {
-            //     return vl;
-            // }
-            // if (vl >= beta + futilityPruningMargin)
-            // {
-
-            //     return vl;
-            // }
-        }
-
         // multi probCut and null pruning
         if (!banNullMove)
         {
@@ -634,10 +605,10 @@ Move Search::searchOpenBook(Board &board)
         }
     }
 
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
-              {
-        // 这里定义比较规则：从大到小排序
-        return a.val > b.val; });
+    // 从大到小排序
+    std::sort(bookMoves.begin(), bookMoves.end(),
+              [](Move &a, Move &b)
+              { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
@@ -660,5 +631,6 @@ Move Search::searchOpenBook(Board &board)
     }
 
     pBookFileStruct->close();
+
     return bookMove;
 }

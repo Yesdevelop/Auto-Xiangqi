@@ -91,11 +91,11 @@ void testWithUI(TEAM team, int maxDepth)
                                 board.undoMove(board.historyMoves.back(), eatens.back());
                                 eatens.pop_back();
                                 setBoardCode(board);
-								moveFileContent = "____";
+                                moveFileContent = "____";
                                 fwrite("____", 4, 1, file);
                                 fclose(file);
                                 count--;
-								std::cout << "undo" << std::endl;
+                                std::cout << "undo" << std::endl;
                             }
                         }
                         break;
