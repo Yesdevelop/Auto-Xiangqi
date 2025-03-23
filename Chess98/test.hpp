@@ -111,12 +111,12 @@ void testWithUI(TEAM team, int maxDepth)
                         eatens.emplace_back(board.doMove(move));
                         break;
                     }
+                    Sleep(50);
                 }
                 else
                 {
                     std::cerr << "CANNOT OPEN FILE!" << result << std::endl;
                 }
-                Sleep(400);
             }
         }
     }

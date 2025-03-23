@@ -10,6 +10,7 @@
 #include <array>
 #include <map>
 #include <cmath>
+#include <thread>
 
 using PIECE_INDEX = int;
 using U64 = unsigned long long;
