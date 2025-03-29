@@ -3,10 +3,7 @@
 #include "hash.hpp"
 #include "board.hpp"
 
-/* ***** 历史启发 ***** */
-
-/// @brief 历史启发
-
+// 历史启发
 enum moveType
 {
     normal = 0,
@@ -78,10 +75,7 @@ void HistoryHeuristic::add(Move move, int depth)
     historyTable[pos1][pos2] += depth * depth;
 }
 
-/* ***** 置换启发 ***** */
-
-/// @brief 置换启发
-
+// 置换表启发
 enum nodeType
 {
     noneType = 0,

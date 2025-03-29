@@ -9,18 +9,6 @@ void test(TEAM team = BLACK, int maxDepth = 16)
     testWithUI(team, maxDepth);
 }
 
-void testOpenBook()
-{
-    Board board = Board(DEFAULT_MAP, RED);
-    board.print();
-
-    Search s;
-    s.searchInit(board);
-
-    Move bookMove = s.searchOpenBook(board);
-
-    std::cout << (int)board.hashKey << " " << (int)board.hashLock << std::endl;
-}
 
 /// 带UI的测试
 void testWithUI(TEAM team, int maxDepth)
@@ -34,7 +22,6 @@ void testWithUI(TEAM team, int maxDepth)
     serverInit(board);
 
     Search s;
-    s.searchInit(board);
     system("cd ../UI && index.html");
 
     std::string moveFileContent = "____";
@@ -45,7 +32,7 @@ void testWithUI(TEAM team, int maxDepth)
         {
             count++;
             std::cout << count;
-            Root node = s.searchMain(board, maxDepth, 3);
+            Result node = s.searchMain(board, maxDepth, 3);
             eatens.emplace_back(board.doMove(node.move));
             setBoardCode(board);
             MOVES _ = Moves::getMoves(board);

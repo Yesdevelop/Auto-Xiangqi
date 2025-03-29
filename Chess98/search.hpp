@@ -5,10 +5,10 @@
 #include "book.hpp"
 
 /// @brief 根节点
-class Root
+class Result
 {
 public:
-    Root(Move move, int score) : move(move), score(score) {}
+    Result(Move move, int score) : move(move), score(score) {}
     Move move{};
     int score = 0;
 };
@@ -16,6 +16,7 @@ public:
 class Search
 {
 public:
+    Search() = default;
     ~Search()
     {
         if (historyCache)
@@ -35,6 +36,17 @@ public:
         }
     }
 
+    Result searchMain(Board &board, int maxDepth, int maxTime);
+    Result searchRoot(Board &board, int depth);
+    int searchPV(Board &board, int depth, int alpha, int beta);
+    int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
+    int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
+    Move searchOpenBook(Board &board);
+
+private:
+    /// @brief 初始化搜索
+    /// @param board
+    /// @param initHashLevel
     void searchInit(Board &board, int initHashLevel = 25)
     {
         rootMoves.resize(0);
@@ -67,25 +79,40 @@ public:
         }
     }
 
+    /// @brief 根节点着法排序
     void sortRootMoves()
     {
-        std::sort(
-            rootMoves.begin(), rootMoves.end(),
-            [](Move &first, Move &second) -> bool
-            {
-                return first.val > second.val;
-            });
+        std::sort(rootMoves.begin(), rootMoves.end(),
+                  [](Move &first, Move &second) -> bool
+                  {
+                      return first.val > second.val;
+                  });
     }
 
-    Root searchMain(Board &board, int maxDepth, int maxTime);
-    Root searchRoot(Board &board, int depth);
-    int searchPV(Board &board, int depth, int alpha, int beta);
-    int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
-    int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
-    Move searchOpenBook(Board &board);
+    /// @brief 长将强制变招
+    /// @param board
+    /// @param moves
+    void banRepeatingCheking(Board &board, MOVES &moves)
+    {
+        MOVES result{};
+        if (board.historyMoves.size() > 7)
+        {
+            for (const Move &move : moves)
+            {
+                if (board.historyMoves[board.historyMoves.size() - 4] == move &&
+                    board.historyMoves[board.historyMoves.size() - 8] == move &&
+                    board.historyMoves[board.historyMoves.size() - 12] == move)
+                    continue;
+                result.emplace_back(move);
+            }
+        }
+        else
+            return;
+        moves = result;
+    }
 
-public:
     MOVES rootMoves;
+
     HistoryHeuristic *historyCache = new HistoryHeuristic{};
     tt *pHashTable = new tt{};
     BookFileStruct *pBookFileStruct = new BookFileStruct{};
@@ -96,54 +123,46 @@ public:
 /// @param maxDepth
 /// @param maxTime
 /// @return
-Root Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
+Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 {
     if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
-    {
-        std::cout << "---------------------------" << std::endl;
-        std::cout << "     !!!!!SUCCESS!!!!!     " << std::endl;
-        std::cout << "---------------------------" << std::endl;
-        system("pause");
         exit(0);
-    }
 
     std::cout << "---------------------" << std::endl;
 
+    // 开局库搜索
     Move openBookMove = Search::searchOpenBook(board);
     if (openBookMove != Move{})
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
-        return Root(openBookMove, 0);
+        return Result(openBookMove, 0);
     }
 
-    searchInit(board);
+    this->searchInit(board);
+
     this->rootMoves = Moves::getMoves(board);
-    clearRepeatings(board, this->rootMoves);
-    Root bestNode = Root(Move(), 0);
+    banRepeatingCheking(board, this->rootMoves);
+
+    Result bestNode = Result(Move(), 0);
     clock_t start = clock();
-    int depth = 0;
 
-    while (depth <= maxDepth)
+    for (int depth = 0; depth <= maxDepth; depth++)
     {
-        depth++;
-
         bestNode = searchRoot(board, depth);
-
+        std::cout << "depth: " << depth;
+        std::cout << " | vl: " << bestNode.score;
+        std::cout << " | duration(ms): " << clock() - start << std::endl;
+        // 杀棋中止
         if (std::abs(bestNode.score) >= BAN)
         {
-            // found killing chess
             break;
         }
-        else if (clock() - start >= maxTime * 1000 / 3)
+        // 超时中止
+        if (clock() - start >= maxTime * 1000 / 3)
         {
-            // iteration timeout
             break;
         }
     }
-
-    std::cout << "search depth: " << depth << std::endl;
-    std::cout << "search vl: " << bestNode.score << std::endl;
-    std::cout << "used time: " << clock() - start << " ms" << std::endl;
 
     return bestNode;
 }
@@ -152,14 +171,16 @@ Root Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 /// @param board
 /// @param depth
 /// @return
-Root Search::searchRoot(Board &board, int depth)
+Result Search::searchRoot(Board &board, int depth)
 {
     Move *pBestMove = nullptr;
     int vl = -INF;
     int vlBest = -INF;
-    for (auto &move : rootMoves)
+
+    for (Move &move : rootMoves)
     {
         Piece eaten = board.doMove(move);
+
         if (vlBest == -INF)
         {
             vl = -searchPV(board, depth - 1, -INF, -vlBest);
@@ -172,29 +193,27 @@ Root Search::searchRoot(Board &board, int depth)
                 vl = -searchPV(board, depth - 1, -INF, -vlBest);
             }
         }
+
         board.undoMove(move, eaten);
 
         if (vl > vlBest)
         {
             vlBest = vl;
             pBestMove = &move;
-            searchStep(move);
+            this->searchStep(move);
         }
     }
 
     if (!pBestMove)
-    {
         vlBest += board.distance;
-    }
     else
-    {
         this->historyCache->add(*pBestMove, depth);
-    }
-
     this->pHashTable->add(board.hashKey, board.hashLock, vlBest, pBestMove ? exactType : alphaType, depth);
 
-    Root result{!pBestMove ? Move{} : *pBestMove, vlBest};
+    Result result{!pBestMove ? Move{} : *pBestMove, vlBest};
+
     sortRootMoves();
+
     return result;
 }
 
@@ -214,6 +233,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         return vlHash;
     }
 
+    // 叶节点返回静态评估值
     if (depth <= 0)
     {
         return Search::searchQ(board, alpha, beta);
