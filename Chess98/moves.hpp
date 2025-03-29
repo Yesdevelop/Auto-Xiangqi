@@ -618,7 +618,19 @@ MOVES Moves::getMoves(Board &board)
     MOVES result{};
     result.reserve(64);
 
+    std::map<PIECEID, int> orderMap{
+        {R_ROOK, 0},
+        {R_KNIGHT, 1},
+        {R_CANNON, 1},
+        {R_BISHOP, 2},
+        {R_PAWN, 3},
+        {R_GUARD, 3},
+        {R_KING, 4}
+    };
     std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
+    // std::sort(pieces.begin(), pieces.end(), [&](const Piece &a, const Piece &b) {
+    //     return orderMap.at(abs(a.pieceid)) < orderMap.at(abs(b.pieceid));
+    // });
     for (const Piece &piece : pieces)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
@@ -681,13 +693,13 @@ MOVES Moves::getGoodCaptures(Board &board)
     result.reserve(moves.size());
 
     const std::map<PIECEID, int> weightPairs{
-        {R_KING, 5},
         {R_ROOK, 4},
         {R_CANNON, 3},
         {R_KNIGHT, 3},
         {R_BISHOP, 2},
         {R_GUARD, 2},
         {R_PAWN, 1},
+        {R_KING, 1},
     };
     std::map<int, MOVES> orderMap{};
 

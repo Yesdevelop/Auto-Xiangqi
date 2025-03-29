@@ -22,7 +22,7 @@ void testWithUI(TEAM team, int maxDepth)
     serverInit(board);
 
     Search s;
-    system("cd ../UI && index.html");
+    std::cout << "Open Chess98/UI/index.html to play chess" << std::endl;
 
     std::string moveFileContent = "____";
     std::vector<Piece> eatens{};

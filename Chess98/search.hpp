@@ -92,7 +92,7 @@ private:
     /// @brief 长将强制变招
     /// @param board
     /// @param moves
-    void banRepeatingCheking(Board &board, MOVES &moves)
+    void banRepeatingChecking(Board &board, MOVES &moves)
     {
         MOVES result{};
         if (board.historyMoves.size() > 7)
@@ -130,18 +130,18 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     std::cout << "---------------------" << std::endl;
 
-    // 开局库搜索
-    Move openBookMove = Search::searchOpenBook(board);
-    if (openBookMove != Move{})
-    {
-        std::cout << "Find a great move from OpenBook!" << std::endl;
-        return Result(openBookMove, 0);
-    }
+    //// 开局库搜索
+    //Move openBookMove = Search::searchOpenBook(board);
+    //if (openBookMove != Move{})
+    //{
+    //    std::cout << "Find a great move from OpenBook!" << std::endl;
+    //    return Result(openBookMove, 0);
+    //}
 
     this->searchInit(board);
 
     this->rootMoves = Moves::getMoves(board);
-    banRepeatingCheking(board, this->rootMoves);
+    banRepeatingChecking(board, this->rootMoves);
 
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
@@ -149,7 +149,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     for (int depth = 0; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(board, depth);
-        std::cout << "depth: " << depth;
+        std::cout << "depth: " << depth + 1;
         std::cout << " | vl: " << bestNode.score;
         std::cout << " | duration(ms): " << clock() - start << std::endl;
         // 杀棋中止
@@ -158,7 +158,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
             break;
         }
         // 超时中止
-        if (clock() - start >= maxTime * 1000 / 3)
+        else if (clock() - start >= maxTime * 1000 / 3)
         {
             break;
         }
