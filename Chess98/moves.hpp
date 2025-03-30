@@ -618,19 +618,7 @@ MOVES Moves::getMoves(Board &board)
     MOVES result{};
     result.reserve(64);
 
-    std::map<PIECEID, int> orderMap{
-        {R_ROOK, 0},
-        {R_KNIGHT, 1},
-        {R_CANNON, 1},
-        {R_BISHOP, 2},
-        {R_PAWN, 3},
-        {R_GUARD, 3},
-        {R_KING, 4}
-    };
     std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
-    // std::sort(pieces.begin(), pieces.end(), [&](const Piece &a, const Piece &b) {
-    //     return orderMap.at(abs(a.pieceid)) < orderMap.at(abs(b.pieceid));
-    // });
     for (const Piece &piece : pieces)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
@@ -681,16 +669,15 @@ MOVES Moves::getCaptureMoves(Board &board)
     return result;
 }
 
-/// @brief 获取当前队伍所有好的吃子着法（MVV/LVA）
+/// @brief 获取当前队伍经过排序整理的吃子着法（SEE）
 /// @param board
 /// @return
 MOVES Moves::getGoodCaptures(Board &board)
 {
-    // SEE
     MOVES moves = Moves::getCaptureMoves(board);
 
     MOVES result{};
-    result.reserve(moves.size());
+    result.reserve(64);
 
     const std::map<PIECEID, int> weightPairs{
         {R_ROOK, 4},
@@ -701,7 +688,7 @@ MOVES Moves::getGoodCaptures(Board &board)
         {R_PAWN, 1},
         {R_KING, 1},
     };
-    std::map<int, MOVES> orderMap{};
+    std::vector<std::vector<Move>> orderMap{{}, {}, {}, {}, {}, {}, {}, {}, {}};
 
     for (const Move &move : moves)
     {
@@ -722,18 +709,12 @@ MOVES Moves::getGoodCaptures(Board &board)
                     score = 1;
             }
             else
-            {
                 score = a - b + 1;
-            }
         }
         else
-        {
             score = a + 1;
-        }
         if (score >= 1)
-        {
             orderMap[score].emplace_back(move);
-        }
     }
 
     for (int score = 8; score >= 1; score--)

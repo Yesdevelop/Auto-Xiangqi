@@ -132,11 +132,11 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     //// 开局库搜索
     Move openBookMove = Search::searchOpenBook(board);
-    if (openBookMove != Move{})
+    /*if (openBookMove != Move{})
     {
        std::cout << "Find a great move from OpenBook!" << std::endl;
        return Result(openBookMove, 0);
-    }
+    }*/
 
     this->searchInit(board);
 
