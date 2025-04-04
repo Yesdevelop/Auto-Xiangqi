@@ -82,33 +82,12 @@ private:
     /// @brief 根节点着法排序
     void sortRootMoves()
     {
-        std::sort(rootMoves.begin(), rootMoves.end(),
-                  [](Move &first, Move &second) -> bool
-                  {
-                      return first.val > second.val;
-                  });
-    }
-
-    /// @brief 长将强制变招
-    /// @param board
-    /// @param moves
-    void banRepeatingChecking(Board &board, MOVES &moves)
-    {
-        MOVES result{};
-        if (board.historyMoves.size() > 7)
-        {
-            for (const Move &move : moves)
+        std::sort(
+            rootMoves.begin(), rootMoves.end(),
+            [](Move &first, Move &second) -> bool
             {
-                if (board.historyMoves[board.historyMoves.size() - 4] == move &&
-                    board.historyMoves[board.historyMoves.size() - 8] == move &&
-                    board.historyMoves[board.historyMoves.size() - 12] == move)
-                    continue;
-                result.emplace_back(move);
-            }
-        }
-        else
-            return;
-        moves = result;
+                return first.val > second.val;
+            });
     }
 
     MOVES rootMoves;
@@ -130,18 +109,16 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     std::cout << "---------------------" << std::endl;
 
-    //// 开局库搜索
-    Move openBookMove = Search::searchOpenBook(board);
-    /*if (openBookMove != Move{})
+    // 开局库搜索
+    /*Move openBookMove = Search::searchOpenBook(board);
+    if (openBookMove != Move{})
     {
-       std::cout << "Find a great move from OpenBook!" << std::endl;
-       return Result(openBookMove, 0);
+        std::cout << "Find a great move from OpenBook!" << std::endl;
+        return Result(openBookMove, 0);
     }*/
 
     this->searchInit(board);
-
     this->rootMoves = Moves::getMoves(board);
-    banRepeatingChecking(board, this->rootMoves);
 
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
@@ -151,6 +128,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         bestNode = searchRoot(board, depth);
         std::cout << "depth: " << depth + 1;
         std::cout << " | vl: " << bestNode.score;
+        std::cout << " | moveid: " << bestNode.move.id;
         std::cout << " | duration(ms): " << clock() - start << std::endl;
         // 杀棋中止
         if (std::abs(bestNode.score) >= BAN)
@@ -187,11 +165,11 @@ Result Search::searchRoot(Board &board, int depth)
         }
         else
         {
-            vl = -searchCut(board, depth - 1, -vlBest);
+            /*vl = -searchCut(board, depth - 1, -vlBest);
             if (vl > vlBest)
-            {
+            {*/
                 vl = -searchPV(board, depth - 1, -INF, -vlBest);
-            }
+            //}
         }
 
         board.undoMove(move, eaten);

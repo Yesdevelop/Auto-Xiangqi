@@ -95,7 +95,7 @@ public:
 class Move
 {
 public:
-    Move() {}
+    Move() = default;
     Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
         : x1(x1),
           y1(y1),
@@ -103,10 +103,7 @@ public:
           y2(y2),
           id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
           val(val),
-          moveType(moveType)
-    {
-    }
-
+          moveType(moveType) {}
     int id = -1;
     int x1 = -1;
     int y1 = -1;

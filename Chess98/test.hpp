@@ -35,7 +35,6 @@ void testWithUI(TEAM team, int maxDepth)
             Result node = s.searchMain(board, maxDepth, 3);
             eatens.emplace_back(board.doMove(node.move));
             setBoardCode(board);
-            MOVES _ = Moves::getMoves(board);
 
             FILE *file = nullptr;
             errno_t result = fopen_s(&file, "./_move_.txt", "r");

@@ -206,9 +206,9 @@ bool relationship_hasProtector(Board &board, int x, int y)
         return true;
     if (abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK && board.teamOn(regionY[2] + 1, y) != team)
         return true;
-    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != team)
+    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && regionY[0] != x && board.teamOn(regionY[0], y) != team)
         return true;
-    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != team)
+    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && regionY[3] != x && board.teamOn(regionY[3], y) != team)
         return true;
 
     // 纵向着法
@@ -218,9 +218,9 @@ bool relationship_hasProtector(Board &board, int x, int y)
         return true;
     if (abs(board.pieceidOn(x, regionX[2] + 1)) == R_ROOK && board.teamOn(x, regionX[2] + 1) != team)
         return true;
-    if (abs(board.pieceidOn(x, regionX[0])) == R_CANNON && board.teamOn(x, regionX[0]) != team)
+    if (abs(board.pieceidOn(x, regionX[0])) == R_CANNON && regionX[0] != y && board.teamOn(x, regionX[0]) != team)
         return true;
-    if (abs(board.pieceidOn(x, regionX[3])) == R_CANNON && board.teamOn(x, regionX[3]) != team)
+    if (abs(board.pieceidOn(x, regionX[3])) == R_CANNON && regionX[3] != y && board.teamOn(x, regionX[3]) != team)
         return true;
 
     return false;
@@ -243,6 +243,19 @@ bool isRiveredPawn(Board &board, int x, int y)
         return true;
     }
     return false;
+}
+
+/// @brief 获取走法列表中的吃子走法
+/// @param board
+/// @param moves
+/// @return
+MOVES getCaptureMoves(Board& board, MOVES moves)
+{
+    MOVES captureMoves;
+    for (const Move& move : moves)
+        if (board.pieceidOn(move.x2, move.y2) != 0)
+            captureMoves.emplace_back(move);
+    return captureMoves;
 }
 
 /// @brief 将fen转PIECEID_MAP

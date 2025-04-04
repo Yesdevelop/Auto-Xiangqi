@@ -680,13 +680,13 @@ MOVES Moves::getGoodCaptures(Board &board)
     result.reserve(64);
 
     const std::map<PIECEID, int> weightPairs{
+        {R_KING, 4},
         {R_ROOK, 4},
         {R_CANNON, 3},
         {R_KNIGHT, 3},
         {R_BISHOP, 2},
         {R_GUARD, 2},
         {R_PAWN, 1},
-        {R_KING, 1},
     };
     std::vector<std::vector<Move>> orderMap{{}, {}, {}, {}, {}, {}, {}, {}, {}};
 
