@@ -165,11 +165,11 @@ Result Search::searchRoot(Board &board, int depth)
         }
         else
         {
-            /*vl = -searchCut(board, depth - 1, -vlBest);
+            vl = -searchCut(board, depth - 1, -vlBest);
             if (vl > vlBest)
-            {*/
+            {
                 vl = -searchPV(board, depth - 1, -INF, -vlBest);
-            //}
+            }
         }
 
         board.undoMove(move, eaten);
@@ -233,6 +233,20 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
     if (!mChecking)
     {
+        // futility pruning
+        if (depth == 1)
+        {
+            int vl = board.evaluate();
+            if (vl <= beta - futilityPruningMargin)
+            {
+                return vl;
+            }
+            if (vl >= beta + futilityPruningMargin)
+            {
+
+                return vl;
+            }
+        }
         // multi probCut
         if (depth % 4 == 0)
         {
@@ -342,6 +356,20 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
     if (!mChecking)
     {
+        // futility pruning
+        if (depth == 1)
+        {
+            int vl = board.evaluate();
+            if (vl <= beta - futilityPruningMargin)
+            {
+                return vl;
+            }
+            if (vl >= beta + futilityPruningMargin)
+            {
+
+                return vl;
+            }
+        }
         // multi probCut and null pruning
         if (!banNullMove)
         {
