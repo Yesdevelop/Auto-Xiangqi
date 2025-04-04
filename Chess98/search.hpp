@@ -61,7 +61,6 @@ private:
         }
         board.distance = 0;
         board.initEvaluate();
-        SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
     }
 
     void searchStep(Move &bestMove)

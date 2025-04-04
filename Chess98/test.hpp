@@ -2,16 +2,8 @@
 #include "search.hpp"
 #include "ui.hpp"
 
-void testWithUI(TEAM team, int maxDepth);
-
-void test(TEAM team = BLACK, int maxDepth = 16)
-{
-    testWithUI(team, maxDepth);
-}
-
-
 /// 带UI的测试
-void testWithUI(TEAM team, int maxDepth)
+void ui(TEAM team, int maxDepth)
 {
     int count = 0;
     PIECEID_MAP pieceidMap = DEFAULT_MAP;
@@ -21,7 +13,7 @@ void testWithUI(TEAM team, int maxDepth)
 
     serverInit(board);
 
-    Search s;
+    Search s{};
     std::cout << "Open Chess98/UI/index.html to play chess" << std::endl;
 
     std::string moveFileContent = "____";
@@ -97,7 +89,7 @@ void testWithUI(TEAM team, int maxDepth)
                         eatens.emplace_back(board.doMove(move));
                         break;
                     }
-                    Sleep(50);
+                    wait(50);
                 }
                 else
                 {

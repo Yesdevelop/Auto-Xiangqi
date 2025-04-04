@@ -249,10 +249,10 @@ bool isRiveredPawn(Board &board, int x, int y)
 /// @param board
 /// @param moves
 /// @return
-MOVES getCaptureMoves(Board& board, MOVES moves)
+MOVES getCaptureMoves(Board &board, MOVES moves)
 {
     MOVES captureMoves;
-    for (const Move& move : moves)
+    for (const Move &move : moves)
         if (board.pieceidOn(move.x2, move.y2) != 0)
             captureMoves.emplace_back(move);
     return captureMoves;
@@ -321,4 +321,9 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     }
 
     return pieceidMap;
+}
+
+void wait(int ms)
+{
+    Sleep(ms);
 }

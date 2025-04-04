@@ -100,6 +100,6 @@ void setBoardCode(Board board)
 void serverInit(Board board)
 {
     system("start /min node ../UI/server.js");
-    Sleep(200);
+    wait(200);
     setBoardCode(board);
 }

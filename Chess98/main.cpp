@@ -2,7 +2,8 @@
 
 int main()
 {
-    test(RED, 16);
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+    ui(RED, 16);
 
     return 0;
 }
