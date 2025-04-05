@@ -43,6 +43,16 @@ public:
     static MOVES getCaptureMoves(Board &board);
 
     static MOVES getGoodCaptures(Board &board);
+
+    static MOVES rook_checking(TEAM team, Board &board, int x, int y);
+
+    static MOVES cannon_checking(TEAM team, Board &board, int x, int y);
+
+    static MOVES knight_checking(TEAM team, Board &board, int x, int y);
+
+    static MOVES pawn_checking(TEAM team, Board &board, int x, int y);
+
+    static MOVES getCheckingMoves(Board &board);
 };
 
 MOVES Moves::king(TEAM team, Board &board, int x, int y)
@@ -722,6 +732,80 @@ MOVES Moves::getGoodCaptures(Board &board)
         for (const Move &move : orderMap[score])
         {
             result.emplace_back(move);
+        }
+    }
+
+    return result;
+}
+
+///// @brief 获取当前队伍所有将军着法
+///// @param board
+///// @return
+MOVES Moves::getCheckingMoves(Board &board)
+{
+    MOVES result{};
+    result.reserve(16);
+
+    // 有无将
+    if (!board.isKingLive(board.team))
+        return MOVES{};
+    // 对面笑
+    for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
+    {
+        if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
+        {
+            if (board.team == RED)
+                return MOVES{
+                    Move{board.pieceRedKing->x, board.pieceRedKing->y,
+                         board.pieceBlackKing->x, board.pieceBlackKing->y}};
+            else
+                return MOVES{
+                    Move{board.pieceBlackKing->x, board.pieceBlackKing->y,
+                         board.pieceRedKing->x, board.pieceRedKing->y}};
+        }
+        if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
+            break;
+    }
+
+    MOVES result{};
+    result.reserve(16);
+
+    MOVES moves = Moves::getMoves(board);
+    for (const Move &move : moves)
+    {
+        PIECEID pieceid = abs(board.pieceidOn(move.x1, move.y1));
+        Piece *king = (board.team == RED) ? board.pieceBlackKing : board.pieceRedKing;
+        if (pieceid == R_KING || pieceid == R_GUARD || pieceid == R_BISHOP)
+            continue;
+        // 有攻击力的子只有车、炮、马、兵
+        if (pieceid != R_KNIGHT)
+        {
+            if (move.x2 != king->x || move.y2 != king->y)
+                continue;
+            if (pieceid == R_ROOK)
+            {
+                for (const Move &_ : Moves::rook_capture(board.team, board, move.x2, move.y2))
+                    if (board.pieceidOn(_.x2, _.y2) == king->pieceid)
+                        result.emplace_back(move);
+            }
+            else if (pieceid == R_CANNON)
+            {
+                for (const Move &_ : Moves::cannon_capture(board.team, board, move.x2, move.y2))
+                    if (board.pieceidOn(_.x2, _.y2) == king->pieceid)
+                        result.emplace_back(move);
+            }
+            else if (pieceid == R_PAWN)
+            {
+                for (const Move &_ : Moves::pawn_capture(board.team, board, move.x2, move.y2))
+                    if (board.pieceidOn(_.x2, _.y2) == king->pieceid)
+                        result.emplace_back(move);
+            }
+        }
+        else
+        {
+            for (const Move &_ : Moves::knight_capture(board.team, board, move.x2, move.y2))
+                if (board.pieceidOn(_.x2, _.y2) == king->pieceid)
+                    result.emplace_back(move);
         }
     }
 
