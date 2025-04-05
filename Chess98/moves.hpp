@@ -44,14 +44,6 @@ public:
 
     static MOVES getGoodCaptures(Board &board);
 
-    static MOVES rook_checking(TEAM team, Board &board, int x, int y);
-
-    static MOVES cannon_checking(TEAM team, Board &board, int x, int y);
-
-    static MOVES knight_checking(TEAM team, Board &board, int x, int y);
-
-    static MOVES pawn_checking(TEAM team, Board &board, int x, int y);
-
     static MOVES getCheckingMoves(Board &board);
 };
 
@@ -743,9 +735,6 @@ MOVES Moves::getGoodCaptures(Board &board)
 ///// @return
 MOVES Moves::getCheckingMoves(Board &board)
 {
-    MOVES result{};
-    result.reserve(16);
-
     // 有无将
     if (!board.isKingLive(board.team))
         return MOVES{};
