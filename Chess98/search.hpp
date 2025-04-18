@@ -141,6 +141,11 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         }
     }
 
+    Piece eaten = board.doMove(bestNode.move);
+    if (inCheck(board) == true)
+        bestNode.move.isCheckingMove = true;
+    board.undoMove(bestNode.move, eaten);
+
     return bestNode;
 }
 
@@ -389,10 +394,17 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
         }
     }
-    // 设置上一步的着法为将军着法
     else
     {
+        // 棋规
         board.historyMoves.rbegin()->isCheckingMove = true;
+        if (board.historyMoves.size() > 5)
+        {
+            if (board.historyMoves[board.historyMoves.size() - 5] == board.historyMoves.back())
+            {
+                return INF;
+            }
+        }
     }
 
     nodeType type = alphaType;
@@ -527,10 +539,17 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
-    // 设置上一步的着法为将军着法
     else
     {
+        // 棋规
         board.historyMoves.rbegin()->isCheckingMove = true;
+        if (board.historyMoves.size() > 5)
+        {
+            if (board.historyMoves[board.historyMoves.size() - 5] == board.historyMoves.back())
+            {
+                return INF;
+            }
+        }
     }
 
     nodeType type = alphaType;
@@ -632,6 +651,18 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
         vlBest = vl;
         alpha = std::max<int>(alpha, vl);
+    }
+    else
+    {
+        // 棋规
+        board.historyMoves.rbegin()->isCheckingMove = true;
+        if (board.historyMoves.size() > 5)
+        {
+            if (board.historyMoves[board.historyMoves.size() - 5] == board.historyMoves.back())
+            {
+                return INF;
+            }
+        }
     }
 
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getGoodCaptures(board);
