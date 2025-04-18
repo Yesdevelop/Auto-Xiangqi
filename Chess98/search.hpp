@@ -109,12 +109,12 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     std::cout << "---------------------" << std::endl;
 
     // 开局库搜索
-    Result openbookResult = Search::searchOpenBook(board);
+    /*Result openbookResult = Search::searchOpenBook(board);
     if (openbookResult.score != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
         return openbookResult;
-    }
+    }*/
 
     this->searchInit(board);
     this->rootMoves = Moves::getMoves(board);
@@ -400,7 +400,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         board.historyMoves.rbegin()->isCheckingMove = true;
         if (board.historyMoves.size() > 5)
         {
-            if (board.historyMoves[board.historyMoves.size() - 5] == board.historyMoves.back())
+            const Move& lastMove = board.historyMoves[board.historyMoves.size() - 5];
+            if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
             {
                 return INF;
             }
@@ -545,7 +546,8 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         board.historyMoves.rbegin()->isCheckingMove = true;
         if (board.historyMoves.size() > 5)
         {
-            if (board.historyMoves[board.historyMoves.size() - 5] == board.historyMoves.back())
+            const Move& lastMove = board.historyMoves[board.historyMoves.size() - 5];
+            if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
             {
                 return INF;
             }
@@ -658,7 +660,8 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         board.historyMoves.rbegin()->isCheckingMove = true;
         if (board.historyMoves.size() > 5)
         {
-            if (board.historyMoves[board.historyMoves.size() - 5] == board.historyMoves.back())
+            const Move& lastMove = board.historyMoves[board.historyMoves.size() - 5];
+            if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
             {
                 return INF;
             }
