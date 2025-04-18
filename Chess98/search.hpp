@@ -109,12 +109,12 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     std::cout << "---------------------" << std::endl;
 
     // 开局库搜索
-    /*Result openbookResult = Search::searchOpenBook(board);
+    Result openbookResult = Search::searchOpenBook(board);
     if (openbookResult.score != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
         return openbookResult;
-    }*/
+    }
 
     this->searchInit(board);
     this->rootMoves = Moves::getMoves(board);
