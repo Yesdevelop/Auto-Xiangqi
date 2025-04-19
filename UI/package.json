@@ -1,0 +1,14 @@
+{
+    "name": "chess98-ui",
+    "version": "1.0.0",
+    "description": "A front-end project for Chess98 UI",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "selenium-webdriver": "^4.12.0"
+    }
+}

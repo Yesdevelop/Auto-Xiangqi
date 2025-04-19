@@ -70,18 +70,26 @@ void setBoardCode(Board board)
 {
     BOARD_CODE code = generateCode(board);
 
-    const BOARD_CODE jsPutCode =
+    const std::string jsPutCode =
         "\
         const http = require('http')\n\
         const options = {\n\
             hostname: '127.0.0.1',\n\
-            path : '/?boardcode=" +
+            path: '/?boardcode=" +
         code + "',\n\
-            port : 9494,\n\
+            port: 9494,\n\
             method : 'PUT'\n\
         }\n\
         http.request(options).end();\n\
-    ";
+        const options2 = {\n\
+            hostname: '127.0.0.1',\n\
+            path: '/?move=" +
+            std::to_string(board.historyMoves.back().id) + "',\n\
+            port: 9494,\n\
+            method : 'PUT'\n\
+        }\n\
+        http.request(options2).end();\n\
+            ";
 
     FILE *file = nullptr;
     errno_t result = fopen_s(&file, "./_put_.js", "w+");
