@@ -188,12 +188,12 @@ Piece Board::piecePosition(int x, int y)
         }
         else
         {
-            return Piece{EMPTY_PIECEID, -1, -1, -1};
+            return Piece{EMPTY_PIECEID, -1, -1, EMPTY_INDEX};
         }
     }
     else
     {
-        return Piece{OVERFLOW_PIECEID, -1, -1, -1};
+        return Piece{OVERFLOW_PIECEID, -1, -1, EMPTY_INDEX};
     }
 }
 
@@ -265,7 +265,7 @@ std::vector<Piece> Board::getPiecesByTeam(TEAM team)
     std::vector<Piece> allPieces = this->getAllLivePieces();
     for (Piece piece : allPieces)
     {
-        if (piece.getTeam() == team)
+        if (piece.team() == team)
         {
             result.emplace_back(piece);
         }
@@ -305,7 +305,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
         this->isBlackKingLive = false;
     }
     // 更新评估分
-    if (attackStarter.getTeam() == RED)
+    if (attackStarter.team() == RED)
     {
         int valNewPos = pieceWeights[attackStarter.pieceid][x2][y2];
         int valOldPos = pieceWeights[attackStarter.pieceid][x1][y1];
@@ -394,7 +394,7 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
         this->isBlackKingLive = true;
     }
     // 更新评估分
-    if (attackStarter.getTeam() == RED)
+    if (attackStarter.team() == RED)
     {
         int valPos1 = pieceWeights[attackStarter.pieceid][x1][y1];
         int valPos2 = pieceWeights[attackStarter.pieceid][x2][y2];
@@ -471,7 +471,7 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
     for (const Piece &piece : this->getAllLivePieces())
     {
         PIECEID pid = std::abs(piece.pieceid);
-        if (piece.getTeam() == RED)
+        if (piece.team() == RED)
         {
             if (piece.y >= 5)
             {
@@ -493,7 +493,7 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
                 }
             }
         }
-        else if (piece.getTeam() == BLACK)
+        else if (piece.team() == BLACK)
         {
             if (piece.y <= 4)
             {
@@ -643,25 +643,16 @@ void Board::print()
             if (i == -1)
             {
                 if (j == -1)
-                {
                     std::cout << "X ";
-                }
                 else
-                {
                     std::cout << j << " ";
-                }
             }
             else
             {
                 if (j == -1)
-                {
                     std::cout << i << " ";
-                }
                 else
-                {
-
-                    std::cout << getPieceName(this->pieceidOn(i, j));
-                }
+                    std::cout << PIECE_NAME_PAIRS.at(this->pieceidOn(i, j));
             }
         }
         std::cout << "\n";

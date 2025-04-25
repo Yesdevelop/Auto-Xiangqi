@@ -1,5 +1,11 @@
+/**
+ * 说明见 /DEV.md
+ */
+
 #pragma once
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include <cassert>
 #include <iostream>
 #include <algorithm>
@@ -12,8 +18,13 @@
 #include <cmath>
 #include <thread>
 
-using PIECE_INDEX = int;
+const int INF = 1000000;
+const int BAN = INF - 2000;
+const int ILLEGAL_VAL = INF * 2;
 using U64 = unsigned long long;
+
+using PIECE_INDEX = int;
+const PIECE_INDEX EMPTY_INDEX = -1;
 
 using PIECEID = int;
 const PIECEID EMPTY_PIECEID = 0;
@@ -50,9 +61,44 @@ PIECEID_MAP DEFAULT_MAP{
      {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
      {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
      {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
-const int INF = 1000000;
-const int BAN = INF - 2000;
-const int ILLEGAL_VAL = INF * 2;
+
+std::map<PIECEID, std::string> PIECE_NAME_PAIRS {
+    {R_KING, "RK"},
+    {R_GUARD, "RG"},
+    {R_BISHOP, "RB"},
+    {R_KNIGHT, "RN"},
+    {R_ROOK, "RR"},
+    {R_CANNON, "RC"},
+    {R_PAWN, "RP"},
+    {B_KING, "BK"},
+    {B_GUARD, "BG"},
+    {B_BISHOP, "BB"},
+    {B_KNIGHT, "BN"},
+    {B_ROOK, "BR"},
+    {B_CANNON, "BC"},
+    {B_PAWN, "BP"},
+    {EMPTY_PIECEID, "__"},
+    {OVERFLOW_PIECEID, "  "}
+};
+
+std::map<std::string, PIECEID> NAME_PIECE_PAIRS {
+    {"RK", R_KING},
+    {"RG", R_GUARD},
+    {"RB", R_BISHOP},
+    {"RN", R_KNIGHT},
+    {"RR", R_ROOK},
+    {"RC", R_CANNON},
+    {"RP", R_PAWN},
+    {"BK", B_KING},
+    {"BG", B_GUARD},
+    {"BB", B_BISHOP},
+    {"BN", B_KNIGHT},
+    {"BR", B_ROOK},
+    {"BC", B_CANNON},
+    {"BP", B_PAWN},
+    {"__", EMPTY_PIECEID},
+    {"  ", OVERFLOW_PIECEID}
+};
 
 /// @brief 棋子类
 class Piece
@@ -64,7 +110,7 @@ public:
           y(y),
           pieceIndex(pieceIndex) {}
 
-    TEAM getTeam() const
+    TEAM team() const
     {
         if (this->pieceid == EMPTY_PIECEID)
         {
@@ -90,6 +136,8 @@ public:
     PIECE_INDEX pieceIndex = -1;
     bool isLive = true;
 };
+
+using PIECES = std::vector<Piece>;
 
 /// @brief 着法类
 class Move
@@ -126,39 +174,11 @@ public:
 
 using MOVES = std::vector<Move>;
 
-/// @brief 获取棋子名称
-/// @param pieceid
-/// @return
-std::string getPieceName(PIECEID pieceid)
+/// @brief 根节点类，记录搜索结果
+class Result
 {
-    if (pieceid == R_KING)
-        return "RK";
-    else if (pieceid == R_GUARD)
-        return "RG";
-    else if (pieceid == R_ROOK)
-        return "RR";
-    else if (pieceid == R_BISHOP)
-        return "RB";
-    else if (pieceid == R_KNIGHT)
-        return "RN";
-    else if (pieceid == R_CANNON)
-        return "RC";
-    else if (pieceid == R_PAWN)
-        return "RP";
-    else if (pieceid == B_KING)
-        return "BK";
-    else if (pieceid == B_GUARD)
-        return "BG";
-    else if (pieceid == B_ROOK)
-        return "BR";
-    else if (pieceid == B_BISHOP)
-        return "BB";
-    else if (pieceid == B_KNIGHT)
-        return "BN";
-    else if (pieceid == B_CANNON)
-        return "BC";
-    else if (pieceid == B_PAWN)
-        return "BP";
-    else
-        return "  ";
-}
+public:
+    Result(Move move, int score) : move(move), val(score) {}
+    Move move{};
+    int val = 0;
+};

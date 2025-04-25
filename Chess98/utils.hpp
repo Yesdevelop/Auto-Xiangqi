@@ -9,12 +9,12 @@ bool inCheck(Board &board)
     Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
     int x = king->x;
     int y = king->y;
-    int team = king->getTeam();
+    int team = king->team();
 
     // 判断敌方的兵是否在附近
     bool c1 = abs(board.pieceidOn(king->x + 1, king->y)) == R_PAWN;
     bool c2 = abs(board.pieceidOn(king->x - 1, king->y)) == R_PAWN;
-    bool c3 = abs(board.pieceidOn(king->x, (king->getTeam() == RED ? king->y - 1 : king->y + 1))) == R_PAWN;
+    bool c3 = abs(board.pieceidOn(king->x, (king->team() == RED ? king->y - 1 : king->y + 1))) == R_PAWN;
     if (c1 || c2 || c3)
     {
         return true;
@@ -69,14 +69,14 @@ bool inCheck(Board &board)
     BITLINE bitlineY = board.getBitLineY(king->y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, king->x, 8);
     if ((abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[1] - 1, y)) == R_KING) &&
-        board.teamOn(regionY[1] - 1, y) != king->getTeam())
+        board.teamOn(regionY[1] - 1, y) != king->team())
         return true;
     if ((abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[2] + 1, y)) == R_KING) &&
-        board.teamOn(regionY[2] + 1, y) != king->getTeam())
+        board.teamOn(regionY[2] + 1, y) != king->team())
         return true;
-    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != king->getTeam())
+    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != king->team())
         return true;
-    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != king->getTeam())
+    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != king->team())
         return true;
 
     // 纵向着法
@@ -323,7 +323,11 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
+/// @brief 等待
+/// @param ms
 void wait(int ms)
 {
+    #ifdef _WIN32
     Sleep(ms);
+    #endif
 }

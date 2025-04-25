@@ -10,10 +10,8 @@ BOARD_CODE generateCode(Board board)
     {
         for (int j = 0; j < 10; j++)
         {
-            PIECEID piece = board.pieceidOn(i, j);
-            auto name = getPieceName(piece);
-            if (name == "  ")
-                name = "__";
+            PIECEID pieceid = board.pieceidOn(i, j);
+            std::string name = PIECE_NAME_PAIRS.at(pieceid);
             code += name;
         }
     }
@@ -30,38 +28,7 @@ PIECEID_MAP decode(BOARD_CODE code)
         char c1 = code[i * size_t(2) - size_t(1)];
         char c2 = code[i * size_t(2)];
         std::string pieceName{c1, c2};
-        if (pieceName == "__")
-            result[x][y] = 0;
-        else if (pieceName == "RR")
-            result[x][y] = R_ROOK;
-        else if (pieceName == "RN")
-            result[x][y] = R_KNIGHT;
-        else if (pieceName == "RB")
-            result[x][y] = R_BISHOP;
-        else if (pieceName == "RG")
-            result[x][y] = R_GUARD;
-        else if (pieceName == "RK")
-            result[x][y] = R_KING;
-        else if (pieceName == "RC")
-            result[x][y] = R_CANNON;
-        else if (pieceName == "RP")
-            result[x][y] = R_PAWN;
-        else if (pieceName == "BR")
-            result[x][y] = B_ROOK;
-        else if (pieceName == "BN")
-            result[x][y] = B_KNIGHT;
-        else if (pieceName == "BB")
-            result[x][y] = B_BISHOP;
-        else if (pieceName == "BG")
-            result[x][y] = B_GUARD;
-        else if (pieceName == "BK")
-            result[x][y] = B_KING;
-        else if (pieceName == "BC")
-            result[x][y] = B_CANNON;
-        else if (pieceName == "BP")
-            result[x][y] = B_PAWN;
-        else
-            std::cerr << "Invalid piece name: " << pieceName << std::endl;
+        result[x][y] = NAME_PIECE_PAIRS.at(pieceName);
     }
     return result;
 }

@@ -14,7 +14,7 @@ void ui(TEAM team, int maxDepth)
     serverInit(board);
 
     Search s{};
-    std::cout << "Open Chess98/UI/index.html to play chess" << std::endl;
+    std::cout << "Open Chess98/UI/index.html to play chess\n" << std::endl;
 
     std::string moveFileContent = "____";
     std::vector<Piece> eatens{};
@@ -39,9 +39,7 @@ void ui(TEAM team, int maxDepth)
                 moveFileContent = std::string(buffer).substr(0, 4);
             }
             else
-            {
                 std::cerr << "CANNOT OPEN FILE!" << result << std::endl;
-            }
         }
         else
         {
@@ -92,9 +90,7 @@ void ui(TEAM team, int maxDepth)
                     wait(50);
                 }
                 else
-                {
                     std::cerr << "CANNOT OPEN FILE!" << result << std::endl;
-                }
             }
         }
     }

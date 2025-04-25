@@ -4,15 +4,6 @@
 #include "utils.hpp"
 #include "book.hpp"
 
-/// @brief 根节点
-class Result
-{
-public:
-    Result(Move move, int score) : move(move), score(score) {}
-    Move move{};
-    int score = 0;
-};
-
 class Search
 {
 public:
@@ -110,7 +101,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     // 开局库搜索
     Result openbookResult = Search::searchOpenBook(board);
-    if (openbookResult.score != -1)
+    if (openbookResult.val != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
         return openbookResult;
@@ -126,11 +117,11 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     {
         bestNode = searchRoot(board, depth);
         std::cout << "depth: " << depth + 1;
-        std::cout << " | vl: " << bestNode.score;
+        std::cout << " | vl: " << bestNode.val;
         std::cout << " | moveid: " << bestNode.move.id;
         std::cout << " | duration(ms): " << clock() - start << std::endl;
         // 杀棋中止
-        if (std::abs(bestNode.score) >= BAN)
+        if (std::abs(bestNode.val) >= BAN)
         {
             break;
         }
