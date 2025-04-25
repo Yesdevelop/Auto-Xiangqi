@@ -70,6 +70,7 @@ void setBoardCode(Board board)
 {
     BOARD_CODE code = generateCode(board);
 
+	const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
     const std::string jsPutCode =
         "\
         const http = require('http')\n\
@@ -84,7 +85,7 @@ void setBoardCode(Board board)
         const options2 = {\n\
             hostname: '127.0.0.1',\n\
             path: '/?move=" +
-            std::to_string(board.historyMoves.back().id) + "',\n\
+            historyMovesBack + "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\
@@ -107,8 +108,7 @@ void setBoardCode(Board board)
 
 void serverInit(Board board)
 {
-    // system("powershell.exe -command \"& {Start-Process -WindowStyle hidden node ../UI/server.js}\"");
-    system("node ../UI/server.js");
+    system("powershell.exe -command \"& {Start-Process -WindowStyle hidden node ../UI/server.js}\"");
     wait(200);
     setBoardCode(board);
 }
