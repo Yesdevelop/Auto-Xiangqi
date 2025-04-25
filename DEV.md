@@ -29,4 +29,82 @@
     - val
     - move
 
+## bitboard.hpp
+
+内部实现细节很难说，我已经把它和 Board 类绑了 friend，毕竟这俩确实联系蛮紧密的，然后把其他方法全都放在了 private 里。可能用到的有这几个：
+
+- getCannonRegion
+- getRookRegion
+- Board::getBitlineX
+- Board::getBitlineY
+
+这是着法生成的例子：
+
+```cpp
+MOVES Moves::rook(TEAM team, Board &board, int x, int y) // 车的着法生成
+{
+    MOVES result{};
+    result.reserve(64);
+
+    // 纵向着法
+    BITLINE bitlineX = board.getBitLineX(x); // 纵向着法就是棋盘上长度为10的那一列
+    REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9); // 最后一个参数放9是告诉这个函数要获取0~9的REGION，获取一列10个子就代9进去
+    for (int y2 = y + 1; y2 < regionX[1]; y2++)
+        result.emplace_back(Move{x, y, x, y2});
+    if (board.teamOn(x, regionX[1]) != team)
+        result.emplace_back(Move{x, y, x, regionX[1]});
+    for (int y2 = y - 1; y2 > regionX[0]; y2--)
+        result.emplace_back(Move{x, y, x, y2});
+    if (board.teamOn(x, regionX[0]) != team)
+        result.emplace_back(Move{x, y, x, regionX[0]});
+
+    // 横向着法
+    BITLINE bitlineY = board.getBitLineY(y); // 横向着法就是长度为9的那一行
+    REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8); // 最后一个参数放8，获取一行就代8进去
+    for (int x2 = x + 1; x2 < regionY[1]; x2++)
+        result.emplace_back(Move{x, y, x2, y});
+    if (board.teamOn(regionY[1], y) != team)
+        result.emplace_back(Move{x, y, regionY[1], y});
+    for (int x2 = x - 1; x2 > regionY[0]; x2--)
+        result.emplace_back(Move{x, y, x2, y});
+    if (board.teamOn(regionY[0], y) != team)
+        result.emplace_back(Move{x, y, regionY[0], y});
+
+    return result;
+}
+
+MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
+{
+    MOVES result{};
+    result.reserve(64);
+
+    // 横向着法
+    BITLINE bitlineY = board.getBitLineY(y);
+    REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
+    for (int x2 = x + 1; x2 <= regionY[2]; x2++)
+        result.emplace_back(Move{x, y, x2, y});
+    if (board.teamOn(regionY[3], y) == -team && regionY[3] != regionY[2])
+        result.emplace_back(Move{x, y, regionY[3], y});
+    for (int x2 = x - 1; x2 >= regionY[1]; x2--)
+        result.emplace_back(Move{x, y, x2, y});
+    if (board.teamOn(regionY[0], y) == -team && regionY[0] != regionY[1])
+        result.emplace_back(Move{x, y, regionY[0], y});
+
+    // 纵向着法
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
+    for (int y2 = y + 1; y2 <= regionX[2]; y2++)
+        result.emplace_back(Move{x, y, x, y2});
+    if (board.teamOn(x, regionX[3]) == -team && regionX[3] != regionX[2])
+        result.emplace_back(Move{x, y, x, regionX[3]});
+    for (int y2 = y - 1; y2 >= regionX[1]; y2--)
+        result.emplace_back(Move{x, y, x, y2});
+    if (board.teamOn(x, regionX[0]) == -team && regionX[0] != regionX[1])
+        result.emplace_back(Move{x, y, x, regionX[0]});
+
+    return result;
+}
+```
+
+
 未完待续...

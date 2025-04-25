@@ -40,43 +40,6 @@ public:
         }
     }
 
-    /// @brief 步进
-    /// @param x1
-    /// @param y1
-    /// @param x2
-    /// @param y2
-    /// @return 是否有吃子
-    void doMove(int x1, int y1, int x2, int y2)
-    {
-        bool ret = bool(this->getBit(x2, y2));
-        this->deleteBit(x1, y1);
-        this->setBit(x2, y2);
-    }
-
-    /// @brief 撤销步进
-    /// @param x1
-    /// @param y1
-    /// @param x2
-    /// @param y2
-    /// @param eaten
-    void undoMove(int x1, int y1, int x2, int y2, bool eaten)
-    {
-        this->setBit(x1, y1);
-        if (!eaten)
-        {
-            this->deleteBit(x2, y2);
-        }
-    }
-
-    /// @brief 获取bitline二进制的第n位(从右边到左边)
-    /// @param bitline
-    /// @param index
-    /// @return
-    int getBit(BITLINE bitline, int index) const
-    {
-        return (bitline >> index) & 1;
-    }
-
     /// @brief 获取车的着法缓存
     /// @param bitline
     /// @param index
@@ -116,6 +79,44 @@ public:
     BITARRAY_Y yBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 private:
+    friend class Board;
+
+    /// @brief 获取bitline二进制的第n位(从右边到左边)
+    /// @param bitline
+    /// @param index
+    /// @return
+    int getBit(BITLINE bitline, int index) const
+    {
+        return (bitline >> index) & 1;
+    }
+    /// @brief 步进
+    /// @param x1
+    /// @param y1
+    /// @param x2
+    /// @param y2
+    /// @return 是否有吃子
+    void doMove(int x1, int y1, int x2, int y2)
+    {
+        bool ret = bool(this->getBit(x2, y2));
+        this->deleteBit(x1, y1);
+        this->setBit(x2, y2);
+    }
+
+    /// @brief 撤销步进
+    /// @param x1
+    /// @param y1
+    /// @param x2
+    /// @param y2
+    /// @param eaten
+    void undoMove(int x1, int y1, int x2, int y2, bool eaten)
+    {
+        this->setBit(x1, y1);
+        if (!eaten)
+        {
+            this->deleteBit(x2, y2);
+        }
+    }
+
     /// @brief 设置棋盘上x, y的数为1
     /// @param x
     /// @param y

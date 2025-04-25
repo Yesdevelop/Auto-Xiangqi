@@ -11,13 +11,10 @@ public:
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
     Piece piecePosition(int x, int y);
-
     PIECEID pieceidOn(int x, int y);
     TEAM teamOn(int x, int y);
-
     std::vector<Piece> getAllLivePieces();
     std::vector<Piece> getPiecesByTeam(TEAM team);
-
     Piece doMove(int x1, int y1, int x2, int y2);
     Piece doMove(Move move);
     void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
