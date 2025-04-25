@@ -73,7 +73,7 @@ MOVES Moves::rook(TEAM team, Board &board, int x, int y) // 车的着法生成
     return result;
 }
 
-MOVES Moves::cannon(TEAM team, Board &board, int x, int y)
+MOVES Moves::cannon(TEAM team, Board &board, int x, int y) // 炮的四个值分别对应eaten1, start, end, eaten2，若没有eaten则eaten = start或者end
 {
     MOVES result{};
     result.reserve(64);

@@ -1,3 +1,7 @@
+/**
+ * 说明见 /DEV.md
+ */
+
 #pragma once
 #include "base.hpp"
 
@@ -8,8 +12,6 @@ using REGION_ROOK = std::array<int, 2>;
 using REGION_CANNON = std::array<int, 4>;
 using TYPE_ROOK_CACHE = std::array<std::array<REGION_ROOK, 10>, 1024>;
 using TYPE_CANNON_CACHE = std::array<std::array<REGION_CANNON, 10>, 1024>;
-
-// 炮的四个值分别对应eaten1, start, end, eaten2，若没有eaten则eaten = 端点
 
 /// @brief 位棋盘(车、炮着法生成)
 class BitBoard
