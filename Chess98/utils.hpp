@@ -1,6 +1,15 @@
 #pragma once
 #include "board.hpp"
 
+/// @brief 等待
+/// @param ms
+void wait(int ms)
+{
+    #ifdef _WIN32
+    Sleep(ms);
+    #endif
+}
+
 /// @brief 判断当前一方是否被将军
 /// @param board
 /// @return
@@ -323,11 +332,17 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
-/// @brief 等待
-/// @param ms
-void wait(int ms)
+/// @brief 当前局面下的着法合理性检测
+/// @param board
+/// @param move
+/// @return 若合理则返回true，否则返回false
+bool isValidMoveInSituation(Board& board, Move move)
 {
-    #ifdef _WIN32
-    Sleep(ms);
-    #endif
+    PIECEID attacker = board.pieceidOn(move.x1, move.y1);
+    if (attacker != move.starter.pieceid)
+        return false;
+
+    // TODO: 未完待续
+    
+    return true;
 }

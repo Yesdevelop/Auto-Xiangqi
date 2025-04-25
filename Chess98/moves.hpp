@@ -38,11 +38,11 @@ public:
 
     static MOVES generateCaptureMoves(Board &board, int x, int y);
 
+    static MOVES getCaptureMovesUnordered(Board &board);
+
     static MOVES getMoves(Board &board);
 
     static MOVES getCaptureMoves(Board &board);
-
-    static MOVES getGoodCaptures(Board &board);
 
     static MOVES getCheckingMoves(Board &board);
 };
@@ -591,50 +591,10 @@ MOVES Moves::generateCaptureMoves(Board &board, int x, int y)
         return MOVES{};
 }
 
-/// @brief 获取当前队伍所有可行着法
-/// @param team
-/// @return
-MOVES Moves::getMoves(Board &board)
-{
-    // 有无将
-    if (!board.isKingLive(board.team))
-        return MOVES{};
-    // 对面笑
-    for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
-    {
-        if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
-        {
-            if (board.team == RED)
-                return MOVES{
-                    Move{board.pieceRedKing->x, board.pieceRedKing->y,
-                         board.pieceBlackKing->x, board.pieceBlackKing->y}};
-            else
-                return MOVES{
-                    Move{board.pieceBlackKing->x, board.pieceBlackKing->y,
-                         board.pieceRedKing->x, board.pieceRedKing->y}};
-        }
-        if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
-            break;
-    }
-
-    MOVES result{};
-    result.reserve(64);
-
-    std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
-    for (const Piece &piece : pieces)
-    {
-        std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
-        for (Move move : moves)
-            result.emplace_back(move);
-    }
-
-    return result;
-}
-
 /// @brief 获取当前队伍所有吃子着法
 /// @param board
 /// @return
-MOVES Moves::getCaptureMoves(Board &board)
+MOVES Moves::getCaptureMovesUnordered(Board &board)
 {
     // 有无将
     if (!board.isKingLive(board.team))
@@ -671,12 +631,56 @@ MOVES Moves::getCaptureMoves(Board &board)
     return result;
 }
 
+/// @brief 获取当前队伍所有可行着法
+/// @param team
+/// @return
+MOVES Moves::getMoves(Board &board)
+{
+    // 有无将
+    if (!board.isKingLive(board.team))
+        return MOVES{};
+    // 对面笑
+    for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
+    {
+        if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
+        {
+            if (board.team == RED)
+                return MOVES{
+                    Move{board.pieceRedKing->x, board.pieceRedKing->y,
+                         board.pieceBlackKing->x, board.pieceBlackKing->y}};
+            else
+                return MOVES{
+                    Move{board.pieceBlackKing->x, board.pieceBlackKing->y,
+                         board.pieceRedKing->x, board.pieceRedKing->y}};
+        }
+        if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
+            break;
+    }
+
+    MOVES result{};
+    result.reserve(64);
+
+    std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
+    for (const Piece &piece : pieces)
+    {
+        std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
+        for (Move move : moves)
+        {
+            move.starter = board.piecePosition(move.x1, move.y1);
+            move.captured = board.piecePosition(move.x2, move.y2);
+            result.emplace_back(move);
+        }
+    }
+
+    return result;
+}
+
 /// @brief 获取当前队伍经过排序整理的吃子着法（SEE）
 /// @param board
 /// @return
-MOVES Moves::getGoodCaptures(Board &board)
+MOVES Moves::getCaptureMoves(Board &board)
 {
-    MOVES moves = Moves::getCaptureMoves(board);
+    MOVES moves = Moves::getCaptureMovesUnordered(board);
 
     MOVES result{};
     result.reserve(64);
@@ -690,7 +694,7 @@ MOVES Moves::getGoodCaptures(Board &board)
         {R_GUARD, 2},
         {R_PAWN, 1},
     };
-    std::vector<std::vector<Move>> orderMap{{}, {}, {}, {}, {}, {}, {}, {}, {}};
+    std::array<std::vector<Move>, 9> orderMap{};
 
     for (const Move &move : moves)
     {
@@ -721,8 +725,10 @@ MOVES Moves::getGoodCaptures(Board &board)
 
     for (int score = 8; score >= 1; score--)
     {
-        for (const Move &move : orderMap[score])
+        for (Move &move : orderMap[score])
         {
+            move.starter = board.piecePosition(move.x1, move.y1);
+            move.captured = board.piecePosition(move.x2, move.y2);
             result.emplace_back(move);
         }
     }

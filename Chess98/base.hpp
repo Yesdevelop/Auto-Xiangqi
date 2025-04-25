@@ -104,6 +104,7 @@ std::map<std::string, PIECEID> NAME_PIECE_PAIRS {
 class Piece
 {
 public:
+    Piece() = default;
     Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
         : pieceid(pieceid),
           x(x),
@@ -160,6 +161,8 @@ public:
     int val = 0;
     int moveType = 0;
     bool isCheckingMove = false;
+    Piece starter{};
+    Piece captured{};
 
     constexpr bool operator==(const Move &move) const
     {

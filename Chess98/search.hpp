@@ -659,7 +659,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         }
     }
 
-    MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getGoodCaptures(board);
+    MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
 
     for (const Move &move : availableMoves)
     {
