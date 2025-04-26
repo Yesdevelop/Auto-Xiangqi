@@ -7,6 +7,8 @@ void wait(int ms)
 {
 #ifdef _WIN32
     Sleep(ms);
+#elif __unix__
+    sleep(ms / 1000);
 #endif
 }
 
