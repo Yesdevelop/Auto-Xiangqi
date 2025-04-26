@@ -3,7 +3,6 @@
 #include "heuristic.hpp"
 #include "utils.hpp"
 #include "book.hpp"
-#define BAN_OPENBOOK 1
 
 class Search
 {

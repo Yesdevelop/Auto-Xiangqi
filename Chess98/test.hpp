@@ -24,7 +24,7 @@ void ui(TEAM team, int maxDepth)
         {
             count++;
             std::cout << count;
-            Result node = s.searchMain(board, maxDepth, 5);
+            Result node = s.searchMain(board, maxDepth, 3);
             eatens.emplace_back(board.doMove(node.move));
             setBoardCode(board);
 
