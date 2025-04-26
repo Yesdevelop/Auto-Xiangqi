@@ -620,7 +620,7 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
     MOVES result{};
     result.reserve(64);
 
-    std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
+    PIECES pieces = board.getPiecesByTeam(board.team);
     for (const Piece &piece : pieces)
     {
         std::vector<Move> moves = Moves::generateCaptureMoves(board, piece.x, piece.y);
@@ -660,13 +660,13 @@ MOVES Moves::getMoves(Board &board)
     MOVES result{};
     result.reserve(64);
 
-    std::vector<Piece> pieces = board.getPiecesByTeam(board.team);
+    PIECES pieces = board.getPiecesByTeam(board.team);
     for (const Piece &piece : pieces)
     {
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)
         {
-            move.starter = board.piecePosition(move.x1, move.y1);
+            move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
             result.emplace_back(move);
         }
@@ -727,7 +727,7 @@ MOVES Moves::getCaptureMoves(Board &board)
     {
         for (Move &move : orderMap[score])
         {
-            move.starter = board.piecePosition(move.x1, move.y1);
+            move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
             result.emplace_back(move);
         }

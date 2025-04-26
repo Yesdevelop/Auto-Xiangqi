@@ -5,9 +5,9 @@
 /// @param ms
 void wait(int ms)
 {
-    #ifdef _WIN32
+#ifdef _WIN32
     Sleep(ms);
-    #endif
+#endif
 }
 
 /// @brief 判断当前一方是否被将军
@@ -336,13 +336,117 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
 /// @param board
 /// @param move
 /// @return 若合理则返回true，否则返回false
-bool isValidMoveInSituation(Board& board, Move move)
+bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
-    if (attacker != move.starter.pieceid)
+    if (attacker != move.attacker.pieceid) // 若攻击者不一致，则一定是不合理着法
+        return false;
+    PIECEID captured = board.pieceidOn(move.x2, move.y2);
+    if (captured != 0 && board.teamOn(move.x2, move.y2) == board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
         return false;
 
-    // TODO: 未完待续
-    
+    // 分类
+    if (abs(attacker) == R_ROOK)
+    {
+        if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法，若横纵坐标都不相同，则一定不合理
+            return false;
+        // 生成车的着法范围，看是否有障碍物
+        BITLINE bitlineX = board.getBitLineX(move.x1);
+        if (move.id == 3949)
+        {
+            std::cout << "";
+        }
+        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, move.y1, 9);
+        if (move.y2 < regionX[0] || move.y2 > regionX[1])
+            return false;
+        // 横向
+        BITLINE bitlineY = board.getBitLineY(move.y1);
+        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, move.x1, 8);
+        if (move.x2 < regionY[0] || move.x2 > regionY[1])
+            return false;
+    }
+    else if (abs(attacker) == R_KNIGHT)
+    {
+        if (move.x1 == move.x2 || move.y1 == move.y2) // 马走法，若横纵坐标都相同，则一定不合理
+            return false;
+        if (abs(move.x1 - move.x2) + abs(move.y1 - move.y2) != 3) // 马走法，若横纵坐标差值不等于3，则一定不合理
+            return false;
+        if (move.x1 - 1 == move.x2 || move.x1 + 1 == move.x2) // 向哪一边走就判断那一边有没有障碍物
+        {
+            if (move.y1 - 2 == move.y2 && board.pieceidOn(move.x1, move.y1 - 1) != 0) // 若有障碍物则不合理
+                return false;
+            if (move.y1 + 2 == move.y2 && board.pieceidOn(move.x1, move.y1 + 1) != 0)
+                return false;
+        }
+        else
+        {
+            if (move.x1 - 2 == move.x2 && board.pieceidOn(move.x1 - 1, move.y1) != 0) // 若有障碍物则不合理
+                return false;
+            if (move.x1 + 2 == move.x2 && board.pieceidOn(move.x1 + 1, move.y1) != 0)
+                return false;
+        }
+        return true;
+    }
+    else if (abs(attacker) == R_BISHOP)
+    {
+        if (move.x1 == move.x2 || move.y1 == move.y2) // 象走法，若横纵坐标都相同，则一定不合理
+            return false;
+        // 象走法，若横纵坐标差值不相等，或者坐标差值不等于2，则一定不合理
+        if (abs(move.x1 - move.x2) != abs(move.y1 - move.y2) || abs(move.x1 - move.x2) != 2)
+            return false;
+        // 象走法，若横纵坐标差值等于2，则不能有障碍物
+        if (board.pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0)
+            return false;
+    }
+    else if (abs(attacker) == R_GUARD)
+    {
+        if (move.x1 == move.x2 || move.y1 == move.y2) // 士走法，若横纵坐标都相同，则一定不合理
+            return false;
+        // 士走法，若横纵坐标差值不等于1，则一定不合理
+        if (abs(move.x1 - move.x2) != 1 && abs(move.y1 - move.y2) != 1)
+            return false;
+    }
+    else if (abs(attacker) == R_KING)
+    {
+        if (move.x1 + 1 == move.x2 && move.y1 == move.y2)
+            return true;
+        if (move.x1 - 1 == move.x2 && move.y1 == move.y2)
+            return true;
+        if (move.x1 == move.x2 && move.y1 + 1 == move.y2)
+            return true;
+        if (move.x1 == move.x2 && move.y1 - 1 == move.y2)
+            return true;
+        return false;
+    }
+    else if (abs(attacker) == R_PAWN)
+    {
+        return true;
+    }
+    else if (abs(attacker) == R_CANNON)
+    {
+        if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法，若横纵坐标都不同，则一定不合理
+            return false;
+        // 生成炮的着法范围
+        BITLINE bitlineX = board.getBitLineX(move.x1);
+        REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, move.y1, 9);
+        if ((move.y2 < regionX[1] - 1 || move.y2 > regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
+            return false;
+        // 横向
+        BITLINE bitlineY = board.getBitLineY(move.y1);
+        REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, move.x1, 8);
+        if ((move.x2 < regionY[1] - 1 || move.x2 > regionY[2] + 1) && move.x2 != regionY[0] && move.x2 != regionY[3])
+            return false;
+    }
+    // 如果走了之后遭受将军，则不合理
+    Piece eaten = board.doMove(move);
+    board.team = -board.team;
+    if (inCheck(board))
+    {
+        board.undoMove(move, eaten);
+        return false;
+    }
+    board.team = -board.team;
+    board.undoMove(move, eaten);
+
     return true;
 }

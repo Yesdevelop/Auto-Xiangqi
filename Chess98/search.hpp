@@ -3,6 +3,7 @@
 #include "heuristic.hpp"
 #include "utils.hpp"
 #include "book.hpp"
+#define BAN_OPENBOOK 1
 
 class Search
 {
@@ -100,12 +101,14 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     std::cout << "---------------------" << std::endl;
 
     // 开局库搜索
+#ifndef BAN_OPENBOOK
     Result openbookResult = Search::searchOpenBook(board);
     if (openbookResult.val != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
         return openbookResult;
     }
+#endif
 
     this->searchInit(board);
     this->rootMoves = Moves::getMoves(board);
@@ -361,7 +364,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
             if (vl >= beta + futilityPruningMargin)
             {
-
                 return vl;
             }
         }
@@ -391,7 +393,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         board.historyMoves.rbegin()->isCheckingMove = true;
         if (board.historyMoves.size() > 5)
         {
-            const Move& lastMove = board.historyMoves[board.historyMoves.size() - 5];
+            const Move &lastMove = board.historyMoves[board.historyMoves.size() - 5];
             if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
             {
                 return INF;
@@ -492,7 +494,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
             if (vl >= beta + futilityPruningMargin)
             {
-
                 return vl;
             }
         }
@@ -537,7 +538,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         board.historyMoves.rbegin()->isCheckingMove = true;
         if (board.historyMoves.size() > 5)
         {
-            const Move& lastMove = board.historyMoves[board.historyMoves.size() - 5];
+            const Move &lastMove = board.historyMoves[board.historyMoves.size() - 5];
             if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
             {
                 return INF;
@@ -576,7 +577,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
         if (vl > vlBest)
         {
-
             vlBest = vl;
             pBestMove = &move;
             if (vl >= beta)
@@ -651,7 +651,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         board.historyMoves.rbegin()->isCheckingMove = true;
         if (board.historyMoves.size() > 5)
         {
-            const Move& lastMove = board.historyMoves[board.historyMoves.size() - 5];
+            const Move &lastMove = board.historyMoves[board.historyMoves.size() - 5];
             if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
             {
                 return INF;

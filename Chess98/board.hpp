@@ -13,8 +13,8 @@ public:
     Piece piecePosition(int x, int y);
     PIECEID pieceidOn(int x, int y);
     TEAM teamOn(int x, int y);
-    std::vector<Piece> getAllLivePieces();
-    std::vector<Piece> getPiecesByTeam(TEAM team);
+    PIECES getAllLivePieces();
+    PIECES getPiecesByTeam(TEAM team);
     Piece doMove(int x1, int y1, int x2, int y2);
     Piece doMove(Move move);
     void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
@@ -101,7 +101,7 @@ public:
 private:
     // 棋盘相关
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
-    std::vector<Piece> pieces{};
+    PIECES pieces{};
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};
     bool isRedKingLive = false;
@@ -240,9 +240,9 @@ TEAM Board::teamOn(int x, int y)
 
 /// @brief 获取棋盘上所有存活的棋子
 /// @return
-std::vector<Piece> Board::getAllLivePieces()
+PIECES Board::getAllLivePieces()
 {
-    std::vector<Piece> result{};
+    PIECES result{};
     for (Piece piece : this->pieces)
     {
         if (piece.isLive == true)
@@ -256,10 +256,10 @@ std::vector<Piece> Board::getAllLivePieces()
 /// @brief 获取指定队伍的所有存活的棋子
 /// @param team
 /// @return
-std::vector<Piece> Board::getPiecesByTeam(TEAM team)
+PIECES Board::getPiecesByTeam(TEAM team)
 {
-    std::vector<Piece> result{};
-    std::vector<Piece> allPieces = this->getAllLivePieces();
+    PIECES result{};
+    PIECES allPieces = this->getAllLivePieces();
     for (Piece piece : allPieces)
     {
         if (piece.team() == team)

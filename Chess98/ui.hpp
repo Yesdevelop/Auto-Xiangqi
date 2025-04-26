@@ -75,7 +75,7 @@ void setBoardCode(Board board)
 
 void serverInit(Board board)
 {
-    system("powershell.exe -command \"& {Start-Process -WindowStyle min node ../UI/server.js}\"");
+    system("powershell.exe -command \"& {Start-Process -WindowStyle min node ../Tests/UI/server.js}\"");
     wait(200);
     setBoardCode(board);
 }

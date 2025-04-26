@@ -161,7 +161,7 @@ public:
     int val = 0;
     int moveType = 0;
     bool isCheckingMove = false;
-    Piece starter{};
+    Piece attacker{};
     Piece captured{};
 
     constexpr bool operator==(const Move &move) const

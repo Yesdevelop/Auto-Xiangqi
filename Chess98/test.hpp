@@ -17,14 +17,14 @@ void ui(TEAM team, int maxDepth)
     std::cout << "Open Chess98/UI/index.html to play chess\n" << std::endl;
 
     std::string moveFileContent = "____";
-    std::vector<Piece> eatens{};
+    PIECES eatens{};
     while (true)
     {
         if (board.team == team)
         {
             count++;
             std::cout << count;
-            Result node = s.searchMain(board, maxDepth, 3);
+            Result node = s.searchMain(board, maxDepth, 5);
             eatens.emplace_back(board.doMove(node.move));
             setBoardCode(board);
 
