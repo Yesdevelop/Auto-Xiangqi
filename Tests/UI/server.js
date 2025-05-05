@@ -34,6 +34,7 @@ http.createServer((request, response) => {
         response.end('successful\n')
         let move = request.url.split('=')[1];
         let file = fs.openSync('./_move_.txt', 'w+')
+        console.log('move', move)
         fs.writeFileSync(file, move)
         fs.closeSync(file)
     }

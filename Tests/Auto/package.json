@@ -4,7 +4,7 @@
     "description": "A front-end project for Chess98 UI",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "node webdriver"
     },
     "author": "",
     "license": "ISC",
