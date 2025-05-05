@@ -10,7 +10,7 @@ void ui(TEAM team, int maxDepth)
     // pieceidMap = fenToPieceidMap("r1bakab2/9/1c4n2/p3n1p1p/2p1c4/7R1/P1P3P1P/1CN6/3R4N/2BAKAB2 w - - 0 1"); // 调试局面时使用
     Board board = Board(pieceidMap, RED);
     board.print();
-
+    
     serverInit(board);
 
     Search s{};

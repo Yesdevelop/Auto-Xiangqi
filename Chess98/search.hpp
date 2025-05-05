@@ -15,6 +15,11 @@ public:
             delete historyCache;
             historyCache = nullptr;
         }
+        if (pKillerTable)
+        {
+            delete pKillerTable;
+            pKillerTable = nullptr;
+        }
         if (pHashTable)
         {
             delete pHashTable;
@@ -42,6 +47,14 @@ private:
     {
         rootMoves.resize(0);
         this->historyCache->init();
+        if (this->pKillerTable->initDone())
+        {
+            this->pKillerTable->reset();
+        }
+        else
+        {
+            this->pKillerTable->init();
+        }
         if (this->pHashTable->initDone())
         {
             this->pHashTable->reset();
@@ -83,7 +96,8 @@ private:
     MOVES rootMoves;
 
     HistoryHeuristic *historyCache = new HistoryHeuristic{};
-    tt *pHashTable = new tt{};
+    KillerTable* pKillerTable = new KillerTable{};
+    TransportationTable*pHashTable = new TransportationTable{};
     BookFileStruct *pBookFileStruct = new BookFileStruct{};
 };
 
@@ -303,11 +317,13 @@ Result Search::searchRoot(Board &board, int depth)
     }
 
     if (!pBestMove)
+    {
         vlBest += board.distance;
+    }
     else
+    {
         this->historyCache->add(*pBestMove, depth);
-    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, pBestMove ? exactType : alphaType, depth);
-
+    }
     Result result{!pBestMove ? Move{} : *pBestMove, vlBest};
 
     sortRootMoves();
@@ -323,18 +339,10 @@ Result Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
-    // probHash
-    int vlHash = -INF;
-    this->pHashTable->get(board.hashKey, board.hashLock, vlHash, alpha, beta, depth, board.distance);
-    if (vlHash != -INF)
-    {
-        return vlHash;
-    }
-
     // 叶节点返回静态评估值
     if (depth <= 0)
     {
-        return Search::searchQ(board, alpha, beta);
+        return Search::searchQ(board,alpha,beta);
     }
 
     // mate distance pruning
@@ -344,7 +352,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         beta = vlDistanceMate;
         if (alpha >= vlDistanceMate)
         {
-            this->pHashTable->add(board.hashKey, board.hashLock, vlDistanceMate, exactType, depth);
             return vlDistanceMate;
         }
     }
@@ -386,57 +393,74 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
         }
     }
-    else
+
+    int vlBest = -INF;
+    Move* pBestMove = nullptr;
+    nodeType type = alphaType;
+    Move goodMove;
+    this->pHashTable->get(board, goodMove);
+    if (goodMove.x1 == -1 && depth > 2)
     {
-        // 棋规
-        board.historyMoves.rbegin()->isCheckingMove = true;
-        if (board.historyMoves.size() > 5)
+        if (searchPV(board, depth / 2, alpha, beta) <= alpha)
         {
-            const Move &lastMove = board.historyMoves[board.historyMoves.size() - 5];
-            if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
-            {
-                return INF;
-            }
+            searchPV(board, depth / 2, -INF, beta);
+        }
+        this->pHashTable->get(board, goodMove);
+    }
+
+    if (goodMove.x1 != -1)
+    {
+        Piece eaten = board.doMove(goodMove);
+        vlBest = -searchPV(board, depth - 1, -beta, -alpha);
+        board.undoMove(goodMove, eaten);
+        pBestMove = &goodMove;
+        if (vlBest >= beta)
+        {
+            type = betaType;
+        }
+        if (vlBest > alpha)
+        {
+            type = exactType;
+            alpha = vlBest;
         }
     }
 
-    nodeType type = alphaType;
-
-    MOVES availableMoves = Moves::getMoves(board);
-    this->historyCache->sort(availableMoves);
-    Move *pBestMove = nullptr;
-    int vl = -INF;
-    int vlBest = -INF;
-    for (auto &move : availableMoves)
+    MOVES availableMoves;
+    if (type != betaType)
     {
-        Piece eaten = board.doMove(move);
-        if (vlBest == -INF)
+        int vl = -INF;
+        availableMoves = Moves::getMoves(board);
+        for (auto& move : availableMoves)
         {
-            vl = -searchPV(board, depth - 1, -beta, -alpha);
-        }
-        else
-        {
-            vl = -searchCut(board, depth - 1, -alpha);
-            if (vl > alpha && vl < beta)
+            Piece eaten = board.doMove(move);
+            if (vlBest == -INF)
             {
                 vl = -searchPV(board, depth - 1, -beta, -alpha);
             }
-        }
-        board.undoMove(move, eaten);
-
-        if (vl > vlBest)
-        {
-            vlBest = vl;
-            pBestMove = &move;
-            if (vl >= beta)
+            else
             {
-                type = betaType;
-                break;
+                vl = -searchCut(board, depth - 1, -alpha);
+                if (vl > alpha && vl < beta)
+                {
+                    vl = -searchPV(board, depth - 1, -beta, -alpha);
+                }
             }
-            if (vl > alpha)
+            board.undoMove(move, eaten);
+
+            if (vl > vlBest)
             {
-                type = exactType;
-                alpha = vl;
+                vlBest = vl;
+                pBestMove = &move;
+                if (vl >= beta)
+                {
+                    type = betaType;
+                    break;
+                }
+                if (vl > alpha)
+                {
+                    type = exactType;
+                    alpha = vl;
+                }
             }
         }
     }
@@ -448,8 +472,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     else
     {
         this->historyCache->add(*pBestMove, depth);
+        this->pHashTable->add(board,*pBestMove);
     }
-    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, type, depth);
 
     return vlBest;
 }
@@ -461,9 +485,10 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
+    
     if (depth <= 0)
     {
-        return Search::searchQ(board, beta - 1, beta, 64);
+        return Search::searchQ(board,beta - 1, beta);
     }
 
     // mate distance pruning
@@ -474,7 +499,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         beta = vlDistanceMate;
         if (vlOriginAlpha >= vlDistanceMate)
         {
-            this->pHashTable->add(board.hashKey, board.hashLock, vlDistanceMate, exactType, depth);
             return vlDistanceMate;
         }
     }
@@ -531,49 +555,17 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
-    else
-    {
-        // 棋规
-        board.historyMoves.rbegin()->isCheckingMove = true;
-        if (board.historyMoves.size() > 5)
-        {
-            const Move &lastMove = board.historyMoves[board.historyMoves.size() - 5];
-            if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
-            {
-                return INF;
-            }
-        }
-    }
 
     nodeType type = alphaType;
-
-    MOVES availableMoves = Moves::getMoves(board);
-    this->historyCache->sort(availableMoves);
-    Move *pBestMove = nullptr;
+    Move* pBestMove = nullptr;
     int vlBest = -INF;
     int searchedCnt = 0;
-    for (auto &move : availableMoves)
+    MOVES killerAvaliableMoves = this->pKillerTable->get(board);
+    for (auto& move : killerAvaliableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -INF;
-        // lmr pruning
-        if (!mChecking &&
-            eaten.pieceid == EMPTY_PIECEID &&
-            depth >= 3 &&
-            searchedCnt >= 4)
-        {
-            vl = -searchCut(board, depth - 2, -beta + 1);
-            if (vl >= beta)
-            {
-                vl = -searchCut(board, depth - 1, -beta + 1);
-            }
-        }
-        else
-        {
-            vl = -searchCut(board, depth - 1, -beta + 1);
-        }
+        int vl = -searchCut(board, depth - 1, -beta + 1);
         board.undoMove(move, eaten);
-
         if (vl > vlBest)
         {
             vlBest = vl;
@@ -584,8 +576,43 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 break;
             }
         }
-
         searchedCnt++;
+    }
+
+    MOVES availableMoves;
+    if (type != betaType)
+    {
+        availableMoves = Moves::getMoves(board);
+        this->historyCache->sort(availableMoves);
+        for (auto& move : availableMoves)
+        {
+            Piece eaten = board.doMove(move);
+            int vl = -INF;
+            // lmr pruning
+            if (!mChecking &&
+                eaten.pieceid == EMPTY_PIECEID &&
+                depth >= 3 &&
+                searchedCnt >= 4)
+            {
+                vl = -searchCut(board, depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
+            }
+            else
+            {
+                vl = -searchCut(board, depth - 1, -beta + 1);
+            }
+            board.undoMove(move, eaten);
+            if (vl > vlBest)
+            {
+                vlBest = vl;
+                pBestMove = &move;
+                if (vl >= beta)
+                {
+                    type = betaType;
+                    break;
+                }
+            }
+            searchedCnt++;
+        }
     }
 
     if (!pBestMove)
@@ -595,8 +622,8 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     else
     {
         this->historyCache->add(*pBestMove, depth);
+        this->pKillerTable->add(board, *pBestMove);
     }
-    this->pHashTable->add(board.hashKey, board.hashLock, vlBest, type, depth);
 
     return vlBest;
 }
@@ -643,19 +670,6 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
         vlBest = vl;
         alpha = std::max<int>(alpha, vl);
-    }
-    else
-    {
-        // 棋规
-        board.historyMoves.rbegin()->isCheckingMove = true;
-        if (board.historyMoves.size() > 5)
-        {
-            const Move &lastMove = board.historyMoves[board.historyMoves.size() - 5];
-            if (lastMove == board.historyMoves.back() && lastMove.isCheckingMove == true)
-            {
-                return INF;
-            }
-        }
     }
 
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
