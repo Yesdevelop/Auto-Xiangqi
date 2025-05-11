@@ -18,6 +18,7 @@ let xiangqiaiLastBoard = [
     [undefined, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
+let count = 0
 async function syncChess98LastMove(driver) {
     http.get('http://localhost:9494/computer', (res) => {
         let data = ''
@@ -26,12 +27,14 @@ async function syncChess98LastMove(driver) {
         })
         res.on('end', async () => {
             console.log("获取着法成功")
-            if (data !== chess98LastMove) {
+            if (data !== chess98LastMove || count > 3) {
+                count = 0
                 chess98LastMove = data
+                console.log("步进成功")
                 await doMoveInXiangqiai(driver)
                 await driver.sleep(2500)
                 await syncXiangqiaiLastMove(driver)
-            }
+            } else count++
         })
     })
     await driver.sleep(600)
