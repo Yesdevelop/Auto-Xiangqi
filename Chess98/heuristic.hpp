@@ -159,42 +159,37 @@ public:
     void get(Board& board, Move& goodMove);
 
 private:
-    tItem *pList = nullptr;
+    std::vector<tItem> pList;
     int hashMask = 0;
     int hashSize = 0;
 };
 
 void TransportationTable::init(int hashLevel)
 {
-    if (this->pList != nullptr)
+    if (!this->pList.empty())
     {
-        delete[] pList;
-        pList = nullptr;
+        std::vector<tItem>().swap(this->pList);
     }
     this->hashSize = (1 << hashLevel);
     this->hashMask = this->hashSize - 1;
-    pList = new tItem[this->hashSize];
+    pList.resize(this->hashSize);
 }
 
 bool TransportationTable::initDone()
 {
-    return (this->pList != nullptr);
+    return (!this->pList.empty());
 }
 
 void TransportationTable::reset()
 {
-    if (this->pList != nullptr)
-    {
-        memset(this->pList, 0, sizeof(tItem) * this->hashSize);
-    }
+    this->pList = std::vector<tItem>(this->hashSize, tItem{});
 }
 
 TransportationTable::~TransportationTable()
 {
-    if (pList != nullptr)
+    if (!this->pList.empty())
     {
-        delete[] pList;
-        pList = nullptr;
+        std::vector<tItem>().swap(this->pList);
     }
 }
 
