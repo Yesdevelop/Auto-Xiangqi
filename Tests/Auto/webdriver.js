@@ -2,111 +2,173 @@ const { Builder, By, Key, until, WebDriver } = require('selenium-webdriver')
 const edge = require('selenium-webdriver/edge')
 const http = require('http')
 const { exec } = require('child_process')
+const { get } = require('selenium-webdriver/http')
 
 let chess98LastMove = "null"
-let xiangqiaiLastBoard = [
-    undefined,
-    [undefined, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [undefined, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [undefined, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-    [undefined, 1, 0, 1, 0, 0, 0, 1, 0, 1],
-    [undefined, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [undefined, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [undefined, 1, 0, 1, 0, 0, 0, 1, 0, 1],
-    [undefined, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-    [undefined, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [undefined, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+let webLastBoard = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 0, 0, 0, 0, 0, 1, 0],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [0, 1, 0, 0, 0, 0, 0, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
+let state = 0
 
-let count = 0
-async function syncChess98LastMove(driver) {
-    http.get('http://localhost:9494/computer', (res) => {
+// 获取Chess98的走法
+async function getChess98LastMove(driver) {
+    console.log("获取Chess98走法")
+    http.get('http://localhost:9494/computer', async (res) => {
         let data = ''
         res.on('data', (chunk) => {
             data += chunk
         })
         res.on('end', async () => {
-            console.log("获取着法成功")
-            if (data !== chess98LastMove || count > 3) {
-                count = 0
+            data = data.padStart(5, '0')
+            if (data !== chess98LastMove) {
                 chess98LastMove = data
-                console.log("步进成功")
-                await doMoveInXiangqiai(driver)
-                await driver.sleep(2500)
-                await syncXiangqiaiLastMove(driver)
-            } else count++
+                console.log("我方步进成功")
+                console.log("我方走法", chess98LastMove)
+                await doMoveOnWeb(driver)
+                chess98LastMove = data
+
+                const wait = async () => {
+                    const currentBoard = await getWebBoard(driver)
+                    if (currentBoard.toString() != webLastBoard.toString()) {
+                        return
+                    }
+                    else {
+                        await driver.sleep(200)
+                        await wait()
+                    }
+                }
+                await wait()
+
+                // 分析两次棋盘的差异
+                const currentBoard = await getWebBoard(driver)
+                const lastBoard = webLastBoard
+                const move = await getWebMove(driver, lastBoard, currentBoard)
+                console.log("对方步进完成")
+                console.log("对方走法", move)
+
+                webLastBoard = currentBoard
+                // 发送
+                await updateXiangqiaiChangeToChess98UI(driver, move)
+
+                state++
+                console.log("==========================")
+            }
+            else {
+                await driver.sleep(200)
+                await getChess98LastMove(driver)
+            }
         })
     })
-    await driver.sleep(600)
 }
 
-async function doMoveInXiangqiai(driver) {
+// 在网页上执行步进
+async function doMoveOnWeb(driver) {
     const x1 = Number(chess98LastMove.charAt(1))
     const y1 = Number(chess98LastMove.charAt(0))
     const x2 = Number(chess98LastMove.charAt(3))
     const y2 = Number(chess98LastMove.charAt(2))
-    const _x1 = 11 - (x1 + 1)
+    const _x1 = 10 - x1
     const _y1 = y1 + 1
-    const _x2 = 11 - (x2 + 1)
+    const _x2 = 10 - x2
     const _y2 = y2 + 1
+    console.error("步进坐标", _x1, _y1, _x2, _y2)
+
+    webLastBoard[9 - x1][y1] = 0
+    webLastBoard[9 - x2][y2] = 1
+
     try {
         const actions = driver.actions()
 
         const start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div`))
         const end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div`))
 
+        // 高亮
+        await driver.executeScript(
+            "arguments[0].style.border='3px solid red';",
+            start
+        )
+        await driver.executeScript(
+            "arguments[0].style.border='3px solid red';",
+            end
+        )
+
+        const startRect = await start.getRect()
+        const endRect = await end.getRect()
+        const startX = Math.ceil(startRect.x + startRect.width / 2)
+        const startY = Math.ceil(startRect.y + startRect.height / 2)
+        const endX = Math.ceil(endRect.x + endRect.width / 2)
+        const endY = Math.ceil(endRect.y + endRect.height / 2)
         await driver.actions({ bridge: true })
-            .move({ origin: start })    // 移动到棋子中心
-            .press()                    // 按下鼠标
-            .pause(300)                 // 短暂停顿模拟人手操作
-            .move({ origin: end })   // 拖到目标位置
-            .pause(200)                 // 释放前停顿
-            .release()                  // 松开鼠标
+            .move({ x: startX, y: startY })
+            .click()
+            .pause(300)
+            .move({ x: endX, y: endY, duration: 300 })
+            .pause(200)
+            .click()
             .perform()
 
-        xiangqiaiLastBoard[_x1][_y1] = 0
-        xiangqiaiLastBoard[_x2][_y2] = 1
+        // 移除高亮
+        await driver.executeScript(
+            "arguments[0].style.border='';",
+            start
+        )
+        await driver.executeScript(
+            "arguments[0].style.border='';",
+            end
+        )
+
+    printBoard(webLastBoard)
+    printBoard(await getWebBoard(driver))
     } catch (error) {
         console.error("步进失败" + error)
-        await doMoveInXiangqiai(driver)
+        await driver.quit()
     }
 }
 
-async function syncXiangqiaiLastMove(driver) {
+// 获取网页的象棋棋盘
+async function getWebBoard(driver) {
     let currentBoard = []
     for (let i = 1; i <= 10; i++) {
         for (let j = 1; j <= 9; j++) {
-            currentBoard[i] = currentBoard[i] || []
+            currentBoard[i - 1] = currentBoard[i - 1] || []
             try {
                 const square = await driver.findElement(By.css(`#game-grid > div:nth-child(${i}) > div:nth-child(${j}) > div.square-has-piece`))
-                if (square)
-                    currentBoard[i][j] = 1
+                currentBoard[i - 1][j - 1] = 1
             } catch (error) {
-                currentBoard[i][j] = 0
+                currentBoard[i - 1][j - 1] = 0
             }
         }
     }
-    if (xiangqiaiLastBoard.toString() != currentBoard.toString()) {
-        const move = await analyzeChangeToGetMove(driver, xiangqiaiLastBoard, currentBoard)
-        if (move.from.x === -1 || move.from.y === -1 || move.to.x === -1 || move.to.y === -1) {
-            console.error("move解析失败")
-            await doMoveInXiangqiai(driver)
-                await driver.sleep(2500)
-                await syncXiangqiaiLastMove(driver)
-            return
-        }
-        console.log("走法如下", move)
-        xiangqiaiLastBoard = currentBoard
-        await updateXiangqiaiChangeToChess98UI(driver, move)
-    } else {
-        await syncXiangqiaiLastMove(driver)
-    }
+    return currentBoard
 }
 
-async function analyzeChangeToGetMove(driver, board1, board2) {
-    // 获取网页上的棋子
+// 获取网页的走法（坐标0开头）
+async function getWebMove(driver, lastBoard, currentBoard) {
+    let move = { x1: -1, y1: -1, x2: -1, y2: -1 }
+
+    // moveFrom
+    // 若原来是1，现是0，则为起点
+    for (let i = 0; i < lastBoard.length; i++) {
+        for (let j = 0; j < lastBoard[i].length; j++) {
+            if (lastBoard[i][j] === 1 && currentBoard[i][j] === 0) {
+                move.x1 = i
+                move.y1 = j
+            }
+        }
+    }
+    // moveTo
+    // 获取网页上的移动过的棋子的位置
     const elements = await driver.findElements(By.css('.pieces-container > div'))
-    let moved = { x: -1, index: -1 }
+    let moved = { x: -1, index: -1 } // index: 这一行的第几个棋子
     let pieces = []
     for (let el of elements) {
         const elChild = await el.findElement(By.css('.pieces-container > div > div > div'))
@@ -118,52 +180,40 @@ async function analyzeChangeToGetMove(driver, board1, board2) {
             moved.index = pieces[rowNum].length - 1
         }
     }
-    // 解析变化
-    let moveFrom = { x: -1, y: -1 }
-    let moveTo = { x: -1, y: -1 }
-    // 如果本来是1的地方变成了0，则定位到了moveFrom
-    for (let i = 1; i <= 10; i++) {
-        for (let j = 1; j <= 9; j++) {
-            if (board1[i][j] == 1 && board2[i][j] == 0) {
-                moveFrom.x = i
-                moveFrom.y = j
-            }
-        }
-    }
-    // 通过moved的index位置来判断y
+    // 用moved.x和moved.index获取棋子在棋盘上的位置
     let count = 0
-    moveTo.x = moved.x
-    for (let k in board1[moved.x]) {
-        if (board2[moved.x][k] == 1) {
+    move.x2 = moved.x - 1
+    for (let k in currentBoard[moved.x - 1]) {
+        if (currentBoard[moved.x - 1][k] == 1) {
             count++
             if (count == moved.index + 1) {
-                moveTo.y = Number(k)
+                move.y2 = Number(k)
                 break
             }
         }
     }
-    return { from: moveFrom, to: moveTo }
+    return move
 }
 
+// 发送走法到Chess98UI Server
 async function updateXiangqiaiChangeToChess98UI(driver, move) {
-    console.log("move", move.from)
-    const x1 = String(10 - move.from.x)
-    const y1 = String(move.from.y - 1)
-    const x2 = String(10 - move.to.x)
-    const y2 = String(move.to.y - 1)
-    console.log(x1, y1, x2, y2)
+    const x1 = String(9 - move.x1)
+    const y1 = String(move.y1)
+    const x2 = String(9 - move.x2)
+    const y2 = String(move.y2)
     const moveString = y1 + x1 + y2 + x2
-    console.log("moveString", moveString)
+    console.log("着法被发送至服务器", moveString)
     http.request({
         hostname: '127.0.0.1',
         path: '/move?playermove=' + moveString,
         port: 9494,
         method: 'GET'
-    }, (res) => { res.on('error', () => { console.error("motherfucker") }) }).end()
-    driver.sleep(1000)
+    }).end()
+    await driver.sleep(300)
 }
 
-async function setupEdgeWithProfile() {
+// 初始化webdriver
+async function init() {
     const options = new edge.Options()
 
     options.addArguments(
@@ -179,11 +229,16 @@ async function setupEdgeWithProfile() {
     return driver
 }
 
+// 打印棋盘
+function printBoard(board) {
+    for (let v of board) { console.log(v.toString()) }
+    console.log("====================================")
+}
+
 async function run() {
     exec('taskkill /F /IM msedge.exe', async () => {
         console.log('开始执行')
-
-        const driver = await setupEdgeWithProfile()
+        const driver = await init()
 
         await driver.get('https://play.xiangqi.com/')
 
@@ -196,14 +251,35 @@ async function run() {
         const playButton = await driver.findElement(By.css('.button-wrapper button:nth-child(1)'))
         await playButton.click()
 
-        await driver.sleep(2000)
+        const wait = async () => {
+            try {
+                const element = await driver.findElement(By.css('.body'))
+                if (element) {
+                    await driver.sleep(200)
+                    await wait()
+                }
+            } catch (error) {
+                return
+            }
+        }
+        await wait()
+
+        await driver.sleep(500)
 
         while (true) {
-            await driver.sleep(1500)
-            await syncChess98LastMove(driver)
+            await getChess98LastMove(driver)
+            const currentState = state
+            const wait = async () => {
+                if (state == currentState) {
+                    await driver.sleep(200)
+                    await wait()
+                }
+                else {
+                    return
+                }
+            }
+            await wait()
         }
-
-        console.log('关闭浏览器')
     })
 }
 
