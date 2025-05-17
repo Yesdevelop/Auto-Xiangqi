@@ -20,11 +20,10 @@ let webLastBoard = [
 let state = 0
 
 async function isEndGame(driver) {
-    const elements = await driver.findElements(By.css('。game-end-widget'))
+    const elements = await driver.findElements(By.css('.game-end-widget'))
     if (elements.length > 0) {
         console.log("游戏结束")
         await driver.quit()
-        return await run()
     }
 }
 // 获取Chess98的走法
