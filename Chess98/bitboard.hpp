@@ -52,7 +52,7 @@ public:
         REGION_ROOK result = this->rookCache[bitline][index];
         if (endpos == 8)
             return result;
-        if (result[1] == 8 && this->getBit(bitline, 9) == 0)
+        if (result[1] == 8 && this->getBit(bitline, 9) == 0 && (this->getBit(bitline, 8) != 1 || index == 8))
             result[1] = 9;
         if (index == 9)
             result[1] = 9;
@@ -69,7 +69,7 @@ public:
         REGION_CANNON result = this->cannonCache[bitline][index];
         if (endpos == 8) 
             return result;
-        if (result[2] == 8 && this->getBit(bitline, 9) == 0)
+        if (result[2] == 8 && this->getBit(bitline, 9) == 0 && (this->getBit(bitline, 8) != 1 || index == 8))
             result[2] = result[3] = 9;
         if (index == 9)
             result[2] = result[3] = 9;

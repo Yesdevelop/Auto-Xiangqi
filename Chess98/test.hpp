@@ -7,10 +7,10 @@ void ui(TEAM team, int maxDepth)
 {
     int count = 0;
     PIECEID_MAP pieceidMap = DEFAULT_MAP;
-    // pieceidMap = fenToPieceidMap("r1bakab2/9/1c4n2/p3n1p1p/2p1c4/7R1/P1P3P1P/1CN6/3R4N/2BAKAB2 w - - 0 1"); // 调试局面时使用
+    // pieceidMap = fenToPieceidMap("3aka3/1R1c1r3/2rcb1n2/p3p1C1p/2pn2bN1/1R7/P1P1P3P/2N3C2/9/2BAKAB2 w"); // 调试局面时使用
     Board board = Board(pieceidMap, RED);
     board.print();
-    
+
     serverInit(board);
 
     Search s{};
@@ -27,6 +27,7 @@ void ui(TEAM team, int maxDepth)
             Result node = s.searchMain(board, maxDepth, 3);
             eatens.emplace_back(board.doMove(node.move));
             setBoardCode(board);
+            board.print();
 
             FILE *file = nullptr;
             errno_t result = fopen_s(&file, "./_move_.txt", "r");
