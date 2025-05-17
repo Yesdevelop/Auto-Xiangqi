@@ -3,6 +3,7 @@
 #include "heuristic.hpp"
 #include "utils.hpp"
 #include "book.hpp"
+#define BAN_OPENBOOK
 
 class Search
 {
@@ -485,7 +486,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    
     if (depth <= 0)
     {
         return Search::searchQ(board,beta - 1, beta);

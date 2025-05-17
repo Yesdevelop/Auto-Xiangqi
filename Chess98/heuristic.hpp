@@ -159,7 +159,7 @@ public:
     void get(Board& board, Move& goodMove);
 
 private:
-    tItem *pList = nullptr;
+    std::vector<tItem>* pList = nullptr;
     int hashMask = 0;
     int hashSize = 0;
 };
@@ -168,12 +168,12 @@ void TransportationTable::init(int hashLevel)
 {
     if (this->pList != nullptr)
     {
-        delete[] pList;
-        pList = nullptr;
+        delete this->pList;
     }
+    this->pList = new std::vector<tItem>;
     this->hashSize = (1 << hashLevel);
     this->hashMask = this->hashSize - 1;
-    pList = new tItem[this->hashSize];
+	this->pList->resize(this->hashSize);
 }
 
 bool TransportationTable::initDone()
@@ -185,7 +185,11 @@ void TransportationTable::reset()
 {
     if (this->pList != nullptr)
     {
-        memset(this->pList, 0, sizeof(tItem) * this->hashSize);
+        for (tItem& item : *this->pList)
+        {
+            item.goodMove = Move{};
+            item.hashLock = 0;
+		}
     }
 }
 
@@ -201,7 +205,7 @@ TransportationTable::~TransportationTable()
 void TransportationTable::add(Board& board, Move& goodMove)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-    tItem &t = this->pList[pos];
+    tItem &t = this->pList->at(pos);
     t.hashLock = board.hashLock;
     t.goodMove = goodMove;
 }
@@ -209,7 +213,7 @@ void TransportationTable::add(Board& board, Move& goodMove)
 void TransportationTable::get(Board& board, Move& goodMove)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-    tItem &t = this->pList[pos];
+    tItem &t = this->pList->at(pos);
     if (t.hashLock == 0 || t.hashLock == board.hashLock)
     {
         if (isValidMoveInSituation(board, t.goodMove))
