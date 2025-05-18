@@ -117,9 +117,7 @@ async function doMoveOnWeb(driver) {
         await driver.actions({ bridge: true })
             .move({ x: startX, y: startY })
             .click()
-            .pause(300)
             .move({ x: endX, y: endY, duration: 300 })
-            .pause(200)
             .click()
             .perform()
 

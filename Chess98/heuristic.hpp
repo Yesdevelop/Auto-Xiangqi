@@ -197,7 +197,7 @@ TransportationTable::~TransportationTable()
 {
     if (pList != nullptr)
     {
-        delete[] pList;
+        delete pList;
         pList = nullptr;
     }
 }
