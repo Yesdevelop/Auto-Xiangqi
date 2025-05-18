@@ -11,10 +11,10 @@ public:
     Search() = default;
     ~Search()
     {
-        if (historyCache)
+        if (pHistoryCache)
         {
-            delete historyCache;
-            historyCache = nullptr;
+            delete pHistoryCache;
+            pHistoryCache = nullptr;
         }
         if (pKillerTable)
         {
@@ -25,11 +25,6 @@ public:
         {
             delete pHashTable;
             pHashTable = nullptr;
-        }
-        if (pBookFileStruct)
-        {
-            delete pBookFileStruct;
-            pBookFileStruct = nullptr;
         }
     }
 
@@ -47,7 +42,7 @@ private:
     void searchInit(Board &board, int initHashLevel = 25)
     {
         rootMoves.resize(0);
-        this->historyCache->init();
+        this->pHistoryCache->init();
         if (this->pKillerTable->initDone())
         {
             this->pKillerTable->reset();
@@ -83,23 +78,11 @@ private:
         }
     }
 
-    /// @brief 根节点着法排序
-    void sortRootMoves()
-    {
-        std::sort(
-            rootMoves.begin(), rootMoves.end(),
-            [](Move &first, Move &second) -> bool
-            {
-                return first.val > second.val;
-            });
-    }
-
     MOVES rootMoves;
 
-    HistoryHeuristic *historyCache = new HistoryHeuristic{};
+    HistoryHeuristic *pHistoryCache = new HistoryHeuristic{};
     KillerTable* pKillerTable = new KillerTable{};
     TransportationTable*pHashTable = new TransportationTable{};
-    BookFileStruct *pBookFileStruct = new BookFileStruct{};
 };
 
 /// @brief 迭代加深
@@ -162,8 +145,11 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 Result Search::searchOpenBook(Board &board)
 {
     BookStruct bk;
+    BookFileStruct *pBookFileStruct = new BookFileStruct{};
+
     if (!pBookFileStruct->open("BOOK.DAT"))
     {
+        delete pBookFileStruct;
         return Result{Move{}, -1};
     }
 
@@ -277,6 +263,8 @@ Result Search::searchOpenBook(Board &board)
 
     pBookFileStruct->close();
 
+    delete pBookFileStruct;
+    
     return Result{bookMove, 1};
 }
 
@@ -323,11 +311,17 @@ Result Search::searchRoot(Board &board, int depth)
     }
     else
     {
-        this->historyCache->add(*pBestMove, depth);
+        this->pHistoryCache->add(*pBestMove, depth);
     }
     Result result{!pBestMove ? Move{} : *pBestMove, vlBest};
 
-    sortRootMoves();
+    // 根节点着法排序
+    std::sort(
+            rootMoves.begin(), rootMoves.end(),
+            [](Move &first, Move &second) -> bool
+            {
+                return first.val > second.val;
+            });
 
     return result;
 }
@@ -472,7 +466,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
     else
     {
-        this->historyCache->add(*pBestMove, depth);
+        this->pHistoryCache->add(*pBestMove, depth);
         this->pHashTable->add(board,*pBestMove);
     }
 
@@ -583,7 +577,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (type != betaType)
     {
         availableMoves = Moves::getMoves(board);
-        this->historyCache->sort(availableMoves);
+        this->pHistoryCache->sort(availableMoves);
         for (auto& move : availableMoves)
         {
             Piece eaten = board.doMove(move);
@@ -621,7 +615,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
     else
     {
-        this->historyCache->add(*pBestMove, depth);
+        this->pHistoryCache->add(*pBestMove, depth);
         this->pKillerTable->add(board, *pBestMove);
     }
 
