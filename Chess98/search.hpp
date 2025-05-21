@@ -576,7 +576,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 break;
             }
         }
-        searchedCnt++;
     }
 
     MOVES availableMoves;

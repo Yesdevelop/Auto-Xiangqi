@@ -185,11 +185,8 @@ void TransportationTable::reset()
 {
     if (this->pList != nullptr)
     {
-        for (tItem& item : *this->pList)
-        {
-            item.goodMove = Move{};
-            item.hashLock = 0;
-		}
+        std::vector<tItem>().swap(*this->pList);
+        this->pList->resize(this->hashSize);
     }
 }
 
