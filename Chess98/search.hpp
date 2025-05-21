@@ -400,7 +400,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     nodeType type = alphaType;
     Move goodMove;
     this->pHashTable->get(board, goodMove);
-    if (goodMove.x1 == -1 && depth > 2)
+    if (goodMove.x1 == -1 && depth >= 2)
     {
         if (searchPV(board, depth / 2, alpha, beta) <= alpha)
         {
@@ -474,6 +474,10 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         this->historyCache->add(*pBestMove, depth);
         this->pHashTable->add(board,*pBestMove);
+        if (type == betaType)
+        {
+            this->pKillerTable->add(board, *pBestMove);
+        }
     }
 
     return vlBest;
@@ -555,25 +559,29 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
-
     nodeType type = alphaType;
     Move* pBestMove = nullptr;
     int vlBest = -INF;
     int searchedCnt = 0;
-    MOVES killerAvaliableMoves = this->pKillerTable->get(board);
-    for (auto& move : killerAvaliableMoves)
+
+    MOVES killerAvaliableMoves;
+    if (type != betaType)
     {
-        Piece eaten = board.doMove(move);
-        int vl = -searchCut(board, depth - 1, -beta + 1);
-        board.undoMove(move, eaten);
-        if (vl > vlBest)
+        killerAvaliableMoves = this->pKillerTable->get(board);
+        for (auto& move : killerAvaliableMoves)
         {
-            vlBest = vl;
-            pBestMove = &move;
-            if (vl >= beta)
+            Piece eaten = board.doMove(move);
+            int vl = -searchCut(board, depth - 1, -beta + 1);
+            board.undoMove(move, eaten);
+            if (vl > vlBest)
             {
-                type = betaType;
-                break;
+                vlBest = vl;
+                pBestMove = &move;
+                if (vl >= beta)
+                {
+                    type = betaType;
+                    break;
+                }
             }
         }
     }
