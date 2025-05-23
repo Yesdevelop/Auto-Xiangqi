@@ -23,7 +23,7 @@ async function isEndGame(driver) {
     const elements = await driver.findElements(By.css('.game-end-widget'))
     if (elements.length > 0) {
         console.log("游戏结束")
-        await driver.sleep(10000000)
+        while (true);
     }
 }
 // 获取Chess98的走法
