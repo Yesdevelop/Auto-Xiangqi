@@ -424,7 +424,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         int vl = -INF;
         availableMoves = Moves::getMoves(board);
-        this->historyCache->sort(availableMoves);
+        this->pHistoryCache->sort(availableMoves);
         for (auto& move : availableMoves)
         {
             Piece eaten = board.doMove(move);
