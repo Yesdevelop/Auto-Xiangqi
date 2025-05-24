@@ -263,7 +263,7 @@ Result Search::searchOpenBook(Board &board)
     pBookFileStruct->close();
 
     delete pBookFileStruct;
-    
+
     return Result{bookMove, 1};
 }
 

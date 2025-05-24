@@ -67,7 +67,7 @@ public:
     REGION_CANNON getCannonRegion(BITLINE bitline, int index, int endpos)
     {
         REGION_CANNON result = this->cannonCache[bitline][index];
-        if (endpos == 8) 
+        if (endpos == 8)
             return result;
         if (result[2] == 8 && this->getBit(bitline, 9) == 0 && (this->getBit(bitline, 8) != 1 || index == 8))
             result[2] = result[3] = 9;
