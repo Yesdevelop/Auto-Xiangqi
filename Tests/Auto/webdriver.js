@@ -1,8 +1,13 @@
-const { Builder, By, Key, until, WebDriver } = require('selenium-webdriver')
-const edge = require('selenium-webdriver/edge')
-const http = require('http')
-const { exec } = require('child_process')
-const { get } = require('selenium-webdriver/http')
+/////////////////////////////
+const OPPONENT_LEVEL = 9
+const CPPFILE_RELATIVE_PATH_DIRECTORY = "../../Chess98/"
+/////////////////////////////
+
+const { Builder, By, Key, until, WebDriver } = require("selenium-webdriver")
+const edge = require("selenium-webdriver/edge")
+const http = require("http")
+const { exec } = require("child_process")
+const { get } = require("selenium-webdriver/http")
 
 let chess98LastMove = "null"
 let webLastBoard = [
@@ -20,22 +25,23 @@ let webLastBoard = [
 let state = 0
 
 async function isEndGame(driver) {
-    const elements = await driver.findElements(By.css('.game-end-widget'))
+    const elements = await driver.findElements(By.css(".game-end-widget"))
     if (elements.length > 0) {
         console.log("游戏结束")
         while (true);
     }
 }
+
 // 获取Chess98的走法
 async function getChess98LastMove(driver) {
     isEndGame(driver)
-    http.get('http://localhost:9494/computer', async (res) => {
-        let data = ''
-        res.on('data', (chunk) => {
+    http.get("http://localhost:9494/computer", async (res) => {
+        let data = ""
+        res.on("data", (chunk) => {
             data += chunk
         })
-        res.on('end', async () => {
-            data = data.padStart(5, '0')
+        res.on("end", async () => {
+            data = data.padStart(5, "0")
             if (data !== chess98LastMove) {
                 chess98LastMove = data
                 console.log("我方步进成功")
@@ -92,50 +98,49 @@ async function doMoveOnWeb(driver) {
     webLastBoard[9 - x1][y1] = 0
     webLastBoard[9 - x2][y2] = 1
 
-    try {
-        const actions = driver.actions()
+    const actions = driver.actions()
 
-        const start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div`))
-        const end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div`))
+    const start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div`))
+    const end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div`))
 
-        // 高亮
-        await driver.executeScript(
-            "arguments[0].style.border='3px solid red';",
-            start
-        )
-        await driver.executeScript(
-            "arguments[0].style.border='3px solid red';",
-            end
-        )
+    // 高亮
+    await driver.executeScript(
+        "arguments[0].style.border='3px solid red';",
+        start
+    )
+    await driver.executeScript(
+        "arguments[0].style.border='3px solid red';",
+        end
+    )
 
-        const startRect = await start.getRect()
-        const endRect = await end.getRect()
-        const startX = Math.ceil(startRect.x + startRect.width / 2)
-        const startY = Math.ceil(startRect.y + startRect.height / 2)
-        const endX = Math.ceil(endRect.x + endRect.width / 2)
-        const endY = Math.ceil(endRect.y + endRect.height / 2)
-        await driver.actions({ bridge: true })
-            .move({ x: startX, y: startY })
-            .click()
-            .move({ x: endX, y: endY, duration: 300 })
-            .click()
-            .perform()
+    const startRect = await start.getRect()
+    const endRect = await end.getRect()
+    const startX = Math.ceil(startRect.x + startRect.width / 2)
+    const startY = Math.ceil(startRect.y + startRect.height / 2)
+    const endX = Math.ceil(endRect.x + endRect.width / 2)
+    const endY = Math.ceil(endRect.y + endRect.height / 2)
+    await driver.actions({ bridge: true })
+        .move({ x: startX, y: startY })
+        .click()
+        .move({ x: endX, y: endY, duration: 300 })
+        .click()
+        .perform()
 
-        // 移除高亮
-        await driver.executeScript(
-            "arguments[0].style.border='';",
-            start
-        )
-        await driver.executeScript(
-            "arguments[0].style.border='';",
-            end
-        )
+    // 移除高亮
+    await driver.executeScript(
+        "arguments[0].style.border='';",
+        start
+    )
+    await driver.executeScript(
+        "arguments[0].style.border='';",
+        end
+    )
 
-    printBoard(webLastBoard)
-    printBoard(await getWebBoard(driver))
-    } catch (error) {
-        console.error("步进失败" + error)
-        await driver.quit()
+    if ((await getWebBoard(driver)).toString() != webLastBoard.toString()) {
+        webLastBoard[9 - x1][y1] = 1
+        webLastBoard[9 - x2][y2] = 0
+        console.log("步进失败，尝试重新步进")
+        await doMoveOnWeb(driver)
     }
 }
 
@@ -172,15 +177,15 @@ async function getWebMove(driver, lastBoard, currentBoard) {
     }
     // moveTo
     // 获取网页上的移动过的棋子的位置
-    const elements = await driver.findElements(By.css('.pieces-container > div'))
+    const elements = await driver.findElements(By.css(".pieces-container > div"))
     let moved = { x: -1, index: -1 } // index: 这一行的第几个棋子
     let pieces = []
     for (let el of elements) {
-        const elChild = await el.findElement(By.css('.pieces-container > div > div > div'))
-        const rowNum = 11 - (await el.getAttribute('r'))
+        const elChild = await el.findElement(By.css(".pieces-container > div > div > div"))
+        const rowNum = 11 - (await el.getAttribute("r"))
         pieces[rowNum] = pieces[rowNum] || []
         pieces[rowNum].push(el)
-        if ((await elChild.getAttribute('class')).match('moved-piece')) {
+        if ((await elChild.getAttribute("class")).match("moved-piece")) {
             moved.x = rowNum
             moved.index = pieces[rowNum].length - 1
         }
@@ -209,10 +214,10 @@ async function updateXiangqiaiChangeToChess98UI(driver, move) {
     const moveString = y1 + x1 + y2 + x2
     console.log("着法被发送至服务器", moveString)
     http.request({
-        hostname: '127.0.0.1',
-        path: '/move?playermove=' + moveString,
+        hostname: "127.0.0.1",
+        path: "/move?playermove=" + moveString,
         port: 9494,
-        method: 'GET'
+        method: "GET"
     }).end()
     await driver.sleep(300)
 }
@@ -227,7 +232,7 @@ async function init() {
         `--log-level=3`
     )
     const driver = await new Builder()
-        .forBrowser('MicrosoftEdge')
+        .forBrowser("MicrosoftEdge")
         .setEdgeOptions(options)
         .build()
 
@@ -241,51 +246,55 @@ function printBoard(board) {
 }
 
 async function run() {
-    exec('taskkill /F /IM msedge.exe', async () => {
-        console.log('开始执行')
-        const driver = await init()
+    exec(`taskkill /F /IM msedge.exe`)
+    exec(`g++ ${CPPFILE_RELATIVE_PATH_DIRECTORY}main.cpp -Ofast -o ${CPPFILE_RELATIVE_PATH_DIRECTORY}a.exe`,
+        () => exec(`start ${CPPFILE_RELATIVE_PATH_DIRECTORY}a.exe`))
+    exec(`start node ../UI/server.js`)
 
-        await driver.get('https://play.xiangqi.com/')
+    console.log("开始执行")
+    const driver = await init()
 
-        const playComputer = await driver.findElement(By.css('div[title="Play Computer"]'))
-        await playComputer.click()
+    await driver.sleep(4000)
+    await driver.get("https://play.xiangqi.com/")
 
-        const bot = await driver.findElement(By.css('.all-bots :nth-child(9)'))
-        await bot.click()
+    const playComputer = await driver.findElement(By.css("div[title='Play Computer']"))
+    await playComputer.click()
 
-        const playButton = await driver.findElement(By.css('.button-wrapper button:nth-child(1)'))
-        await playButton.click()
+    const bot = await driver.findElement(By.css(`.all-bots :nth-child(${OPPONENT_LEVEL})`))
+    await bot.click()
 
+    const playButton = await driver.findElement(By.css(".button-wrapper button:nth-child(1)"))
+    await playButton.click()
+
+    const wait = async () => {
+        try {
+            const element = await driver.findElement(By.css(".body"))
+            if (element) {
+                await driver.sleep(200)
+                await wait()
+            }
+        } catch (error) {
+            return
+        }
+    }
+    await wait()
+
+    await driver.sleep(500)
+
+    while (true) {
+        await getChess98LastMove(driver)
+        const currentState = state
         const wait = async () => {
-            try {
-                const element = await driver.findElement(By.css('.body'))
-                if (element) {
-                    await driver.sleep(200)
-                    await wait()
-                }
-            } catch (error) {
+            if (state == currentState) {
+                await driver.sleep(200)
+                await wait()
+            }
+            else {
                 return
             }
         }
         await wait()
-
-        await driver.sleep(500)
-
-        while (true) {
-            await getChess98LastMove(driver)
-            const currentState = state
-            const wait = async () => {
-                if (state == currentState) {
-                    await driver.sleep(200)
-                    await wait()
-                }
-                else {
-                    return
-                }
-            }
-            await wait()
-        }
-    })
+    }
 }
 
 run()
