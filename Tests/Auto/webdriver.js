@@ -100,8 +100,17 @@ async function doMoveOnWeb(driver) {
 
     const actions = driver.actions()
 
-    const start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div`))
-    const end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div`))
+    let start, end
+    start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div`))
+    end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div`))
+    if (_x1 === 1)
+        start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div:last-child`))
+    if (_x2 === 1)
+        end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div:last-child`))
+    if (_x1 === 10)
+        start = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x1}) > div:nth-child(${_y1}) > div:first-child`))
+    if (_x2 === 10)
+        end = await driver.findElement(By.css(`#game-grid > div:nth-child(${_x2}) > div:nth-child(${_y2}) > div:first-child`))
 
     // 高亮
     await driver.executeScript(
