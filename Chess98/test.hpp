@@ -16,7 +16,6 @@ void ui(TEAM team, int maxDepth)
     std::cout << "Open Chess98/UI/index.html to play chess\n" << std::endl;
 
     std::string moveFileContent = "____";
-    PIECES eatens{};
     while (true)
     {
         if (board.team == team)
@@ -24,7 +23,7 @@ void ui(TEAM team, int maxDepth)
             count++;
             std::cout << count;
             Result node = s.searchMain(board, maxDepth, 3);
-            eatens.emplace_back(board.doMove(node.move));
+            board.doMove(node.move);
             setBoardCode(board);
 
             FILE *file = nullptr;
@@ -55,16 +54,14 @@ void ui(TEAM team, int maxDepth)
                     std::string content = std::string(buffer).substr(0, 4);
                     if (content == "undo")
                     {
-                        if (eatens.size() > 1)
+                        if (board.historyEatens.size() > 1)
                         {
                             FILE *file = nullptr;
                             errno_t result = fopen_s(&file, "./_move_.txt", "w+");
                             if (result == 0)
                             {
-                                board.undoMove(board.historyMoves.back(), eatens.back());
-                                eatens.pop_back();
-                                board.undoMove(board.historyMoves.back(), eatens.back());
-                                eatens.pop_back();
+                                board.undoMove(board.historyMoves.back(), board.historyEatens.back());
+                                board.undoMove(board.historyMoves.back(), board.historyEatens.back());
                                 setBoardCode(board);
                                 moveFileContent = "____";
                                 fwrite("____", 4, 1, file);
@@ -83,7 +80,7 @@ void ui(TEAM team, int maxDepth)
                         int x2 = std::stoi(content.substr(2, 1));
                         int y2 = std::stoi(content.substr(3, 1));
                         Move move{x1, y1, x2, y2};
-                        eatens.emplace_back(board.doMove(move));
+                        board.doMove(move);
                         break;
                     }
                     wait(50);

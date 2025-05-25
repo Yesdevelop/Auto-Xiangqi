@@ -19,17 +19,42 @@ public:
     Piece doMove(Move move);
     void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
     void undoMove(Move move, Piece eaten);
+    void initEvaluate();
+    void vlOpenCalculator(int &vlOpen);
+    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
+    void initHashInfo();
+    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 
     bool isKingLive(TEAM team) const
     {
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    TEAM team;
-    Piece *pieceRedKing = nullptr;
-    Piece *pieceBlackKing = nullptr;
-
-    void print();
+    void print()
+    {
+        for (int i = -1; i <= 8; i++)
+        {
+            for (int j = -1; j <= 9; j++)
+            {
+                if (i == -1)
+                {
+                    if (j == -1)
+                        std::cout << "X ";
+                    else
+                        std::cout << j << " ";
+                }
+                else
+                {
+                    if (j == -1)
+                        std::cout << i << " ";
+                    else
+                        std::cout << PIECE_NAME_PAIRS.at(this->pieceidOn(i, j));
+                }
+            }
+            std::cout << "\n";
+        }
+        std::cout << std::endl;
+    };
 
     int evaluate() const
     {
@@ -58,34 +83,6 @@ public:
         return (vlSelf > 10000 + 1200);
     }
 
-    void initEvaluate();
-
-    void vlOpenCalculator(int &vlOpen);
-    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
-
-    bool isChecking = false;
-    MOVES historyMoves{};
-
-    // 和根节点的距离
-    int distance = 0;
-
-    // 评估相关
-    int vlRed = 0;
-    int vlBlack = 0;
-
-    // 哈希相关
-    int32 hashKey = 0;
-    int32 hashLock = 0;
-
-    std::vector<int32> hashKeyList;
-    std::vector<int32> hashLockList;
-
-    void initHashInfo();
-    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
-
-    PIECEID_MAP pieceidMap{};
-
-    // 位棋盘辅助着法生成相关
     BITLINE getBitLineX(int x) const
     {
         return this->bitboard->xBitBoard[x];
@@ -96,7 +93,17 @@ public:
         return this->bitboard->yBitBoard[y];
     }
 
+    MOVES historyMoves{};
+    PIECES historyEatens{};
+    TEAM team = -1;
+    Piece *pieceRedKing = nullptr;
+    Piece *pieceBlackKing = nullptr;
     BitBoard *bitboard = nullptr;
+    int distance = 0; // 和根节点的距离
+    int vlRed = 0;
+    int vlBlack = 0;
+    int32 hashKey = 0;
+    int32 hashLock = 0;
 
 private:
     // 棋盘相关
@@ -106,6 +113,9 @@ private:
     std::vector<PIECE_INDEX> blackPieces{};
     bool isRedKingLive = false;
     bool isBlackKingLive = false;
+    PIECEID_MAP pieceidMap{};
+    std::vector<int32> hashKeyList{};
+    std::vector<int32> hashLockList{};
 };
 
 /// @brief 初始化棋盘
@@ -342,6 +352,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->team = -this->team;
     this->distance += 1;
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
+    this->historyEatens.emplace_back(eaten);
     this->bitboard->doMove(x1, y1, x2, y2);
 
     return eaten;
@@ -367,6 +378,7 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
+    this->historyEatens.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
 
     Piece attackStarter = this->piecePosition(x2, y2);
@@ -628,31 +640,4 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
-}
-
-/// @brief 打印
-void Board::print()
-{
-    for (int i = -1; i <= 8; i++)
-    {
-        for (int j = -1; j <= 9; j++)
-        {
-            if (i == -1)
-            {
-                if (j == -1)
-                    std::cout << "X ";
-                else
-                    std::cout << j << " ";
-            }
-            else
-            {
-                if (j == -1)
-                    std::cout << i << " ";
-                else
-                    std::cout << PIECE_NAME_PAIRS.at(this->pieceidOn(i, j));
-            }
-        }
-        std::cout << "\n";
-    }
-    std::cout << std::endl;
 }
