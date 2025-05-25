@@ -57,9 +57,4 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="BOOK.DAT">
-      <Filter>Resource Files</Filter>
-    </Text>
-  </ItemGroup>
 </Project>
