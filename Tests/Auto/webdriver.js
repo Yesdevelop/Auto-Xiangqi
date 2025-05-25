@@ -257,12 +257,10 @@ function printBoard(board) {
 async function run() {
     exec(`taskkill /F /IM msedge.exe`)
     exec(`cd ${CPPFILE_RELATIVE_PATH_DIRECTORY} && g++ main.cpp -Ofast -o a.exe && start a.exe`)
-    exec(`start node ../UI/server.js`)
 
     console.log("开始执行")
     const driver = await init()
 
-    await driver.sleep(4000)
     await driver.get("https://play.xiangqi.com/")
 
     const playComputer = await driver.findElement(By.css("div[title='Play Computer']"))
