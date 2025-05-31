@@ -255,54 +255,56 @@ function printBoard(board) {
 }
 
 async function run() {
-    exec(`taskkill /F /IM msedge.exe`)
     exec(`cd ${CPPFILE_RELATIVE_PATH_DIRECTORY} && g++ main.cpp -Ofast -o a.exe && start a.exe`)
 
-    console.log("开始执行")
-    const driver = await init()
 
-    await driver.sleep(4000)
-    
-    await driver.get("https://play.xiangqi.com/")
+    exec(`taskkill /F /IM msedge.exe`, async () => {
+        console.log("开始执行")
+        const driver = await init()
 
-    const playComputer = await driver.findElement(By.css("div[title='Play Computer']"))
-    await playComputer.click()
+        await driver.sleep(4000)
 
-    const bot = await driver.findElement(By.css(`.all-bots :nth-child(${OPPONENT_LEVEL})`))
-    await bot.click()
+        await driver.get("https://play.xiangqi.com/")
 
-    const playButton = await driver.findElement(By.css(".button-wrapper button:nth-child(1)"))
-    await playButton.click()
+        const playComputer = await driver.findElement(By.css("div.btn-list > div:nth-child(2)"))
+        await playComputer.click()
 
-    const wait = async () => {
-        try {
-            const element = await driver.findElement(By.css(".body"))
-            if (element) {
-                await driver.sleep(200)
-                await wait()
-            }
-        } catch (error) {
-            return
-        }
-    }
-    await wait()
+        const bot = await driver.findElement(By.css(`.all-bots :nth-child(${OPPONENT_LEVEL})`))
+        await bot.click()
 
-    await driver.sleep(500)
+        const playButton = await driver.findElement(By.css(".button-wrapper button:nth-child(1)"))
+        await playButton.click()
 
-    while (true) {
-        await getChess98LastMove(driver)
-        const currentState = state
         const wait = async () => {
-            if (state == currentState) {
-                await driver.sleep(200)
-                await wait()
-            }
-            else {
+            try {
+                const element = await driver.findElement(By.css(".body"))
+                if (element) {
+                    await driver.sleep(200)
+                    await wait()
+                }
+            } catch (error) {
                 return
             }
         }
         await wait()
-    }
+
+        await driver.sleep(500)
+
+        while (true) {
+            await getChess98LastMove(driver)
+            const currentState = state
+            const wait = async () => {
+                if (state == currentState) {
+                    await driver.sleep(200)
+                    await wait()
+                }
+                else {
+                    return
+                }
+            }
+            await wait()
+        }
+    })
 }
 
 run()
