@@ -41,11 +41,11 @@ async function getChess98LastMove(driver) {
             data += chunk
         })
         res.on("end", async () => {
-            data = data.padStart(5, "0")
+            data = data.padStart(5, "0").slice(0, 4)
             if (data !== chess98LastMove) {
-                chess98LastMove = data
                 console.log("我方步进成功")
-                console.log("我方走法", chess98LastMove)
+                chess98LastMove = data
+
                 await doMoveOnWeb(driver)
                 chess98LastMove = data
 
@@ -65,8 +65,7 @@ async function getChess98LastMove(driver) {
                 const currentBoard = await getWebBoard(driver)
                 const lastBoard = webLastBoard
                 const move = await getWebMove(driver, lastBoard, currentBoard)
-                console.log("对方步进完成")
-                console.log("对方走法", move)
+                console.log("对方步进成功")
 
                 webLastBoard = currentBoard
                 // 发送
@@ -148,7 +147,7 @@ async function doMoveOnWeb(driver) {
     if ((await getWebBoard(driver)).toString() != webLastBoard.toString()) {
         webLastBoard[9 - x1][y1] = 1
         webLastBoard[9 - x2][y2] = 0
-        console.log("步进失败，尝试重新步进")
+        console.error("步进失败，尝试重新步进")
         await doMoveOnWeb(driver)
     }
 }
@@ -257,12 +256,9 @@ function printBoard(board) {
 async function run() {
     exec(`cd ${CPPFILE_RELATIVE_PATH_DIRECTORY} && g++ main.cpp -Ofast -o a.exe && start a.exe`)
 
-
     exec(`taskkill /F /IM msedge.exe`, async () => {
         console.log("开始执行")
         const driver = await init()
-
-        await driver.sleep(4000)
 
         await driver.get("https://play.xiangqi.com/")
 

@@ -83,52 +83,64 @@ public:
     void init();
     bool initDone();
     void reset();
-    void add(Board& board, Move& move);
-    std::vector<Move> get(Board& board);
+    void add(Board &board, Move &move);
+    std::vector<Move> get(Board &board);
+
 private:
     const int maxKillerDistance = 128;
     const int width = 2;
     std::vector<MOVES> KillerMoveList;
 };
 
-KillerTable::~KillerTable() {
-    for (auto& MoveVec : this->KillerMoveList) {
+KillerTable::~KillerTable()
+{
+    for (auto &MoveVec : this->KillerMoveList)
+    {
         std::vector<Move>().swap(MoveVec);
     }
     std::vector<MOVES>().swap(this->KillerMoveList);
 }
 
-void KillerTable::init() {
+void KillerTable::init()
+{
     KillerMoveList.resize(this->maxKillerDistance);
-    for (auto& moveVec : this->KillerMoveList) {
+    for (auto &moveVec : this->KillerMoveList)
+    {
         moveVec = MOVES(this->width, Move());
     }
 }
 
-bool KillerTable::initDone() {
+bool KillerTable::initDone()
+{
     return !(this->KillerMoveList.empty());
 }
 
-void KillerTable::reset() {
-    for (auto& moveVec : this->KillerMoveList) {
+void KillerTable::reset()
+{
+    for (auto &moveVec : this->KillerMoveList)
+    {
         moveVec = MOVES(this->width, Move());
     }
 }
 
-MOVES KillerTable::get(Board& board) {
+MOVES KillerTable::get(Board &board)
+{
     assert(board.distance < this->maxKillerDistance);
     MOVES results;
-    for (auto& move : this->KillerMoveList[board.distance]) {
-        if (isValidMoveInSituation(board, move)) {
+    for (auto &move : this->KillerMoveList[board.distance])
+    {
+        if (isValidMoveInSituation(board, move))
+        {
             results.emplace_back(move);
         }
     }
     return results;
 }
 
-void KillerTable::add(Board& board, Move& move) {
+void KillerTable::add(Board &board, Move &move)
+{
     assert(board.distance < this->maxKillerDistance);
-    MOVES& moveVec = this->KillerMoveList[board.distance];
+    MOVES &moveVec = this->KillerMoveList[board.distance];
     moveVec[1] = moveVec[0];
     moveVec[0] = move;
 }
@@ -155,11 +167,11 @@ public:
     void init(int hashLevel = 16);
     bool initDone();
     void reset();
-    void add(Board& board, Move& goodMove);
-    void get(Board& board, Move& goodMove);
+    void add(Board &board, Move &goodMove);
+    void get(Board &board, Move &goodMove);
 
 private:
-    std::vector<tItem>* pList = nullptr;
+    std::vector<tItem> *pList = nullptr;
     int hashMask = 0;
     int hashSize = 0;
 };
@@ -173,7 +185,7 @@ void TransportationTable::init(int hashLevel)
     this->pList = new std::vector<tItem>;
     this->hashSize = (1 << hashLevel);
     this->hashMask = this->hashSize - 1;
-	this->pList->resize(this->hashSize);
+    this->pList->resize(this->hashSize);
 }
 
 bool TransportationTable::initDone()
@@ -199,7 +211,7 @@ TransportationTable::~TransportationTable()
     }
 }
 
-void TransportationTable::add(Board& board, Move& goodMove)
+void TransportationTable::add(Board &board, Move &goodMove)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList->at(pos);
@@ -207,7 +219,7 @@ void TransportationTable::add(Board& board, Move& goodMove)
     t.goodMove = goodMove;
 }
 
-void TransportationTable::get(Board& board, Move& goodMove)
+void TransportationTable::get(Board &board, Move &goodMove)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList->at(pos);

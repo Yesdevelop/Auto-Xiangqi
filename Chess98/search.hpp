@@ -80,8 +80,8 @@ private:
     MOVES rootMoves;
 
     HistoryHeuristic *pHistoryCache = new HistoryHeuristic{};
-    KillerTable* pKillerTable = new KillerTable{};
-    TransportationTable*pHashTable = new TransportationTable{};
+    KillerTable *pKillerTable = new KillerTable{};
+    TransportationTable *pHashTable = new TransportationTable{};
 };
 
 /// @brief 迭代加深
@@ -314,11 +314,11 @@ Result Search::searchRoot(Board &board, int depth)
 
     // 根节点着法排序
     std::sort(
-            rootMoves.begin(), rootMoves.end(),
-            [](Move &first, Move &second) -> bool
-            {
-                return first.val > second.val;
-            });
+        rootMoves.begin(), rootMoves.end(),
+        [](Move &first, Move &second) -> bool
+        {
+            return first.val > second.val;
+        });
 
     return result;
 }
@@ -334,7 +334,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // 叶节点返回静态评估值
     if (depth <= 0)
     {
-        return Search::searchQ(board,alpha,beta);
+        return Search::searchQ(board, alpha, beta);
     }
 
     // mate distance pruning
@@ -387,7 +387,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
 
     int vlBest = -INF;
-    Move* pBestMove = nullptr;
+    Move *pBestMove = nullptr;
     nodeType type = alphaType;
     Move goodMove;
     this->pHashTable->get(board, goodMove);
@@ -423,7 +423,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         int vl = -INF;
         availableMoves = Moves::getMoves(board);
         this->pHistoryCache->sort(availableMoves);
-        for (auto& move : availableMoves)
+        for (auto &move : availableMoves)
         {
             Piece eaten = board.doMove(move);
             if (vlBest == -INF)
@@ -465,7 +465,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     else
     {
         this->pHistoryCache->add(*pBestMove, depth);
-        this->pHashTable->add(board,*pBestMove);
+        this->pHashTable->add(board, *pBestMove);
     }
 
     return vlBest;
@@ -480,7 +480,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
     if (depth <= 0)
     {
-        return Search::searchQ(board,beta - 1, beta);
+        return Search::searchQ(board, beta - 1, beta);
     }
 
     // mate distance pruning
@@ -548,7 +548,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
     nodeType type = alphaType;
-    Move* pBestMove = nullptr;
+    Move *pBestMove = nullptr;
     int vlBest = -INF;
     int searchedCnt = 0;
 
@@ -556,7 +556,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (type != betaType)
     {
         killerAvaliableMoves = this->pKillerTable->get(board);
-        for (auto& move : killerAvaliableMoves)
+        for (auto &move : killerAvaliableMoves)
         {
             Piece eaten = board.doMove(move);
             int vl = -searchCut(board, depth - 1, -beta + 1);
@@ -579,7 +579,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         availableMoves = Moves::getMoves(board);
         this->pHistoryCache->sort(availableMoves);
-        for (auto& move : availableMoves)
+        for (auto &move : availableMoves)
         {
             Piece eaten = board.doMove(move);
             int vl = -INF;

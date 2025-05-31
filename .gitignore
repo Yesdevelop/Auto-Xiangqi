@@ -365,3 +365,4 @@ FodyWeavers.xsd
 .vscode
 **/*.exe
 **/_*_.*
+**/BOOK.DAT

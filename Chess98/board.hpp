@@ -438,6 +438,41 @@ void Board::undoMove(Move move, Piece eaten)
     this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
 }
 
+void Board::initEvaluate()
+{
+    // 更新权重数组
+    int vlOpen = 0;
+    int vlRedAttack = 0;
+    int vlBlackAttack = 0;
+    this->vlOpenCalculator(vlOpen);
+    this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
+
+    pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
+    vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
+    vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
+
+    // 调整不受威胁方少掉的士象分
+    this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
+    this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
+
+    // 进一步重新计算分数
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            PIECEID pid = this->pieceidMap[x][y];
+            if (pid > 0)
+            {
+                this->vlRed += pieceWeights[pid][x][y];
+            }
+            else if (pid < 0)
+            {
+                this->vlBlack += pieceWeights[pid][x][size_t(9) - y];
+            }
+        }
+    }
+}
+
 void Board::vlOpenCalculator(int &vlOpen)
 {
     // 首先判断局势处于开中局还是残局阶段，方法是计算各种棋子的数量，按照车=6、马炮=3、其它=1相加
@@ -559,41 +594,6 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
     }
     vlRedAttack = std::min<int>(vlRedAttack, TOTAL_ATTACK_VALUE);
     vlBlackAttack = std::min<int>(vlBlackAttack, TOTAL_ATTACK_VALUE);
-}
-
-void Board::initEvaluate()
-{
-    // 更新权重数组
-    int vlOpen = 0;
-    int vlRedAttack = 0;
-    int vlBlackAttack = 0;
-    this->vlOpenCalculator(vlOpen);
-    this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
-
-    pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
-    vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
-    vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
-
-    // 调整不受威胁方少掉的士象分
-    this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
-    this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
-
-    // 进一步重新计算分数
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            PIECEID pid = this->pieceidMap[x][y];
-            if (pid > 0)
-            {
-                this->vlRed += pieceWeights[pid][x][y];
-            }
-            else if (pid < 0)
-            {
-                this->vlBlack += pieceWeights[pid][x][size_t(9) - y];
-            }
-        }
-    }
 }
 
 void Board::initHashInfo()
