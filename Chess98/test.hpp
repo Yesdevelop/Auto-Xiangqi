@@ -7,7 +7,7 @@ void ui(TEAM team, int maxDepth)
 {
     int count = 0;
     PIECEID_MAP pieceidMap = DEFAULT_MAP;
-    pieceidMap = fenToPieceidMap("4kab2/4a4/4b3c/pr2C3R/4P4/2c6/P1n3r1P/C8/4N4/R1BAKAB2 w - - 0 1"); // 调试局面时使用
+    // pieceidMap = fenToPieceidMap("4kab2/4a4/4b3c/pr2C3R/4P4/2c6/P1n3r1P/C8/4N4/R1BAKAB2 w - - 0 1"); // 调试局面时使用
     //pieceidMap = fenToPieceidMap("3k1ab2/4a4/4b3c/p3CR3/4P4/4c4/P2r4P/4C4/4N4/2BAKAB2 w - - 0 1");
     //pieceidMap = fenToPieceidMap("1R1rkab2/4a4/4b3c/p3CR3/4P4/4c4/P2r4P/4C4/4N4/2BAKAB2 w - - 0 1");
     Board board = Board(pieceidMap, RED);
