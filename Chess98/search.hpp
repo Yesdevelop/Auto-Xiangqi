@@ -556,19 +556,22 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (type != betaType)
     {
         killerAvaliableMoves = this->pKillerTable->get(board);
-        for (auto &move : killerAvaliableMoves)
+        for (Move& move : killerAvaliableMoves)
         {
-            Piece eaten = board.doMove(move);
-            int vl = -searchCut(board, depth - 1, -beta + 1);
-            board.undoMove(move, eaten);
-            if (vl > vlBest)
+            if (board.isKingLive(board.team))
             {
-                vlBest = vl;
-                pBestMove = &move;
-                if (vl >= beta)
+                Piece eaten = board.doMove(move);
+                int vl = -searchCut(board, depth - 1, -beta + 1);
+                board.undoMove(move, eaten);
+                if (vl > vlBest)
                 {
-                    type = betaType;
-                    break;
+                    vlBest = vl;
+                    pBestMove = &move;
+                    if (vl >= beta)
+                    {
+                        type = betaType;
+                        break;
+                    }
                 }
             }
         }
