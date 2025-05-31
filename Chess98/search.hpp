@@ -97,14 +97,12 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     std::cout << "---------------------" << std::endl;
 
     // 开局库搜索
-#ifndef BAN_OPENBOOK
     Result openbookResult = Search::searchOpenBook(board);
     if (openbookResult.val != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
         return openbookResult;
     }
-#endif
 
     this->searchInit(board);
     this->rootMoves = Moves::getMoves(board);
