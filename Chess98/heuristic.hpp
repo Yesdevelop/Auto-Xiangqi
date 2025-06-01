@@ -29,14 +29,14 @@ public:
         return first.val > second.val;
     }
 
-    mutable int historyTable[90][90];
+    std::array<std::array<int, 90>, 90> historyTable{};
 };
 
 /// @brief 二维坐标转索引
 /// @param x
 /// @param y
 /// @return
-int toIndex(int x, int y)
+inline int toIndex(int x, int y)
 {
     return 10 * x + y;
 }
@@ -44,7 +44,6 @@ int toIndex(int x, int y)
 /// @brief 初始化
 void HistoryHeuristic::init() const
 {
-    std::memset(this->historyTable, 0, sizeof(int) * 90 * 90);
 }
 
 /// @brief 历史表排序
@@ -72,10 +71,16 @@ void HistoryHeuristic::add(Move move, int depth)
 {
     int pos1 = toIndex(move.x1, move.y1);
     int pos2 = toIndex(move.x2, move.y2);
-    historyTable[pos1][pos2] += depth * depth;
+    try {
+        this->historyTable.at(pos1).at(pos2) += depth * depth;
+    }
+    catch (std::exception) {
+        std::cout << move.id << std::endl;
+        std::cout << pos1 << std::endl << pos2 << std::endl;
+        while (true);
+    }
 }
 
-/// @brief 在截断表中增加一个历史记录
 class KillerTable
 {
 public:
@@ -83,7 +88,7 @@ public:
     void init();
     bool initDone();
     void reset();
-    void add(Board &board, Move &move);
+    void add(Board &board, Move move);
     std::vector<Move> get(Board &board);
 
 private:
@@ -126,7 +131,7 @@ void KillerTable::reset()
 MOVES KillerTable::get(Board &board)
 {
     assert(board.distance < this->maxKillerDistance);
-    MOVES results;
+    MOVES results{};
     for (auto &move : this->KillerMoveList[board.distance])
     {
         if (isValidMoveInSituation(board, move))
@@ -137,7 +142,7 @@ MOVES KillerTable::get(Board &board)
     return results;
 }
 
-void KillerTable::add(Board &board, Move &move)
+void KillerTable::add(Board &board, Move move)
 {
     assert(board.distance < this->maxKillerDistance);
     MOVES &moveVec = this->KillerMoveList[board.distance];

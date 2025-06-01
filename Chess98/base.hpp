@@ -1,7 +1,3 @@
-/**
- * 说明见 /DEV.md
- */
-
 #pragma once
 #ifdef _WIN32
 #include <windows.h>

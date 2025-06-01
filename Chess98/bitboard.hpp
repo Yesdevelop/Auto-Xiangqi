@@ -1,7 +1,3 @@
-/**
- * 说明见 /DEV.md
- */
-
 #pragma once
 #include "base.hpp"
 
@@ -31,7 +27,7 @@ public:
         // 初始化车、炮的着法缓存
         for (BITLINE bitline = 1; bitline <= pow(2, 10); bitline++)
         {
-            for (int index = 0; index < 10; index++)
+            for (int index = 0; index <= 9; index++)
             {
                 if (this->getBit(bitline, index) == 1)
                 {
@@ -50,12 +46,10 @@ public:
     REGION_ROOK getRookRegion(BITLINE bitline, int index, int endpos)
     {
         REGION_ROOK result = this->rookCache[bitline][index];
-        if (endpos == 8)
-            return result;
-        if (result[1] == 8 && this->getBit(bitline, 9) == 0 && (this->getBit(bitline, 8) != 1 || index == 8))
-            result[1] = 9;
-        if (index == 9)
-            result[1] = 9;
+        if (endpos == 8 && result[1] == 9)
+        {
+            result[1] = 8;
+        }
         return result;
     }
 
@@ -67,12 +61,10 @@ public:
     REGION_CANNON getCannonRegion(BITLINE bitline, int index, int endpos)
     {
         REGION_CANNON result = this->cannonCache[bitline][index];
-        if (endpos == 8)
-            return result;
-        if (result[2] == 8 && this->getBit(bitline, 9) == 0 && (this->getBit(bitline, 8) != 1 || index == 8))
-            result[2] = result[3] = 9;
-        if (index == 9)
-            result[2] = result[3] = 9;
+        if (endpos == 8 && result[3] == 9)
+        {
+            result[2] = result[3] = 8;
+        }
         return result;
     }
 
@@ -147,7 +139,7 @@ private:
     REGION_ROOK generateRookRegion(BITLINE bitline, int index) const
     {
         int beg = 0;
-        int end = 8;
+        int end = 9;
         for (int pos = index - 1; pos >= 0; pos--)
         {
             if (this->getBit(bitline, pos) != 0)
@@ -156,7 +148,7 @@ private:
                 break;
             }
         }
-        for (int pos = index + 1; pos <= 8; pos++)
+        for (int pos = index + 1; pos <= 9; pos++)
         {
             if (this->getBit(bitline, pos) != 0)
             {
@@ -177,8 +169,8 @@ private:
     {
         int eaten1 = 0;
         int beg = 0;
-        int end = 8;
-        int eaten2 = 8;
+        int end = 9;
+        int eaten2 = 9;
         for (int pos = index - 1; pos >= 0; pos--)
         {
             if (this->getBit(bitline, pos) != 0)
@@ -196,7 +188,7 @@ private:
                 break;
             }
         }
-        for (int pos = index + 1; pos <= 8; pos++)
+        for (int pos = index + 1; pos <= 9; pos++)
         {
             if (this->getBit(bitline, pos) != 0)
             {

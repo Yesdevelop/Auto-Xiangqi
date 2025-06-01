@@ -254,7 +254,7 @@ function printBoard(board) {
 }
 
 async function run() {
-    exec(`cd ${CPPFILE_RELATIVE_PATH_DIRECTORY} && g++ main.cpp -Ofast -o a.exe && start a.exe`)
+    // exec(`cd ${CPPFILE_RELATIVE_PATH_DIRECTORY} && g++ main.cpp -Ofast -o a.exe && start a.exe`)
 
     exec(`taskkill /F /IM msedge.exe`, async () => {
         console.log("开始执行")
