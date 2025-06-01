@@ -41,7 +41,6 @@ private:
     void searchInit(Board &board, int initHashLevel = 25)
     {
         rootMoves.resize(0);
-        this->pHistoryCache->init();
         if (this->pKillerTable->initDone())
         {
             this->pKillerTable->reset();
@@ -96,7 +95,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     std::cout << "---------------------" << std::endl;
 
-    // 开局库搜索
+    // openbook search
     Result openbookResult = Search::searchOpenBook(board);
     if (openbookResult.val != -1)
     {
@@ -113,17 +112,13 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     for (int depth = 0; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(board, depth);
+        // log
         std::cout << "depth: " << depth + 1;
         std::cout << " | vl: " << bestNode.val;
         std::cout << " | moveid: " << bestNode.move.id;
         std::cout << " | duration(ms): " << clock() - start << std::endl;
-        // 杀棋中止
-        if (std::abs(bestNode.val) >= BAN)
-        {
-            break;
-        }
-        // 超时中止
-        else if (clock() - start >= maxTime * 1000 / 3)
+        // timeout break
+        if (clock() - start >= maxTime * 1000 / 3)
         {
             break;
         }

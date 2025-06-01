@@ -98,7 +98,6 @@ std::map<std::string, PIECEID> NAME_PIECE_PAIRS {
     {"  ", OVERFLOW_PIECEID}
 };
 
-/// @brief 棋子类
 class Piece
 {
 public:
@@ -138,7 +137,6 @@ public:
 
 using PIECES = std::vector<Piece>;
 
-/// @brief 着法类
 class Move
 {
 public:
@@ -175,11 +173,33 @@ public:
 
 using MOVES = std::vector<Move>;
 
-/// @brief 根节点类，记录搜索结果
 class Result
 {
 public:
     Result(Move move, int score) : move(move), val(score) {}
     Move move{};
     int val = 0;
+};
+
+enum moveType
+{
+    normal = 0,
+    capture = 1,
+    history = 2,
+    killer = 3,
+    hash = 4
+};
+
+enum nodeType
+{
+    noneType = 0,
+    alphaType = 1,
+    betaType = 2,
+    exactType = 3,
+};
+
+struct tItem
+{
+    Move goodMove;
+    int32 hashLock = 0;
 };
