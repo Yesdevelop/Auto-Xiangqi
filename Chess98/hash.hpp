@@ -1,9 +1,6 @@
 #pragma once
 #include "base.hpp"
 
-using int32 = int;
-using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
-
 const int32 PLAYER_KEY = 1099503838;
 const int32 PLAYER_LOCK = 1730021002;
 

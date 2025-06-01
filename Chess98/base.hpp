@@ -20,6 +20,8 @@ const int INF = 1000000;
 const int BAN = INF - 2000;
 const int ILLEGAL_VAL = INF * 2;
 using U64 = unsigned long long;
+using int32 = int;
+using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
 
 using PIECE_INDEX = int;
 const PIECE_INDEX EMPTY_INDEX = -1;
@@ -200,6 +202,6 @@ enum nodeType
 
 struct tItem
 {
-    Move goodMove;
+    Move goodMove{};
     int32 hashLock = 0;
 };
