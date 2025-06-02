@@ -174,7 +174,7 @@ const int TOTAL_MIDGAME_VALUE = ROOK_MIDGAME_VALUE * 4 + KNIGHT_CANNON_MIDGAME_V
 
 // 先行权的基础分值，可以按照出子效率的紧迫程度去调整（开局更紧迫）
 
-const int TOTAL_ADVANCED_VALUE = 10;
+const int TOTAL_ADVANCED_VALUE = 12;
 
 // 对方越偏向进攻，过河进入我方地界的棋子就越多，因此可以按照敌方过河子数量调整攻防策略
 

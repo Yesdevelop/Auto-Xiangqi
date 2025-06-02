@@ -10,21 +10,9 @@ public:
     Search() = default;
     ~Search()
     {
-        if (pHistoryCache)
-        {
-            delete pHistoryCache;
-            pHistoryCache = nullptr;
-        }
-        if (pKillerTable)
-        {
-            delete pKillerTable;
-            pKillerTable = nullptr;
-        }
-        if (pHashTable)
-        {
-            delete pHashTable;
-            pHashTable = nullptr;
-        }
+        delete pHistoryCache;
+        delete pKillerTable;
+        delete pHashTable;
     }
 
     Result searchMain(Board &board, int maxDepth, int maxTime);
@@ -38,27 +26,14 @@ private:
     /// @brief 初始化搜索
     /// @param board
     /// @param initHashLevel
-    void searchInit(Board &board, int initHashLevel = 25)
+    void reset(Board& board)
     {
-        rootMoves.resize(0);
-        if (this->pKillerTable->initDone())
-        {
-            this->pKillerTable->reset();
-        }
-        else
-        {
-            this->pKillerTable->init();
-        }
-        if (this->pHashTable->initDone())
-        {
-            this->pHashTable->reset();
-        }
-        else
-        {
-            this->pHashTable->init(initHashLevel);
-        }
+        this->rootMoves = MOVES{};
         board.distance = 0;
         board.initEvaluate();
+        this->pHistoryCache->reset();
+        this->pKillerTable->reset();
+        this->pHashTable->reset();
     }
 
     void searchStep(Move &bestMove)
@@ -76,7 +51,7 @@ private:
         }
     }
 
-    MOVES rootMoves;
+    MOVES rootMoves{};
 
     HistoryHeuristic *pHistoryCache = new HistoryHeuristic{};
     KillerTable *pKillerTable = new KillerTable{};
@@ -103,7 +78,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         return openbookResult;
     }
 
-    this->searchInit(board);
+    this->reset(board);
     this->rootMoves = Moves::getMoves(board);
 
     Result bestNode = Result(Move(), 0);
