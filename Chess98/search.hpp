@@ -442,10 +442,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    if (!board.isKingLive(board.team))
-    {
-		return -INF + board.distance;
-    }
     // searchQ
     if (depth <= 0)
     {
@@ -588,7 +584,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pKiller->add(board, bestMove);
+        if (type == betaType)
+        {
+            this->pKiller->add(board, bestMove);
+        }
     }
 
     return vlBest;
