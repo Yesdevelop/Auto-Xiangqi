@@ -111,7 +111,7 @@ public:
     }
 
     void reset();
-    void add(Board &board, Move &goodMove);
+    void add(Board &board, Move &goodMove, int depth);
     Move get(Board &board);
 
 private:
@@ -126,19 +126,23 @@ void TransportationTable::reset()
     this->pList.resize(this->hashSize);
 }
 
-void TransportationTable::add(Board &board, Move &goodMove)
+void TransportationTable::add(Board &board, Move &goodMove, int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
-    t.hashLock = board.hashLock;
-    t.goodMove = goodMove;
+    if (t.hashLock == 0 || depth >= t.depth) 
+    {
+        t.hashLock = board.hashLock;
+        t.depth = depth;
+        t.goodMove = goodMove;
+    }
 }
 
 Move TransportationTable::get(Board &board)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
-    if (t.hashLock == 0 || t.hashLock == board.hashLock)
+    if (t.hashLock == board.hashLock)
     {
         if (isValidMoveInSituation(board, t.goodMove))
         {

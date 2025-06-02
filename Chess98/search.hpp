@@ -276,8 +276,8 @@ Result Search::searchRoot(Board &board, int depth)
     }
     else
     {
-        this->pHistoryCache->add(bestMove, depth);
-        this->pHashTable->add(board, bestMove);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, depth);
     }
     Result result{bestMove.id == -1 ? Move{} : bestMove, vlBest};
 
@@ -429,7 +429,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove);
+        this->pTransportation->add(board, bestMove, depth);
     }
 
     return vlBest;
@@ -558,7 +558,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             if (!mChecking &&
                 eaten.pieceid == EMPTY_PIECEID &&
                 depth >= 3 &&
-                searchedCnt >= 5)
+                searchedCnt >= 4)
             {
                 vl = -searchCut(board, depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
             }
