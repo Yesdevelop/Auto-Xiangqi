@@ -280,6 +280,7 @@ Result Search::searchRoot(Board &board, int depth)
     else
     {
         this->pHistoryCache->add(bestMove, depth);
+        this->pHashTable->add(board, bestMove);
     }
     Result result{bestMove.id == -1 ? Move{} : bestMove, vlBest};
 
