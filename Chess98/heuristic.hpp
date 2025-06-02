@@ -54,10 +54,10 @@ void HistoryHeuristic::add(Move move, int depth)
 
 void HistoryHeuristic::reset()
 {
-    this->historyTable = std::array<std::array<int, 90>, 90>{};
+    this->historyTable.fill({});
 }
 
-// Killer Heuristic
+// Killer Table
 class KillerTable
 {
 public:
@@ -74,7 +74,7 @@ private:
 
 void KillerTable::reset()
 {
-    this->killerMoves = std::array<std::array<Move, KillerTable::width>, KillerTable::maxKillerDistance>{};
+    this->killerMoves.fill({});
 }
 
 MOVES KillerTable::get(Board &board)
@@ -92,7 +92,6 @@ MOVES KillerTable::get(Board &board)
 
 void KillerTable::add(Board &board, Move move)
 {
-    assert(board.distance < this->maxKillerDistance);
     std::array<Move, KillerTable::width> &moves = this->killerMoves[board.distance];
     moves[1] = moves[0];
     moves[0] = move;

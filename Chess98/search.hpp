@@ -79,6 +79,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     }
 
     this->reset(board);
+    
     this->rootMoves = Moves::getMoves(board);
 
     Result bestNode = Result(Move(), 0);
