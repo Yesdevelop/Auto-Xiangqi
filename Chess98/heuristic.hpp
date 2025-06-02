@@ -67,9 +67,7 @@ public:
     MOVES get(Board &board);
 
 private:
-    static const int maxKillerDistance = 128;
-    static const int width = 2;
-    std::array<std::array<Move, KillerTable::width>, KillerTable::maxKillerDistance> killerMoves{};
+    std::array<std::array<Move, 2>, 128> killerMoves{};
 };
 
 void KillerTable::reset()
@@ -92,7 +90,7 @@ MOVES KillerTable::get(Board &board)
 
 void KillerTable::add(Board &board, Move move)
 {
-    std::array<Move, KillerTable::width> &moves = this->killerMoves[board.distance];
+    std::array<Move, 2> &moves = this->killerMoves[board.distance];
     moves[1] = moves[0];
     moves[0] = move;
 }
@@ -110,7 +108,7 @@ public:
 
     void reset();
     void add(Board &board, Move &goodMove);
-    void get(Board &board, Move &goodMove);
+    Move get(Board &board);
 
 private:
     std::vector<tItem> pList{};
@@ -132,7 +130,7 @@ void TransportationTable::add(Board &board, Move &goodMove)
     t.goodMove = goodMove;
 }
 
-void TransportationTable::get(Board &board, Move &goodMove)
+Move TransportationTable::get(Board &board)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
@@ -140,7 +138,8 @@ void TransportationTable::get(Board &board, Move &goodMove)
     {
         if (isValidMoveInSituation(board, t.goodMove))
         {
-            goodMove = t.goodMove;
+            return t.goodMove;
         }
     }
+    return Move{};
 }

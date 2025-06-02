@@ -10,9 +10,9 @@ public:
     Search() = default;
     ~Search()
     {
-        delete pHistoryCache;
-        delete pKillerTable;
-        delete pHashTable;
+        delete pHistory;
+        delete pKiller;
+        delete pTransportation;
     }
 
     Result searchMain(Board &board, int maxDepth, int maxTime);
@@ -23,17 +23,14 @@ public:
     int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
 
 private:
-    /// @brief 初始化搜索
-    /// @param board
-    /// @param initHashLevel
     void reset(Board& board)
     {
         this->rootMoves = MOVES{};
         board.distance = 0;
         board.initEvaluate();
-        this->pHistoryCache->reset();
-        this->pKillerTable->reset();
-        this->pHashTable->reset();
+        this->pHistory->reset();
+        this->pKiller->reset();
+        this->pTransportation->reset();
     }
 
     void searchStep(Move &bestMove)
@@ -53,9 +50,9 @@ private:
 
     MOVES rootMoves{};
 
-    HistoryHeuristic *pHistoryCache = new HistoryHeuristic{};
-    KillerTable *pKillerTable = new KillerTable{};
-    TransportationTable *pHashTable = new TransportationTable{};
+    HistoryHeuristic *pHistory = new HistoryHeuristic{};
+    KillerTable *pKiller = new KillerTable{};
+    TransportationTable *pTransportation = new TransportationTable{};
 };
 
 /// @brief 迭代加深
@@ -79,7 +76,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     }
 
     this->reset(board);
-    
+
     this->rootMoves = Moves::getMoves(board);
 
     Result bestNode = Result(Move(), 0);
@@ -279,17 +276,12 @@ Result Search::searchRoot(Board &board, int depth)
     }
     else
     {
-        this->pHistoryCache->add(bestMove, depth);
+        this->pHistory->add(bestMove, depth);
     }
     Result result{bestMove.id == -1 ? Move{} : bestMove, vlBest};
 
-    // sort root moves by value
-    std::sort(
-        rootMoves.begin(), rootMoves.end(),
-        [](Move &first, Move &second) -> bool
-        {
-            return first.val > second.val;
-        });
+    // sort by history because it seems that history heuristic is more effective
+    this->pHistory->sort(rootMoves);
 
     return result;
 }
@@ -362,15 +354,14 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     int vlBest = -INF;
     Move bestMove{};
     nodeType type = alphaType;
-    Move goodMove;
-    this->pHashTable->get(board, goodMove);
+    Move goodMove = this->pTransportation->get(board);
     if (goodMove.id == -1 && depth >= 2)
     {
         if (searchPV(board, depth / 2, alpha, beta) <= alpha)
         {
             searchPV(board, depth / 2, -INF, beta);
         }
-        this->pHashTable->get(board, goodMove);
+        goodMove = this->pTransportation->get(board);
     }
     if (goodMove.id != -1)
     {
@@ -394,7 +385,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         int vl = -INF;
         MOVES availableMoves = Moves::getMoves(board);
-        this->pHistoryCache->sort(availableMoves);
+        this->pHistory->sort(availableMoves);
         for (auto &move : availableMoves)
         {
             Piece eaten = board.doMove(move);
@@ -436,8 +427,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
     else
     {
-        this->pHistoryCache->add(bestMove, depth);
-        this->pHashTable->add(board, bestMove);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove);
     }
 
     return vlBest;
@@ -450,6 +441,10 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
+    if (!board.isKingLive(board.team))
+    {
+		return -INF + board.distance;
+    }
     // searchQ
     if (depth <= 0)
     {
@@ -529,11 +524,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     int searchedCnt = 0;
     if (type != betaType)
     {
-        MOVES killerAvailableMoves = this->pKillerTable->get(board);
-        for (Move &move : killerAvailableMoves)
+        MOVES killerAvailableMoves = this->pKiller->get(board);
+		MOVES _moves = Moves::getMoves(board);
+        for (const Move &move : killerAvailableMoves)
         {
-            if (board.isKingLive(board.team))
-            {
                 Piece eaten = board.doMove(move);
                 int vl = -searchCut(board, depth - 1, -beta + 1);
                 board.undoMove(move, eaten);
@@ -546,7 +540,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                         type = betaType;
                         break;
                     }
-                }
             }
         }
     }
@@ -555,7 +548,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (type != betaType)
     {
         MOVES availableMoves = Moves::getMoves(board);
-        this->pHistoryCache->sort(availableMoves);
+        this->pHistory->sort(availableMoves);
         for (Move &move : availableMoves)
         {
             Piece eaten = board.doMove(move);
@@ -564,7 +557,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             if (!mChecking &&
                 eaten.pieceid == EMPTY_PIECEID &&
                 depth >= 3 &&
-                searchedCnt >= 4)
+                searchedCnt >= 5)
             {
                 vl = -searchCut(board, depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
             }
@@ -593,8 +586,8 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
     else
     {
-        this->pHistoryCache->add(bestMove, depth);
-        this->pKillerTable->add(board, bestMove);
+        this->pHistory->add(bestMove, depth);
+        this->pKiller->add(board, bestMove);
     }
 
     return vlBest;

@@ -341,8 +341,12 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
 bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
+    if (attacker == 0) // 若攻击者不存在，则一定是不合理着法
+		return false;
     if (attacker != move.attacker.pieceid) // 若攻击者不一致，则一定是不合理着法
         return false;
+    if (move.attacker.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
+		return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
     if (captured != 0 && board.teamOn(move.x2, move.y2) == board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
         return false;
@@ -383,7 +387,7 @@ bool isValidMoveInSituation(Board &board, Move move)
     }
     else if (abs(attacker) == R_BISHOP)
     {
-        // 象走法，若横纵坐标差值等于2，则不能有障碍物
+        // 象走法，不能有障碍物
         if (board.pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0)
             return false;
     }
@@ -394,12 +398,12 @@ bool isValidMoveInSituation(Board &board, Move move)
         // 生成炮的着法范围
         BITLINE bitlineX = board.getBitLineX(move.x1);
         REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, move.y1, 9);
-        if ((move.y2 < regionX[1] - 1 || move.y2 > regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
+        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
             return false;
         // 横向
         BITLINE bitlineY = board.getBitLineY(move.y1);
         REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, move.x1, 8);
-        if ((move.x2 < regionY[1] - 1 || move.x2 > regionY[2] + 1) && move.x2 != regionY[0] && move.x2 != regionY[3])
+        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
             return false;
     }
 
