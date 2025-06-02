@@ -13,7 +13,7 @@ public:
     void reset();
 
 private:
-    std::array<std::array<int, 90>, 90> historyTable{};
+    std::array<std::array<std::array<int, 90>, 90>,2> historyTable{};
 
     int toIndex(int x, int y) const
     {
@@ -29,8 +29,10 @@ void HistoryHeuristic::sort(MOVES &moves) const
         {
             int pos1 = this->toIndex(move.x1, move.y1);
             int pos2 = this->toIndex(move.x2, move.y2);
+            int teamID = (move.attacker.team() + 1) >> 1;
+            assert(teamID >= 0 && teamID <= 1);
             move.moveType = history;
-            move.val = historyTable[pos1][pos2];
+            move.val = historyTable[teamID][pos1][pos2];
         }
     }
     // vl history compare
@@ -49,7 +51,9 @@ void HistoryHeuristic::add(Move move, int depth)
 {
     int pos1 = this->toIndex(move.x1, move.y1);
     int pos2 = this->toIndex(move.x2, move.y2);
-    this->historyTable.at(pos1).at(pos2) += depth * depth;
+    int teamID = (move.attacker.team() + 1) >> 1;
+    assert(teamID >= 0 && teamID <= 1);
+    this->historyTable.at(teamID).at(pos1).at(pos2) += depth * depth;
 }
 
 void HistoryHeuristic::reset()
