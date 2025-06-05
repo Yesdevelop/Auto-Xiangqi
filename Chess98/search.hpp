@@ -317,12 +317,20 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
                 {
                     return vlHash;
                 }
+                else if (depth <= 0)
+                {
+                    return beta;
+                }
             }
             else if (vlHash <= alpha)
             {
                 if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) <= alpha)
                 {
                     return vlHash;
+                }
+                else if (depth <= 0)
+                {
+                    return alpha;
                 }
             }
             else
@@ -500,6 +508,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             else if (vlHash < beta && statisValue < beta)
             {
                 return vlHash;
+            }
+            else if (depth <= 0)
+            {
+                return statisValue;
             }
         }
     }
