@@ -374,10 +374,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             searchPV(board, depth / 2, -INF, beta);
         }
         goodMove = this->pTransportation->get(board,vlHash,alpha,beta,depth);
-        if (depth >= 4)
-        {
-            depth -= static_cast<int>(depth / 4);
-        }
     }
     if (goodMove.id != -1)
     {
@@ -536,15 +532,9 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     nodeType type = alphaType;
     int searchedCnt = 0;
     Move goodMove = this->pTransportation->get(board, vlHash, beta - 1, beta, depth);
-
-    if (vlHash >= beta)
+    if (vlHash != -INF)
     {
         return vlHash;
-    }
-
-    if (depth >= 4 && goodMove.x1 == -1)
-    {
-        depth -= static_cast<int>(depth / 3);
     }
 
     if (goodMove.id != -1)
