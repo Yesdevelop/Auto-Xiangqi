@@ -3,6 +3,48 @@
 #include "hash.hpp"
 #include "bitboard.hpp"
 
+/// @brief 重复检测表
+class miniHashCache
+{
+public:
+    miniHashCache(int cacheSize = 4096)
+    {
+        assert(cacheSize >= 1024);
+        this->reset(cacheSize);
+    }
+    void reset(int cacheSize)
+    {
+        this->miniCacheVec = std::vector<int>(cacheSize, -1);
+    }
+    bool findRepeatStatus(int32 key)
+    {
+        const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
+        int& val = this->miniCacheVec[pos];
+        return (val != -1);
+    }
+    void doMove(int32 key,int distance)
+    {
+        const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
+        int& val = this->miniCacheVec[pos];
+        if (val == -1)
+        {
+            val = distance;
+        }
+    }
+    void undoMove(int32 key, int distance)
+    {
+        const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
+        int& val = this->miniCacheVec[pos];
+        if (val == distance)
+        {
+            val = -1;
+        }
+    }
+protected:
+    std::vector<int> miniCacheVec;
+    friend class Board;
+};
+
 /// @brief 棋盘类
 class Board
 {
@@ -93,6 +135,11 @@ public:
         return this->bitboard->yBitBoard[y];
     }
 
+    bool findRepeatStatus()
+    {
+        return this->repeatStatus.findRepeatStatus(this->hashKey);
+    }
+
     MOVES historyMoves{};
     PIECES historyEatens{};
     TEAM team = -1;
@@ -116,6 +163,7 @@ private:
     PIECEID_MAP pieceidMap{};
     std::vector<int32> hashKeyList{};
     std::vector<int32> hashLockList{};
+    miniHashCache repeatStatus;
 };
 
 /// @brief 初始化棋盘
@@ -354,7 +402,9 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyEatens.emplace_back(eaten);
     this->bitboard->doMove(x1, y1, x2, y2);
-
+    
+    //重复检测
+    this->repeatStatus.doMove(this->hashKey, this->distance);
     return eaten;
 }
 
@@ -428,6 +478,9 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
+
+    //重复检测
+    this->repeatStatus.undoMove(this->hashKey, this->distance);
 }
 
 /// @brief 撤销步进

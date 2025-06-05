@@ -364,7 +364,35 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     goodMove = this->pTransportation->get(board, vlHash, alpha, beta, depth);
     if (vlHash != -INF)
     {
-        return vlHash;
+        if (!board.findRepeatStatus())
+        {
+            return vlHash;
+        }
+        else
+        {
+            if (vlHash >= beta)
+            {
+                if (Search::searchQ(board, beta - 1, beta, board.distance + 16) >= beta)
+                {
+                    return vlHash;
+                }
+            }
+            else if (vlHash <= alpha)
+            {
+                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) <= alpha)
+                {
+                    return vlHash;
+                }
+            }
+            else
+            {
+                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) > alpha 
+                    && Search::searchQ(board, beta - 1, beta, board.distance + 16) < beta)
+                {
+                    return vlHash;
+                }
+            }
+        }
     }
 
     if (goodMove.id == -1 && depth >= 2)
@@ -534,7 +562,22 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     Move goodMove = this->pTransportation->get(board, vlHash, beta - 1, beta, depth);
     if (vlHash != -INF)
     {
-        return vlHash;
+        if (!board.findRepeatStatus())
+        {
+            return vlHash;
+        }
+        else {
+            if (vlHash >= beta 
+                && Search::searchQ(board, beta - 1, beta, board.distance + 16) >= beta)
+            {
+                return vlHash;
+            }
+            else if (vlHash < beta 
+                && Search::searchQ(board, beta - 1, beta, board.distance + 16) < beta)
+            {
+                return vlHash;
+            }
+        }
     }
 
     if (goodMove.id != -1)
