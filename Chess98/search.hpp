@@ -374,6 +374,10 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             searchPV(board, depth / 2, -INF, beta);
         }
         goodMove = this->pTransportation->get(board,vlHash,alpha,beta,depth);
+        if (depth >= 4)
+        {
+            depth -= static_cast<int>(depth / 4);
+        }
     }
     if (goodMove.id != -1)
     {
@@ -532,9 +536,15 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     nodeType type = alphaType;
     int searchedCnt = 0;
     Move goodMove = this->pTransportation->get(board, vlHash, beta - 1, beta, depth);
-    if (vlHash != -INF)
+
+    if (vlHash >= beta)
     {
         return vlHash;
+    }
+
+    if (depth >= 4 && goodMove.x1 == -1)
+    {
+        depth -= static_cast<int>(depth / 3);
     }
 
     if (goodMove.id != -1)
@@ -560,18 +570,18 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 		MOVES _moves = Moves::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
-                Piece eaten = board.doMove(move);
-                int vl = -searchCut(board, depth - 1, -beta + 1);
-                board.undoMove(move, eaten);
-                if (vl > vlBest)
+            Piece eaten = board.doMove(move);
+            int vl = -searchCut(board, depth - 1, -beta + 1);
+            board.undoMove(move, eaten);
+            if (vl > vlBest)
+            {
+                vlBest = vl;
+                bestMove = move;
+                if (vl >= beta)
                 {
-                    vlBest = vl;
-                    bestMove = move;
-                    if (vl >= beta)
-                    {
-                        type = betaType;
-                        break;
-                    }
+                    type = betaType;
+                    break;
+                }
             }
         }
     }
