@@ -295,12 +295,46 @@ Result Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
-    //transportation table values
+    //transportation table value
     int vlBest = -INF;
     int vlHash = -INF;
     Move bestMove{};
     nodeType type = alphaType;
     Move goodMove;
+
+    this->pTransportation->getValue(board, vlHash, alpha, beta, depth);
+    if (vlHash != -INF)
+    {
+        if (!board.findRepeatStatus())
+        {
+            return vlHash;
+        }
+        else
+        {
+            if (vlHash >= beta)
+            {
+                if (Search::searchQ(board, beta - 1, beta, board.distance + 16) >= beta)
+                {
+                    return vlHash;
+                }
+            }
+            else if (vlHash <= alpha)
+            {
+                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) <= alpha)
+                {
+                    return vlHash;
+                }
+            }
+            else
+            {
+                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) > alpha
+                    && Search::searchQ(board, beta - 1, beta, board.distance + 16) < beta)
+                {
+                    return vlHash;
+                }
+            }
+        }
+    }
     
     // searchQ
     if (depth <= 0)
@@ -360,48 +394,15 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
-    // transportation table value and moves
-    goodMove = this->pTransportation->get(board, vlHash, alpha, beta, depth);
-    if (vlHash != -INF)
-    {
-        if (!board.findRepeatStatus())
-        {
-            return vlHash;
-        }
-        else
-        {
-            if (vlHash >= beta)
-            {
-                if (Search::searchQ(board, beta - 1, beta, board.distance + 16) >= beta)
-                {
-                    return vlHash;
-                }
-            }
-            else if (vlHash <= alpha)
-            {
-                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) <= alpha)
-                {
-                    return vlHash;
-                }
-            }
-            else
-            {
-                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) > alpha 
-                    && Search::searchQ(board, beta - 1, beta, board.distance + 16) < beta)
-                {
-                    return vlHash;
-                }
-            }
-        }
-    }
-
+    // transportation table move
+    this->pTransportation->getMove(board, goodMove);
     if (goodMove.id == -1 && depth >= 2)
     {
         if (searchPV(board, depth / 2, alpha, beta) <= alpha)
         {
             searchPV(board, depth / 2, -INF, beta);
         }
-        goodMove = this->pTransportation->get(board,vlHash,alpha,beta,depth);
+        this->pTransportation->getMove(board,goodMove);
     }
     if (goodMove.id != -1)
     {
@@ -481,6 +482,28 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 /// @return
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
+    //transportation table value
+    int vlHash = -INF;
+    this->pTransportation->getValue(board, vlHash, beta - 1, beta, depth);
+    if (vlHash != -INF)
+    {
+        if (!board.findRepeatStatus())
+        {
+            return vlHash;
+        }
+        else {
+            int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + 16);
+            if (vlHash >= beta && statisValue >= beta)
+            {
+                return vlHash;
+            }
+            else if (vlHash < beta && statisValue < beta)
+            {
+                return vlHash;
+            }
+        }
+    }
+    
     // searchQ
     if (depth <= 0)
     {
@@ -553,32 +576,13 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // transportation table value and moves
-    int vlHash = -INF;
+    // transportation table move
     int vlBest = -INF;
     Move bestMove{};
     nodeType type = alphaType;
     int searchedCnt = 0;
-    Move goodMove = this->pTransportation->get(board, vlHash, beta - 1, beta, depth);
-    if (vlHash != -INF)
-    {
-        if (!board.findRepeatStatus())
-        {
-            return vlHash;
-        }
-        else {
-            if (vlHash >= beta 
-                && Search::searchQ(board, beta - 1, beta, board.distance + 16) >= beta)
-            {
-                return vlHash;
-            }
-            else if (vlHash < beta 
-                && Search::searchQ(board, beta - 1, beta, board.distance + 16) < beta)
-            {
-                return vlHash;
-            }
-        }
-    }
+    Move goodMove;
+    this->pTransportation->getMove(board,goodMove);
 
     if (goodMove.id != -1)
     {

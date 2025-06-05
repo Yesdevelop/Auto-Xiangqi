@@ -112,7 +112,8 @@ public:
 
     void reset();
     void add(Board &board, Move &goodMove, int vl, int type, int depth);
-    Move get(Board &board,int& vl, int vlApha, int vlBeta,int depth);
+    void getValue(Board &board,int& vl, int vlApha, int vlBeta,int depth);
+    void getMove(Board& board,Move& goodMove);
     int vlAdjust(int vl, int nDistance);
 
 private:
@@ -157,7 +158,7 @@ void TransportationTable::add(Board &board, Move &goodMove,int vl,int type, int 
     }
 }
 
-Move TransportationTable::get(Board &board, int& vl, int vlApha, int vlBeta,int depth)
+void TransportationTable::getValue(Board &board, int& vl, int vlApha, int vlBeta,int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
@@ -178,11 +179,18 @@ Move TransportationTable::get(Board &board, int& vl, int vlApha, int vlBeta,int 
                 vl = vlBeta;
             }
         }
-        
+    }
+}
+
+void TransportationTable::getMove(Board& board, Move& goodMove)
+{
+    const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
+    tItem& t = this->pList.at(pos);
+    if (t.hashLock == board.hashLock)
+    {
         if (isValidMoveInSituation(board, t.goodMove))
         {
-            return t.goodMove;
+            goodMove = t.goodMove;
         }
     }
-    return Move{};
 }
