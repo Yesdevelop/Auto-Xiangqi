@@ -441,7 +441,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         vlBest += board.distance;
     }
-    else
+    else if(type != alphaType)
     {
         this->pHistory->add(bestMove, depth);
         this->pTransportation->add(board, bestMove,vlBest,type, depth);
@@ -626,13 +626,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         vlBest += board.distance;
     }
-    else
+    else if(type == betaType)
     {
         this->pHistory->add(bestMove, depth);
-        if (type == betaType)
-        {
-            this->pKiller->add(board, bestMove);
-        }
+        this->pKiller->add(board, bestMove);
         this->pTransportation->add(board, bestMove, vlBest, type, depth);
     }
 
