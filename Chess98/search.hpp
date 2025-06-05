@@ -305,7 +305,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // searchQ
     if (depth <= 0)
     {
-        int vl = Search::searchQ(board, alpha, beta);
+        int vl = Search::searchQ(board, alpha, beta, board.distance + 16);
         this->pTransportation->add(board, bestMove, vl, exactType, depth);
         return vl;
     }
@@ -460,7 +460,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // searchQ
     if (depth <= 0)
     {
-        return Search::searchQ(board, beta - 1, beta);
+        return Search::searchQ(board, beta - 1, beta,board.distance + 16);
     }
 
     // mate distance pruning

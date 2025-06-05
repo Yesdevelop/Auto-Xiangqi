@@ -147,14 +147,13 @@ void TransportationTable::add(Board &board, Move &goodMove,int vl,int type, int 
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
-    if (t.hashLock == 0 || depth >= t.depth) 
+    if (t.hashLock == 0
+        || (t.hashLock == board.hashLock && depth > t.depth)
+        || (t.hashLock != board.hashLock && depth >= t.depth))
     {
         t.hashLock = board.hashLock;
         t.depth = depth;
-        if (goodMove.x1 != -1)
-        {
-            t.goodMove = goodMove;
-        }
+        t.goodMove = goodMove;
         t.vl = vl;
         t.type = type;
     }
@@ -166,7 +165,7 @@ Move TransportationTable::get(Board &board, int& vl, int vlApha, int vlBeta,int 
     tItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
-        if (t.depth >= depth)
+        if (t.depth >= depth || std::abs(t.vl) >= BAN)
         {
             if (t.type == exactType)
             {
