@@ -277,7 +277,7 @@ Result Search::searchRoot(Board &board, int depth)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, exactType, depth);
     }
     Result result{bestMove.id == -1 ? Move{} : bestMove, vlBest};
 
@@ -295,10 +295,19 @@ Result Search::searchRoot(Board &board, int depth)
 /// @return
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
+    //transportation table values
+    int vlBest = -INF;
+    int vlHash = -INF;
+    Move bestMove{};
+    nodeType type = alphaType;
+    Move goodMove;
+    
     // searchQ
     if (depth <= 0)
     {
-        return Search::searchQ(board, alpha, beta);
+        int vl = Search::searchQ(board, alpha, beta);
+        this->pTransportation->add(board, bestMove, vl, exactType, depth);
+        return vl;
     }
 
     // mate distance pruning
@@ -351,18 +360,20 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
-    // transportation table moves
-    int vlBest = -INF;
-    Move bestMove{};
-    nodeType type = alphaType;
-    Move goodMove = this->pTransportation->get(board);
+    // transportation table value and moves
+    goodMove = this->pTransportation->get(board, vlHash, alpha, beta, depth);
+    if (vlHash != -INF)
+    {
+        return vlHash;
+    }
+
     if (goodMove.id == -1 && depth >= 2)
     {
         if (searchPV(board, depth / 2, alpha, beta) <= alpha)
         {
             searchPV(board, depth / 2, -INF, beta);
         }
-        goodMove = this->pTransportation->get(board);
+        goodMove = this->pTransportation->get(board,vlHash,alpha,beta,depth);
     }
     if (goodMove.id != -1)
     {
@@ -429,7 +440,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, depth);
+        this->pTransportation->add(board, bestMove,vlBest,type, depth);
     }
 
     return vlBest;
@@ -514,11 +525,35 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // killer heuristic
-    nodeType type = alphaType;
-    Move bestMove{};
+    // transportation table value and moves
+    int vlHash = -INF;
     int vlBest = -INF;
+    Move bestMove{};
+    nodeType type = alphaType;
     int searchedCnt = 0;
+    Move goodMove = this->pTransportation->get(board, vlHash, beta - 1, beta, depth);
+    if (vlHash != -INF)
+    {
+        return vlHash;
+    }
+
+    if (goodMove.id != -1)
+    {
+        Piece eaten = board.doMove(goodMove);
+        int vl = -searchCut(board, depth - 1, -beta + 1);
+        board.undoMove(goodMove, eaten);
+        bestMove = goodMove;
+        if (vl > vlBest)
+        {
+            vlBest = vl;
+            if (vl >= beta)
+            {
+                type = betaType;
+            }
+        }
+    }
+
+    // killer heuristic
     if (type != betaType)
     {
         MOVES killerAvailableMoves = this->pKiller->get(board);
@@ -588,6 +623,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         {
             this->pKiller->add(board, bestMove);
         }
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
     }
 
     return vlBest;

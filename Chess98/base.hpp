@@ -205,4 +205,6 @@ struct tItem
     Move goodMove{};
     int32 depth = 0;
     int32 hashLock = 0;
+    int32 vl = 0;
+    int32 type = Unknown;
 };

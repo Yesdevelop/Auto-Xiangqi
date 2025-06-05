@@ -111,8 +111,9 @@ public:
     }
 
     void reset();
-    void add(Board &board, Move &goodMove, int depth);
-    Move get(Board &board);
+    void add(Board &board, Move &goodMove, int vl, int type, int depth);
+    Move get(Board &board,int& vl, int vlApha, int vlBeta,int depth);
+    int vlAdjust(int vl, int nDistance);
 
 private:
     std::vector<tItem> pList{};
@@ -126,7 +127,23 @@ void TransportationTable::reset()
     this->pList.resize(this->hashSize);
 }
 
-void TransportationTable::add(Board &board, Move &goodMove, int depth)
+int TransportationTable::vlAdjust(int vl, int nDistance)
+{
+    if (std::abs(vl) >= BAN)
+    {
+        if (vl < 0)
+        {
+            return vl + nDistance;
+        }
+        if (vl > 0)
+        {
+            return vl - nDistance;
+        }
+    }
+    return vl;
+}
+
+void TransportationTable::add(Board &board, Move &goodMove,int vl,int type, int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
@@ -134,16 +151,37 @@ void TransportationTable::add(Board &board, Move &goodMove, int depth)
     {
         t.hashLock = board.hashLock;
         t.depth = depth;
-        t.goodMove = goodMove;
+        if (goodMove.x1 != -1)
+        {
+            t.goodMove = goodMove;
+        }
+        t.vl = vl;
+        t.type = type;
     }
 }
 
-Move TransportationTable::get(Board &board)
+Move TransportationTable::get(Board &board, int& vl, int vlApha, int vlBeta,int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
+        if (t.depth >= depth)
+        {
+            if (t.type == exactType)
+            {
+                vl = this->vlAdjust(t.vl, board.distance);
+            }
+            else if (t.type == alphaType && t.vl <= vlApha)
+            {
+                vl = vlApha;
+            }
+            else if (t.type == betaType && t.vl >= vlBeta)
+            {
+                vl = vlBeta;
+            }
+        }
+        
         if (isValidMoveInSituation(board, t.goodMove))
         {
             return t.goodMove;
