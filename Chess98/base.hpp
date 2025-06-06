@@ -209,4 +209,4 @@ struct tItem
     int32 type = Unknown;
 };
 
-const int QuiestExtendDepth = 8;
+const int QuiestExtendDepth = 2;
