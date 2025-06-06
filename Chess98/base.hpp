@@ -208,3 +208,5 @@ struct tItem
     int32 vl = 0;
     int32 type = Unknown;
 };
+
+const int QuiestExtendDepth = 8;

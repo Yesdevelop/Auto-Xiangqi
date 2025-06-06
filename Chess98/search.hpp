@@ -31,6 +31,7 @@ private:
         this->pHistory->reset();
         this->pKiller->reset();
         this->pTransportation->reset();
+        this->closeOpenBook = false;
     }
 
     void searchStep(Move &bestMove)
@@ -53,6 +54,8 @@ private:
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
     TransportationTable *pTransportation = new TransportationTable{};
+    
+    bool closeOpenBook = false;
 };
 
 /// @brief 迭代加深
@@ -68,11 +71,17 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     std::cout << "---------------------" << std::endl;
 
     // openbook search
-    Result openbookResult = Search::searchOpenBook(board);
-    if (openbookResult.val != -1)
+    if (!closeOpenBook)
     {
-        std::cout << "Find a great move from OpenBook!" << std::endl;
-        return openbookResult;
+        Result openbookResult = Search::searchOpenBook(board);
+        if (openbookResult.val != -1)
+        {
+            std::cout << "Find a great move from OpenBook!" << std::endl;
+            return openbookResult;
+        }
+        else {
+            closeOpenBook = true;
+        }
     }
 
     this->reset(board);
@@ -313,7 +322,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         {
             if (vlHash >= beta)
             {
-                if (Search::searchQ(board, beta - 1, beta, board.distance + 16) >= beta)
+                if (Search::searchQ(board, beta - 1, beta, board.distance + QuiestExtendDepth) >= beta)
                 {
                     return vlHash;
                 }
@@ -324,7 +333,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
             else if (vlHash <= alpha)
             {
-                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) <= alpha)
+                if (Search::searchQ(board, alpha, alpha + 1, board.distance + QuiestExtendDepth) <= alpha)
                 {
                     return vlHash;
                 }
@@ -335,8 +344,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
             else
             {
-                if (Search::searchQ(board, alpha, alpha + 1, board.distance + 16) > alpha
-                    && Search::searchQ(board, beta - 1, beta, board.distance + 16) < beta)
+                if (Search::searchQ(board, alpha, alpha + 1, board.distance + QuiestExtendDepth) > alpha
+                    && Search::searchQ(board, beta - 1, beta, board.distance + QuiestExtendDepth) < beta)
                 {
                     return vlHash;
                 }
@@ -347,7 +356,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // searchQ
     if (depth <= 0)
     {
-        int vl = Search::searchQ(board, alpha, beta, board.distance + 16);
+        int vl = Search::searchQ(board, alpha, beta, board.distance + QuiestExtendDepth);
         this->pTransportation->add(board, bestMove, vl, exactType, depth);
         return vl;
     }
@@ -500,7 +509,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             return vlHash;
         }
         else {
-            int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + 16);
+            int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + QuiestExtendDepth);
             if (vlHash >= beta && statisValue >= beta)
             {
                 return vlHash;
@@ -519,7 +528,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // searchQ
     if (depth <= 0)
     {
-        return Search::searchQ(board, beta - 1, beta,board.distance + 16);
+        return Search::searchQ(board, beta - 1, beta,board.distance + QuiestExtendDepth);
     }
 
     // mate distance pruning
@@ -711,7 +720,6 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
     // null and delta pruning
     const bool mChecking = inCheck(board);
-    int leftDistance = mChecking ? std::min<int>(4, maxDistance - 1) : maxDistance - 1;
     int vlBest = -INF;
     if (!mChecking)
     {
@@ -735,7 +743,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     for (const Move &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
-        int vl = -Search::searchQ(board, -beta, -alpha, leftDistance);
+        int vl = -Search::searchQ(board, -beta, -alpha, maxDistance - 1);
         board.undoMove(move, eaten);
         if (vl > vlBest)
         {
