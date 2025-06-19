@@ -590,9 +590,6 @@ MOVES Moves::generateCaptureMoves(Board &board, int x, int y)
 
 MOVES Moves::getCaptureMovesUnordered(Board &board)
 {
-    // 有无将
-    if (!board.isKingLive(board.team))
-        return MOVES{};
     // 对面笑
     for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
     {
@@ -627,9 +624,6 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
 
 MOVES Moves::getMoves(Board &board)
 {
-    // 有无将
-    if (!board.isKingLive(board.team))
-        return MOVES{};
     // 对面笑
     for (int y = board.pieceRedKing->y + 1; y <= 9; y++)
     {

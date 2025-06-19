@@ -288,6 +288,16 @@ Result Search::searchRoot(Board &board, int depth)
 
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
+    // check if the king is live
+    if (board.isKingLive(board.team) == false)
+    {
+        return -INF + board.distance;
+    }
+    else if (board.isKingLive(-board.team) == false)
+    {
+        return INF - board.distance;
+    }
+
     // transportation table value
     int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
     if (vlHash != -INF)
@@ -476,6 +486,15 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
+    // check if the king is live
+    if (board.isKingLive(board.team) == false)
+    {
+		return -INF + board.distance;
+    }
+    else if (board.isKingLive(-board.team) == false)
+    {
+        return INF - board.distance;
+	}
     // transportation table value
     int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
     if (vlHash != -INF)
@@ -520,8 +539,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // tricks
+    // variables
     const bool mChecking = inCheck(board);
+
+    // tricks
     if (!mChecking)
     {
         // futility pruning
@@ -573,7 +594,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // public variables
+    // variables
     int vlBest = -INF;
     Move bestMove{};
     nodeType type = alphaType;
@@ -673,6 +694,16 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
+    // check if the king is live
+    if (board.isKingLive(board.team) == false)
+    {
+        return -INF + board.distance;
+    }
+    else if (board.isKingLive(-board.team) == false)
+    {
+        return INF - board.distance;
+    }
+
     // evaluate
     if (board.distance >= maxDistance)
     {
@@ -690,9 +721,11 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         }
     }
 
-    // null and delta pruning
+    // variables
     const bool mChecking = inCheck(board);
     int vlBest = -INF;
+
+    // null and delta pruning
     if (!mChecking)
     {
         int vl = board.evaluate();
