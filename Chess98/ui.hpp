@@ -37,7 +37,7 @@ void setBoardCode(Board board)
 {
     BOARD_CODE code = generateCode(board);
 
-	const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
+    const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
     const std::string jsPutCode =
         "\
         const http = require('http')\n\
@@ -52,7 +52,7 @@ void setBoardCode(Board board)
         const options2 = {\n\
             hostname: '127.0.0.1',\n\
             path: '/?move=" +
-            historyMovesBack + "',\n\
+        historyMovesBack + "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\

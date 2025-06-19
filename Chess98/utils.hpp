@@ -1,8 +1,6 @@
 #pragma once
 #include "board.hpp"
 
-/// @brief 等待
-/// @param ms
 void wait(int ms)
 {
 #ifdef _WIN32
@@ -12,9 +10,6 @@ void wait(int ms)
 #endif
 }
 
-/// @brief 判断当前一方是否被将军
-/// @param board
-/// @return
 bool inCheck(Board &board)
 {
     Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
@@ -107,11 +102,6 @@ bool inCheck(Board &board)
     return false;
 }
 
-/// @brief 是否被保护
-/// @param board
-/// @param x
-/// @param y
-/// @return
 bool relationship_hasProtector(Board &board, int x, int y)
 {
     TEAM team = -board.teamOn(x, y);
@@ -237,11 +227,6 @@ bool relationship_hasProtector(Board &board, int x, int y)
     return false;
 }
 
-/// @brief 检查是否是过河卒
-/// @param board
-/// @param x
-/// @param y
-/// @return
 bool isRiveredPawn(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);
@@ -256,10 +241,6 @@ bool isRiveredPawn(Board &board, int x, int y)
     return false;
 }
 
-/// @brief 获取走法列表中的吃子走法
-/// @param board
-/// @param moves
-/// @return
 MOVES getCaptureMoves(Board &board, MOVES moves)
 {
     MOVES captureMoves;
@@ -269,9 +250,6 @@ MOVES getCaptureMoves(Board &board, MOVES moves)
     return captureMoves;
 }
 
-/// @brief 将fen转PIECEID_MAP
-/// @param fenCode
-/// @return
 PIECEID_MAP fenToPieceidMap(std::string fenCode)
 {
     PIECEID_MAP pieceidMap = PIECEID_MAP{{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -334,19 +312,15 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
-/// @brief 当前局面下的着法合理性检测
-/// @param board
-/// @param move
-/// @return 若合理则返回true，否则返回false
 bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
     if (attacker == 0) // 若攻击者不存在，则一定是不合理着法
-		return false;
+        return false;
     if (attacker != move.attacker.pieceid) // 若攻击者不一致，则一定是不合理着法
         return false;
     if (move.attacker.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
-		return false;
+        return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
     if (captured != 0 && board.teamOn(move.x2, move.y2) == board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
         return false;

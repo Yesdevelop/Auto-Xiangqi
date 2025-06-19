@@ -13,7 +13,7 @@ public:
     void reset();
 
 private:
-    std::array<std::array<std::array<int, 90>, 90>,2> historyTable{};
+    std::array<std::array<std::array<int, 90>, 90>, 2> historyTable{};
 
     int toIndex(int x, int y) const
     {
@@ -58,7 +58,7 @@ void HistoryHeuristic::add(Move move, int depth)
 
 void HistoryHeuristic::reset()
 {
-    this->historyTable.fill({});
+    std::memset(this->historyTable.data(), 0, sizeof(this->historyTable));
 }
 
 // Killer Table
@@ -111,9 +111,9 @@ public:
     }
 
     void reset();
-    void add(Board &board, Move &goodMove, int vl, int type, int depth);
-    void getValue(Board &board,int& vl, int vlApha, int vlBeta,int depth);
-    void getMove(Board& board,Move& goodMove);
+    void add(Board &board, Move goodMove, int vl, int type, int depth);
+    int getValue(Board &board, int vlApha, int vlBeta, int depth);
+    Move getMove(Board &board);
     int vlAdjust(int vl, int nDistance);
 
 private:
@@ -144,7 +144,7 @@ int TransportationTable::vlAdjust(int vl, int nDistance)
     return vl;
 }
 
-void TransportationTable::add(Board &board, Move &goodMove,int vl,int type, int depth)
+void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
@@ -158,7 +158,7 @@ void TransportationTable::add(Board &board, Move &goodMove,int vl,int type, int 
     }
 }
 
-void TransportationTable::getValue(Board &board, int& vl, int vlApha, int vlBeta,int depth)
+int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     tItem &t = this->pList.at(pos);
@@ -168,29 +168,31 @@ void TransportationTable::getValue(Board &board, int& vl, int vlApha, int vlBeta
         {
             if (t.type == exactType)
             {
-                vl = this->vlAdjust(t.vl, board.distance);
+                return this->vlAdjust(t.vl, board.distance);
             }
             else if (t.type == alphaType && t.vl <= vlApha)
             {
-                vl = vlApha;
+                return vlApha;
             }
             else if (t.type == betaType && t.vl >= vlBeta)
             {
-                vl = vlBeta;
+                return vlBeta;
             }
         }
     }
+    return -INF;
 }
 
-void TransportationTable::getMove(Board& board, Move& goodMove)
+Move TransportationTable::getMove(Board &board)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-    tItem& t = this->pList.at(pos);
+    tItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
         if (isValidMoveInSituation(board, t.goodMove))
         {
-            goodMove = t.goodMove;
+            return t.goodMove;
         }
     }
+    return Move{};
 }

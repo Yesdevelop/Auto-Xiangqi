@@ -2,7 +2,6 @@
 #include "board.hpp"
 #include "utils.hpp"
 
-/// @brief 着法生成
 class Moves
 {
 public:
@@ -589,9 +588,6 @@ MOVES Moves::generateCaptureMoves(Board &board, int x, int y)
         return MOVES{};
 }
 
-/// @brief 获取当前队伍所有吃子着法
-/// @param board
-/// @return
 MOVES Moves::getCaptureMovesUnordered(Board &board)
 {
     // 有无将
@@ -629,9 +625,6 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
     return result;
 }
 
-/// @brief 获取当前队伍所有可行着法
-/// @param team
-/// @return
 MOVES Moves::getMoves(Board &board)
 {
     // 有无将
@@ -673,9 +666,6 @@ MOVES Moves::getMoves(Board &board)
     return result;
 }
 
-/// @brief 获取当前队伍经过排序整理的吃子着法（SEE）
-/// @param board
-/// @return
 MOVES Moves::getCaptureMoves(Board &board)
 {
     MOVES moves = Moves::getCaptureMovesUnordered(board);

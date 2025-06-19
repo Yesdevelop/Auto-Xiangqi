@@ -3,7 +3,6 @@
 #include "hash.hpp"
 #include "bitboard.hpp"
 
-/// @brief 重复检测表
 class miniHashCache
 {
 public:
@@ -19,13 +18,13 @@ public:
     bool findRepeatStatus(int32 key)
     {
         const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
-        int& val = this->miniCacheVec[pos];
+        int &val = this->miniCacheVec[pos];
         return (val != -1);
     }
-    void doMove(int32 key,int distance)
+    void doMove(int32 key, int distance)
     {
         const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
-        int& val = this->miniCacheVec[pos];
+        int &val = this->miniCacheVec[pos];
         if (val == -1)
         {
             val = distance;
@@ -34,18 +33,18 @@ public:
     void undoMove(int32 key, int distance)
     {
         const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
-        int& val = this->miniCacheVec[pos];
+        int &val = this->miniCacheVec[pos];
         if (val == distance)
         {
             val = -1;
         }
     }
+
 protected:
     std::vector<int> miniCacheVec;
     friend class Board;
 };
 
-/// @brief 棋盘类
 class Board
 {
 public:
@@ -166,8 +165,6 @@ private:
     miniHashCache repeatStatus;
 };
 
-/// @brief 初始化棋盘
-/// @param pieceidMap 棋子id位置表，一般传DEFAULT_PIECEID_MAP
 Board::Board(PIECEID_MAP pieceidMap, int initTeam)
 {
     this->distance = 0;
@@ -219,18 +216,11 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
     this->bitboard = new BitBoard{this->pieceidMap};
 }
 
-/// @brief 通过索引号查找piece
-/// @param pieceIndex
-/// @return
 Piece Board::pieceIndex(PIECE_INDEX pieceIndex)
 {
     return this->pieces[pieceIndex];
 }
 
-/// @brief 通过位置查找piece（若为空则返回一个index为-1的piece）
-/// @param x
-/// @param y
-/// @return
 Piece Board::piecePosition(int x, int y)
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
@@ -252,10 +242,6 @@ Piece Board::piecePosition(int x, int y)
     }
 }
 
-/// @brief 获取指定位置上的pieceid
-/// @param x
-/// @param y
-/// @return
 PIECEID Board::pieceidOn(int x, int y)
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
@@ -268,10 +254,6 @@ PIECEID Board::pieceidOn(int x, int y)
     }
 }
 
-/// @brief 获取指定位置上的队伍
-/// @param x
-/// @param y
-/// @return
 TEAM Board::teamOn(int x, int y)
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
@@ -296,8 +278,6 @@ TEAM Board::teamOn(int x, int y)
     }
 }
 
-/// @brief 获取棋盘上所有存活的棋子
-/// @return
 PIECES Board::getAllLivePieces()
 {
     PIECES result{};
@@ -311,9 +291,6 @@ PIECES Board::getAllLivePieces()
     return result;
 }
 
-/// @brief 获取指定队伍的所有存活的棋子
-/// @param team
-/// @return
 PIECES Board::getPiecesByTeam(TEAM team)
 {
     PIECES result{};
@@ -329,12 +306,6 @@ PIECES Board::getPiecesByTeam(TEAM team)
     return result;
 }
 
-/// @brief 步进
-/// @param x1
-/// @param y1
-/// @param x2
-/// @param y2
-/// @return 被吃掉的子
 Piece Board::doMove(int x1, int y1, int x2, int y2)
 {
     Piece eaten = this->piecePosition(x2, y2);
@@ -402,26 +373,17 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyEatens.emplace_back(eaten);
     this->bitboard->doMove(x1, y1, x2, y2);
-    
-    //重复检测
+
+    // 重复检测
     this->repeatStatus.doMove(this->hashKey, this->distance);
     return eaten;
 }
 
-/// @brief 步进
-/// @param move
-/// @return 被吃掉的子
 Piece Board::doMove(Move move)
 {
     return this->doMove(move.x1, move.y1, move.x2, move.y2);
 }
 
-/// @brief 撤销步进
-/// @param x1
-/// @param y1
-/// @param x2
-/// @param y2
-/// @param eaten
 void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 {
     // 其他
@@ -479,13 +441,10 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
 
-    //重复检测
+    // 重复检测
     this->repeatStatus.undoMove(this->hashKey, this->distance);
 }
 
-/// @brief 撤销步进
-/// @param move
-/// @param eaten
 void Board::undoMove(Move move, Piece eaten)
 {
     this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);

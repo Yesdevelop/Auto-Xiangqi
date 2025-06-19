@@ -2,7 +2,6 @@
 #include "search.hpp"
 #include "ui.hpp"
 
-/// 带UI的测试
 void ui(TEAM team, int maxDepth)
 {
     int count = 0;
@@ -15,7 +14,8 @@ void ui(TEAM team, int maxDepth)
     serverInit(board);
 
     Search s{};
-    std::cout << "Open Chess98/UI/index.html to play chess\n" << std::endl;
+    std::cout << "Open Chess98/UI/index.html to play chess\n"
+              << std::endl;
 
     std::string moveFileContent = "____";
     while (true)

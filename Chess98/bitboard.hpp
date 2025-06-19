@@ -9,7 +9,6 @@ using REGION_CANNON = std::array<int, 4>;
 using TYPE_ROOK_CACHE = std::array<std::array<REGION_ROOK, 10>, 1024>;
 using TYPE_CANNON_CACHE = std::array<std::array<REGION_CANNON, 10>, 1024>;
 
-/// @brief 位棋盘(车、炮着法生成)
 class BitBoard
 {
 public:
@@ -38,11 +37,6 @@ public:
         }
     }
 
-    /// @brief 获取车的着法缓存
-    /// @param bitline
-    /// @param index
-    /// @param endpos 只接受8或9
-    /// @return
     REGION_ROOK getRookRegion(BITLINE bitline, int index, int endpos)
     {
         REGION_ROOK result = this->rookCache[bitline][index];
@@ -53,11 +47,6 @@ public:
         return result;
     }
 
-    /// @brief 获取炮的着法缓存
-    /// @param bitline
-    /// @param index
-    /// @param endpos
-    /// @return
     REGION_CANNON getCannonRegion(BITLINE bitline, int index, int endpos)
     {
         REGION_CANNON result = this->cannonCache[bitline][index];
@@ -77,20 +66,10 @@ public:
 private:
     friend class Board;
 
-    /// @brief 获取bitline二进制的第n位(从右边到左边)
-    /// @param bitline
-    /// @param index
-    /// @return
     int getBit(BITLINE bitline, int index) const
     {
         return (bitline >> index) & 1;
     }
-    /// @brief 步进
-    /// @param x1
-    /// @param y1
-    /// @param x2
-    /// @param y2
-    /// @return 是否有吃子
     void doMove(int x1, int y1, int x2, int y2)
     {
         bool ret = bool(this->getBit(x2, y2));
@@ -98,12 +77,6 @@ private:
         this->setBit(x2, y2);
     }
 
-    /// @brief 撤销步进
-    /// @param x1
-    /// @param y1
-    /// @param x2
-    /// @param y2
-    /// @param eaten
     void undoMove(int x1, int y1, int x2, int y2, bool eaten)
     {
         this->setBit(x1, y1);
@@ -113,29 +86,18 @@ private:
         }
     }
 
-    /// @brief 设置棋盘上x, y的数为1
-    /// @param x
-    /// @param y
     void setBit(int x, int y)
     {
         this->xBitBoard[x] |= (1 << y);
         this->yBitBoard[y] |= (1 << x);
     }
 
-    /// @brief 设置棋盘上x, y的数为0
-    /// @param x
-    /// @param y
     void deleteBit(int x, int y)
     {
         this->xBitBoard[x] &= ~(1 << y);
         this->yBitBoard[y] &= ~(1 << x);
     }
 
-    /// @brief 获取车的着法范围
-    /// @param bitline
-    /// @param index 车的所在位置
-    /// @param end 截止点，接受8或9
-    /// @return
     REGION_ROOK generateRookRegion(BITLINE bitline, int index) const
     {
         int beg = 0;
@@ -160,11 +122,6 @@ private:
         return REGION_ROOK{beg, end};
     }
 
-    /// @brief 获取炮的着法范围
-    /// @param bitline
-    /// @param index 炮的所在位置
-    /// @param end 截止点，接受9或10
-    /// @return
     REGION_CANNON generateCannonRegion(BITLINE bitline, int index) const
     {
         int eaten1 = 0;

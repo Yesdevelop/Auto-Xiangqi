@@ -62,7 +62,7 @@ PIECEID_MAP DEFAULT_MAP{
      {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
      {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
 
-std::map<PIECEID, std::string> PIECE_NAME_PAIRS {
+std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
     {R_KING, "RK"},
     {R_GUARD, "RG"},
     {R_BISHOP, "RB"},
@@ -78,10 +78,9 @@ std::map<PIECEID, std::string> PIECE_NAME_PAIRS {
     {B_CANNON, "BC"},
     {B_PAWN, "BP"},
     {EMPTY_PIECEID, "__"},
-    {OVERFLOW_PIECEID, "  "}
-};
+    {OVERFLOW_PIECEID, "  "}};
 
-std::map<std::string, PIECEID> NAME_PIECE_PAIRS {
+std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
     {"RK", R_KING},
     {"RG", R_GUARD},
     {"RB", R_BISHOP},
@@ -97,8 +96,7 @@ std::map<std::string, PIECEID> NAME_PIECE_PAIRS {
     {"BC", B_CANNON},
     {"BP", B_PAWN},
     {"__", EMPTY_PIECEID},
-    {"  ", OVERFLOW_PIECEID}
-};
+    {"  ", OVERFLOW_PIECEID}};
 
 class Piece
 {
@@ -209,4 +207,4 @@ struct tItem
     int32 type = Unknown;
 };
 
-const int QuiestExtendDepth = 2;
+const int QUIESCENCE_EXTEND_DEPTH = 2;
