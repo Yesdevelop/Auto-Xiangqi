@@ -6,7 +6,7 @@ void ui(TEAM team, int maxDepth)
 {
     int count = 0;
     PIECEID_MAP pieceidMap = DEFAULT_MAP;
-    // pieceidMap = fenToPieceidMap("4kab2/4a4/2n1b4/4p4/pr4pR1/1c7/4P4/B1N3R2/C2r5/3AKAB2 w - - 0 1"); // 调试局面时使用
+    //pieceidMap = fenToPieceidMap("4k4/9/9/5R3/9/9/9/4p4/3p1p3/2p1K1p2 w - - 0 1"); // 调试局面时使用
     Board board = Board(pieceidMap, RED);
     board.print();
     serverInit(board);
@@ -14,16 +14,24 @@ void ui(TEAM team, int maxDepth)
     Search s{};
     std::cout << "Open Chess98/UI/index.html to play chess\n"
               << std::endl;
-
     std::string moveFileContent = "____";
+
     while (true)
     {
         if (board.team == team)
         {
             count++;
             std::cout << count;
-            Result node = s.searchMain(board, 20, 3);
+            Result node = s.searchMain(board, 13, 3);
             board.doMove(node.move);
+
+            if (inCheck(board) == true)
+                board.historyMoves.back().isCheckingMove = true;
+            if (board.isRepeatStatus())
+            {
+                std::cout << "REPEAT STATUS!" << std::endl;
+			}
+
             setBoardCode(board);
 
             FILE *file = nullptr;

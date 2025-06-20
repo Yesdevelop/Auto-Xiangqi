@@ -3,48 +3,6 @@
 #include "hash.hpp"
 #include "bitboard.hpp"
 
-class miniHashCache
-{
-public:
-    miniHashCache(int cacheSize = 4096)
-    {
-        assert(cacheSize >= 1024);
-        this->reset(cacheSize);
-    }
-    void reset(int cacheSize)
-    {
-        this->miniCacheVec = std::vector<int>(cacheSize, -1);
-    }
-    bool findRepeatStatus(int32 key)
-    {
-        const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
-        int &val = this->miniCacheVec[pos];
-        return (val != -1);
-    }
-    void doMove(int32 key, int distance)
-    {
-        const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
-        int &val = this->miniCacheVec[pos];
-        if (val == -1)
-        {
-            val = distance;
-        }
-    }
-    void undoMove(int32 key, int distance)
-    {
-        const int pos = key & (static_cast<int>(this->miniCacheVec.size()) - 1);
-        int &val = this->miniCacheVec[pos];
-        if (val == distance)
-        {
-            val = -1;
-        }
-    }
-
-protected:
-    std::vector<int> miniCacheVec;
-    friend class Board;
-};
-
 class Board
 {
 public:
@@ -134,9 +92,18 @@ public:
         return this->bitboard->yBitBoard[y];
     }
 
-    bool findRepeatStatus()
+    bool isRepeatStatus() const
     {
-        return this->repeatStatus.findRepeatStatus(this->hashKey);
+        if (this->historyMoves.size() < 5)
+        {
+            return false;
+        }
+        const Move &lastMove = this->historyMoves[this->historyMoves.size() - 5];
+        if (lastMove == this->historyMoves.back() && lastMove.isCheckingMove == true && historyMoves.back().isCheckingMove == true)
+        {
+            return true;
+        }
+        return false;
     }
 
     MOVES historyMoves{};
@@ -152,7 +119,6 @@ public:
     int32 hashLock = 0;
 
 private:
-    // 棋盘相关
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
     std::vector<PIECE_INDEX> redPieces{};
@@ -162,7 +128,6 @@ private:
     PIECEID_MAP pieceidMap{};
     std::vector<int32> hashKeyList{};
     std::vector<int32> hashLockList{};
-    miniHashCache repeatStatus;
 };
 
 Board::Board(PIECEID_MAP pieceidMap, int initTeam)
@@ -330,6 +295,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         this->isBlackKingLive = false;
     }
+    this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
     if (attackStarter.team() == RED)
     {
@@ -366,16 +332,15 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     }
     this->hashKey ^= PLAYER_KEY;
     this->hashLock ^= PLAYER_LOCK;
-
-    // 其他
+    // 更新棋盘数据
     this->team = -this->team;
     this->distance += 1;
+    // 记录历史走法
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
+    this->historyMoves.back().attacker = attackStarter;
+    this->historyMoves.back().captured = eaten;
     this->historyEatens.emplace_back(eaten);
-    this->bitboard->doMove(x1, y1, x2, y2);
 
-    // 重复检测
-    this->repeatStatus.doMove(this->hashKey, this->distance);
     return eaten;
 }
 
@@ -440,9 +405,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
-
-    // 重复检测
-    this->repeatStatus.undoMove(this->hashKey, this->distance);
 }
 
 void Board::undoMove(Move move, Piece eaten)

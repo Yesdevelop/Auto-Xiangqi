@@ -102,11 +102,6 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         }
     }
 
-    Piece eaten = board.doMove(bestNode.move);
-    if (inCheck(board) == true)
-        bestNode.move.isCheckingMove = true;
-    board.undoMove(bestNode.move, eaten);
-
     return bestNode;
 }
 
@@ -259,14 +254,15 @@ Result Search::searchRoot(Board &board, int depth)
             }
         }
 
-        board.undoMove(move, eaten);
-
-        if (vl > vlBest)
+		// adjust vlBest when the move is not a repeat
+        if (vl > vlBest && board.isRepeatStatus() == false)
         {
             vlBest = vl;
             bestMove = move;
             this->searchStep(move);
         }
+
+        board.undoMove(move, eaten);
     }
 
     if (bestMove.id == -1)
@@ -288,79 +284,80 @@ Result Search::searchRoot(Board &board, int depth)
 
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
-    // check if the king is live
-    if (board.isKingLive(board.team) == false)
+    // 检查将帅是否在棋盘上
+    if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
-        return -INF + board.distance;
-    }
-    else if (board.isKingLive(-board.team) == false)
-    {
-        return INF - board.distance;
+        return board.isKingLive(board.team) == false ? -INF : INF;
     }
 
-    // transportation table value
-    int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
+    // 置换表分数
+    const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
     if (vlHash != -INF)
     {
-        if (!board.findRepeatStatus())
+        if (vlHash >= beta)
         {
-            return vlHash;
+            if (Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
+            {
+                return vlHash;
+            }
+            else if (depth <= 0)
+            {
+                return beta;
+            }
+        }
+        else if (vlHash <= alpha)
+        {
+            if (Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
+            {
+                return vlHash;
+            }
+            else if (depth <= 0)
+            {
+                return alpha;
+            }
         }
         else
         {
-            if (vlHash >= beta)
+            const int vl1 = Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
+            const int vl2 = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+            if (vl1 > alpha && vl2 < beta)
             {
-                if (Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
-                {
-                    return vlHash;
-                }
-                else if (depth <= 0)
-                {
-                    return beta;
-                }
-            }
-            else if (vlHash <= alpha)
-            {
-                if (Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
-                {
-                    return vlHash;
-                }
-                else if (depth <= 0)
-                {
-                    return alpha;
-                }
-            }
-            else
-            {
-                if (Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) > alpha && Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) < beta)
-                {
-                    return vlHash;
-                }
+                return vlHash;
             }
         }
     }
 
-    // searchQ
+    // 静态搜索
     if (depth <= 0)
     {
         int vl = Search::searchQ(board, alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-        this->pTransportation->add(board, Move{}, vl, exactType, depth);
+		this->pTransportation->add(board, Move{}, vl, exactType, depth); // add to transportation table
         return vl;
     }
 
     // mate distance pruning
-    const int vlDistanceMate = INF - board.distance;
-    if (vlDistanceMate < beta)
+    if (INF - board.distance < beta)
     {
-        beta = vlDistanceMate;
-        if (alpha >= vlDistanceMate)
+        beta = INF - board.distance; // vl distance mate
+        if (alpha >= beta)
         {
-            return vlDistanceMate;
+            return beta;
+        }
+    }
+
+    // variables
+    const bool mChecking = inCheck(board);
+
+    // 验证上一步是否是将军着法
+    if (mChecking)
+    {
+        if (board.historyMoves.size() > 0)
+        {
+            board.historyMoves.back().isCheckingMove = true;
         }
     }
 
     // tricks
-    const bool mChecking = inCheck(board);
     if (!mChecking)
     {
         // futility pruning
@@ -396,13 +393,13 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
         }
     }
-
-    // public variables
+	
+    // variables
     int vlBest = -INF;
     Move bestMove{};
     nodeType type = alphaType;
 
-    // transportation table move
+    // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id == -1 && depth >= 2)
     {
@@ -429,15 +426,44 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
-    // search
+    // 搜索
     if (type != betaType)
     {
         int vl = -INF;
         MOVES availableMoves = Moves::getMoves(board);
+
+        // 若检测到被将军则避免送将着法
+        if (mChecking)
+        {
+            MOVES moves{};
+            for (auto &move : availableMoves)
+            {
+				Piece eaten = board.doMove(move);
+                board.team = -board.team;
+                if (!inCheck(board))
+                {
+					moves.emplace_back(move);
+				}
+                board.team = -board.team;
+                board.undoMove(move, eaten);
+			}
+            availableMoves = moves;
+        }
+
+        // 历史启发
         this->pHistory->sort(availableMoves);
-        for (auto &move : availableMoves)
+
+        for (const Move &move : availableMoves)
         {
             Piece eaten = board.doMove(move);
+
+			// 避免重复局面
+            if (board.isRepeatStatus())
+            {
+                board.undoMove(move, eaten);
+                continue;
+			}
+
             if (vlBest == -INF)
             {
                 vl = -searchPV(board, depth - 1, -beta, -alpha);
@@ -450,8 +476,10 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
                     vl = -searchPV(board, depth - 1, -beta, -alpha);
                 }
             }
+
             board.undoMove(move, eaten);
 
+			// 更新最佳值
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -470,7 +498,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
     }
 
-    // result
+    // 结果
     if (bestMove.id == -1)
     {
         vlBest += board.distance;
@@ -486,42 +514,36 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    // check if the king is live
+    // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false)
     {
-		return -INF + board.distance;
+        return -INF + board.distance;
     }
     else if (board.isKingLive(-board.team) == false)
     {
         return INF - board.distance;
-	}
-    // transportation table value
+    }
+    
+    // 置换表分数
     int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
     if (vlHash != -INF)
     {
-        if (!board.findRepeatStatus())
+        int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+        if (vlHash >= beta && statisValue >= beta)
         {
             return vlHash;
         }
-        else
+        else if (vlHash < beta && statisValue < beta)
         {
-            int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-            if (vlHash >= beta && statisValue >= beta)
-            {
-                return vlHash;
-            }
-            else if (vlHash < beta && statisValue < beta)
-            {
-                return vlHash;
-            }
-            else if (depth <= 0)
-            {
-                return statisValue;
-            }
+            return vlHash;
+        }
+        else if (depth <= 0)
+        {
+            return statisValue;
         }
     }
 
-    // searchQ
+    // 静态搜索
     if (depth <= 0)
     {
         return Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
@@ -541,6 +563,15 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
     // variables
     const bool mChecking = inCheck(board);
+
+    // 验证上一步是否是将军着法
+	if (mChecking)
+    {
+        if (board.historyMoves.size() > 0)
+        {
+            board.historyMoves.back().isCheckingMove = true;
+        }
+    }
 
     // tricks
     if (!mChecking)
@@ -593,14 +624,14 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
-
+    
     // variables
     int vlBest = -INF;
     Move bestMove{};
     nodeType type = alphaType;
     int searchedCnt = 0;
 
-    // transportation table move
+    // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id != -1)
     {
@@ -618,7 +649,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // killer heuristic
+    // 杀手启发
     if (type != betaType)
     {
         MOVES killerAvailableMoves = this->pKiller->get(board);
@@ -641,15 +672,45 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
     }
 
-    // search
+    // 搜索
     if (type != betaType)
     {
+		// 获取所有可行着法
         MOVES availableMoves = Moves::getMoves(board);
+
+        // 若检测到被将军则避免送将着法
+        if (mChecking)
+        {
+            MOVES moves{};
+            for (auto& move : availableMoves)
+            {
+                Piece eaten = board.doMove(move);
+                board.team = -board.team;
+                if (!inCheck(board))
+                {
+                    moves.emplace_back(move);
+                }
+                board.team = -board.team;
+                board.undoMove(move, eaten);
+            }
+            availableMoves = moves;
+        }
+
+        // 历史启发
         this->pHistory->sort(availableMoves);
+
         for (Move &move : availableMoves)
         {
             Piece eaten = board.doMove(move);
             int vl = -INF;
+
+            // 避免重复局面
+            if (board.isRepeatStatus())
+            {
+                board.undoMove(move, eaten);
+                continue;
+            }
+
             // lmr pruning
             if (!mChecking &&
                 eaten.pieceid == EMPTY_PIECEID &&
@@ -662,7 +723,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             {
                 vl = -searchCut(board, depth - 1, -beta + 1);
             }
+
             board.undoMove(move, eaten);
+
+			// 更新最佳值
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -673,11 +737,12 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                     break;
                 }
             }
+
             searchedCnt++;
         }
     }
 
-    // result
+    // 结果
     if (bestMove.id == -1)
     {
         vlBest += board.distance;
@@ -694,7 +759,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-    // check if the king is live
+	// 检测将帅是否在棋盘上
     if (board.isKingLive(board.team) == false)
     {
         return -INF + board.distance;
@@ -704,7 +769,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         return INF - board.distance;
     }
 
-    // evaluate
+    // 返回评估结果
     if (board.distance >= maxDistance)
     {
         return board.evaluate();
@@ -725,6 +790,15 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     const bool mChecking = inCheck(board);
     int vlBest = -INF;
 
+	// 验证上一步是否是将军着法
+    if (mChecking)
+    {
+        if (board.historyMoves.size() > 0)
+        {
+            board.historyMoves.back().isCheckingMove = true;
+        }
+    }
+
     // null and delta pruning
     if (!mChecking)
     {
@@ -743,7 +817,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         alpha = std::max<int>(alpha, vl);
     }
 
-    // search
+    // 搜索
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
     for (const Move &move : availableMoves)
     {
@@ -757,11 +831,14 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
                 return vl;
             }
             vlBest = vl;
-            alpha = std::max<int>(alpha, vl);
+            if (vl > alpha)
+            {
+                alpha = vl;
+            }
         }
     }
 
-    // result
+    // 结果
     if (vlBest == -INF)
     {
         vlBest += board.distance;
