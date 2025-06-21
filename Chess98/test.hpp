@@ -6,7 +6,7 @@ void ui(TEAM team, int maxDepth)
 {
     int count = 0;
     PIECEID_MAP pieceidMap = DEFAULT_MAP;
-    //pieceidMap = fenToPieceidMap("4k4/9/9/5R3/9/9/9/4p4/3p1p3/2p1K1p2 w - - 0 1"); // 调试局面时使用
+    pieceidMap = fenToPieceidMap("4k4/9/9/5R3/9/9/9/4p4/3p1p3/2p1K1p2 w - - 0 1"); // 调试局面时使用
     Board board = Board(pieceidMap, RED);
     board.print();
     serverInit(board);

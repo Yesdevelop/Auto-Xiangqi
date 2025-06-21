@@ -336,12 +336,13 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
 
     // mate distance pruning
-    if (INF - board.distance < beta)
+    const int vlDistanceMate = INF - board.distance;
+    if (vlDistanceMate < beta)
     {
-        beta = INF - board.distance; // vl distance mate
-        if (alpha >= beta)
+        beta = vlDistanceMate;
+        if (alpha >= vlDistanceMate)
         {
-            return beta;
+            return vlDistanceMate;
         }
     }
 
@@ -515,13 +516,9 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
     // 检查将帅是否在棋盘上
-    if (board.isKingLive(board.team) == false)
+    if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
-        return -INF + board.distance;
-    }
-    else if (board.isKingLive(-board.team) == false)
-    {
-        return INF - board.distance;
+        return board.isKingLive(board.team) == false ? -INF : INF;
     }
     
     // 置换表分数
@@ -760,13 +757,9 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
 	// 检测将帅是否在棋盘上
-    if (board.isKingLive(board.team) == false)
+    if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
-        return -INF + board.distance;
-    }
-    else if (board.isKingLive(-board.team) == false)
-    {
-        return INF - board.distance;
+        return board.isKingLive(board.team) == false ? -INF : INF;
     }
 
     // 返回评估结果
@@ -822,6 +815,14 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     for (const Move &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
+
+        // 避免重复局面
+        if (board.isRepeatStatus())
+        {
+            board.undoMove(move, eaten);
+            continue;
+        }
+
         int vl = -Search::searchQ(board, -beta, -alpha, maxDistance - 1);
         board.undoMove(move, eaten);
         if (vl > vlBest)
