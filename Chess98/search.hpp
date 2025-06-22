@@ -61,9 +61,9 @@ private:
 Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 {
     if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
+    {
         exit(0);
-
-    std::cout << "---------------------" << std::endl;
+    }
 
     // openbook search
     if (!closeOpenBook)
@@ -394,7 +394,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             }
         }
     }
-	
+
     // variables
     int vlBest = -INF;
     Move bestMove{};
@@ -520,7 +520,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         return board.isKingLive(board.team) == false ? -INF : INF;
     }
-    
+
     // 置换表分数
     int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
     if (vlHash != -INF)
@@ -621,7 +621,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             }
         }
     }
-    
+
     // variables
     int vlBest = -INF;
     Move bestMove{};

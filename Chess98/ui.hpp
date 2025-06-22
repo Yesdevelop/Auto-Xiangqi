@@ -1,7 +1,53 @@
 #pragma once
 #include "board.hpp"
+#include "search.hpp"
 
 using BOARD_CODE = std::string;
+
+FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0)
+{
+    FILE *file = nullptr;
+    errno_t result = fopen_s(&file, filename.c_str(), mode);
+    if (retryCount >= 5)
+    {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        std::cerr << "UI cannot run, please check the file path and permissions." << std::endl;
+		system("pause");
+		throw std::runtime_error("Failed to open file after multiple attempts.");
+    }
+    if (result != 0)
+    {
+        wait(50);
+        return openFile(filename, mode, retryCount + 1);
+    }
+    return file;
+}
+
+std::string readFile(const std::string &filename)
+{
+    FILE *file = openFile(filename, "r");
+    if (!file)
+        return "";
+
+    fseek(file, 0, SEEK_END);
+    long length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    std::string content(length, '\0');
+    fread(&content[0], 1, length, file);
+    fclose(file);
+    return content;
+}
+
+void writeFile(const std::string &filename, const std::string &content)
+{
+    FILE *file = openFile(filename, "w+");
+    if (!file)
+        return;
+
+    fwrite(content.c_str(), 1, content.size(), file);
+    fclose(file);
+}
 
 BOARD_CODE generateCode(Board board)
 {
@@ -35,8 +81,7 @@ PIECEID_MAP decode(BOARD_CODE code)
 
 void setBoardCode(Board board)
 {
-    BOARD_CODE code = generateCode(board);
-
+    const BOARD_CODE code = generateCode(board);
     const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
     const std::string jsPutCode =
         "\
@@ -59,23 +104,82 @@ void setBoardCode(Board board)
         http.request(options2).end();\n\
             ";
 
-    FILE *file = nullptr;
-    errno_t result = fopen_s(&file, "./_put_.js", "w+");
-    if (result == 0)
-    {
-        fprintf(file, jsPutCode.c_str());
-        std::fclose(file);
-        system("node _put_.js");
-    }
-    else
-    {
-        std::cerr << "CANNOT OPEN FILE!" << std::endl;
-    }
+    wait(200);
+    writeFile("./_put_.js", jsPutCode);
+    system("node ./_put_.js");
 }
 
-void serverInit(Board board)
+void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string fenCode)
 {
-    system("node ../Tests/UI/server.js");
-    wait(200);
+    // 初始局面
+    PIECEID_MAP pieceidMap = fenToPieceidMap(fenCode);
+
+    // variables
+    int count = 0;
+    Board board = Board(pieceidMap, RED);
+    Search s{};
+
+    // 界面
+    std::thread uiServerThread([&]() { system(std::string("node " + serverDir).c_str()); });
+    uiServerThread.detach();
     setBoardCode(board);
+    std::string moveFileContent = "____";
+    while (true)
+    {
+        if (board.team == team)
+        {
+            count++;
+            std::cout << count << "---------------------" << std::endl;
+
+            // 人机做出决策
+            Result node = s.searchMain(board, maxDepth, maxTime);
+            board.doMove(node.move);
+            if (inCheck(board) == true)
+                board.historyMoves.back().isCheckingMove = true;
+
+            setBoardCode(board);
+            moveFileContent = readFile("./_move_.txt");
+        }
+        else
+        {
+            // 读取文件
+            std::string content = readFile("./_move_.txt");
+
+            // 悔棋
+            if (content == "undo" && board.historyEatens.size() > 1)
+            {
+                count--;
+                std::cout << "undo" << std::endl;
+                board.undoMove(board.historyMoves.back(), board.historyEatens.back());
+                board.undoMove(board.historyMoves.back(), board.historyEatens.back());
+
+                writeFile("./_move_.txt", moveFileContent);
+                setBoardCode(board);
+                moveFileContent = "____";
+            }
+
+            // 如果内容和上次内容不一致，则执行步进
+            if (content != "undo" && content != moveFileContent)
+            {
+                try
+                {
+                    moveFileContent = content;
+                    int x1 = std::stoi(content.substr(0, 1));
+                    int y1 = std::stoi(content.substr(1, 1));
+                    int x2 = std::stoi(content.substr(2, 1));
+                    int y2 = std::stoi(content.substr(3, 1));
+                    Move move{x1, y1, x2, y2};
+                    board.doMove(move);
+                }
+				catch (std::exception& e)
+                {
+                    // 避免转换失败导致崩溃
+                    std::cerr << "Invalid move: " << moveFileContent << std::endl;
+                    system("pause");
+                    throw e;
+                }
+            }
+        }
+        wait(50);
+    }
 }

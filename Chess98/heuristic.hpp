@@ -111,43 +111,7 @@ void captureSort(Board& board, MOVES& moves)
 		{R_GUARD, 2},
 		{R_PAWN, 1},
 	};
-	// 获取吃子着法数量
-	int count = 0;
-	for (const Move& move : moves)
-	{
-		if (move.captured.pieceid != EMPTY_PIECEID)
-		{
-			count++;
-		}
-	}
-	// 提取吃子着法
-	std::sort(moves.begin(), moves.end(),
-		[&board, &weightPairs](const Move& first, const Move& second) -> bool
-		{
-			// 把吃子着法放在前面
-			if (second.captured.pieceid != EMPTY_PIECEID)
-			{
-				return false;
-			}
-		}
-	);
-	// 对吃子着法进行排序，小子吃大子优先
-	std::sort(moves.begin(), moves.begin() + count,
-		[&board, &weightPairs](const Move& first, const Move& second) -> bool
-		{
-			if (first.captured.pieceid == EMPTY_PIECEID || second.captured.pieceid == EMPTY_PIECEID)
-			{
-				return false;
-			}
-			int firstWeight = weightPairs.at(std::abs(first.captured.pieceid));
-			int secondWeight = weightPairs.at(std::abs(second.captured.pieceid));
-			if (firstWeight != secondWeight)
-			{
-				return firstWeight > secondWeight;
-			}
-			return first.val > second.val;
-		}
-	);
+	// TODO:
 }
 
 // 置换表启发

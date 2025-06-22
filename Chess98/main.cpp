@@ -5,7 +5,7 @@ int main()
 #ifdef _WIN32
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
 #endif
-    ui(RED, 16);
+    testByUI();
 
     return 0;
 }
