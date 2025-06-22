@@ -526,7 +526,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (vlHash != -INF)
     {
         int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-        if (vlHash >= beta && statisValue >= beta)
+        if (vlHash >= beta && statisValue >= beta && board.distance + QUIESCENCE_EXTEND_DEPTH)
         {
             return vlHash;
         }
@@ -801,13 +801,16 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
             return vl;
         }
         // delta pruning
-        if (vl <= alpha - deltaPruningMargin)
+        if (vl <= alpha - deltaPruningMargin && board.nullSafe())
         {
+            // For safety reasons, delta pruning should be switched off in the late endgame
             return alpha;
         }
-
         vlBest = vl;
-        alpha = std::max<int>(alpha, vl);
+        if (vl > alpha)
+        {
+            alpha = vl;
+        }
     }
 
     // 搜索

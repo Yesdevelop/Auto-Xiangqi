@@ -94,7 +94,17 @@ public:
 
     bool isRepeatStatus() const
     {
-        return this->isRepeat != 0;
+        if (this->historyMoves.size() >= 5 &&
+            this->historyMoves[this->historyMoves.size() - 5] == this->historyMoves.back() &&
+            this->historyMoves[this->historyMoves.size() - 5].isCheckingMove == true && 
+            historyMoves.back().isCheckingMove == true)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     MOVES historyMoves{};
@@ -332,19 +342,6 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->historyMoves.back().attacker = attackStarter;
     this->historyMoves.back().captured = eaten;
     this->historyEatens.emplace_back(eaten);
-	// 更新是否重复状态
-    if (this->historyMoves.size() >= 5 && this->isRepeat == 0)
-    {
-        const Move& lastMove = this->historyMoves[this->historyMoves.size() - 5];
-        if (lastMove == this->historyMoves.back() && lastMove.isCheckingMove == true && historyMoves.back().isCheckingMove == true)
-        {
-            this->isRepeat++;
-        }
-    }
-    if (this->isRepeat != 0)
-    {
-        this->isRepeat++;
-    }
     return eaten;
 }
 
@@ -409,23 +406,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
-	// 更新是否重复状态
-    if (this->historyMoves.size() >= 5 && this->isRepeat != 0)
-    {
-        this->isRepeat = 0;
-    }
-    if (this->isRepeat == 1)
-    {
-        const Move& lastMove = this->historyMoves[this->historyMoves.size() - 5];
-        if (!(lastMove == this->historyMoves.back() && lastMove.isCheckingMove == true && historyMoves.back().isCheckingMove == true))
-        {
-            this->isRepeat = 0;
-        }
-    }
-    if (this->isRepeat != 0 && this->isRepeat != 1)
-    {
-        this->isRepeat--;
-    }
 }
 
 void Board::undoMove(Move move, Piece eaten)
