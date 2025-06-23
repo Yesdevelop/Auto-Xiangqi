@@ -29,7 +29,7 @@ public:
     Result searchRoot(Board &board, int depth);
     int searchPV(Board &board, int depth, int alpha, int beta);
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
-    int searchQ(Board &board, int alpha, int beta, int maxDistance = maxSearchDistance);
+    int searchQ(Board &board, int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
 
     MOVES rootMoves{};
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
@@ -37,7 +37,7 @@ public:
     TransportationTable *pTransportation = new TransportationTable{};
 };
 
-inline void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
+void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
 {
     if (mChecking)
     {
@@ -57,12 +57,90 @@ inline void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMove
     }
 }
 
-inline void setCheckingMove(Board &board, bool mChecking)
+void setCheckingMove(Board &board, bool mChecking)
 {
     if (mChecking && board.historyMoves.size() > 0)
     {
         board.historyMoves.back().isCheckingMove = true;
     }
+}
+
+TrickResult<int> nullAndDeltaPruning(Board &board, bool mChecking, int &alpha, int &beta, int &vlBest)
+{
+    if (!mChecking)
+    {
+        int vl = board.evaluate();
+        if (vl >= beta)
+        {
+            return TrickResult<int>{true, {vl}};
+        }
+        // delta pruning
+        if (vl <= alpha - DELTA_PRUNING_MARGIN)
+        {
+            return TrickResult<int>{true, {alpha}};
+        }
+        vlBest = vl;
+        if (vl > alpha)
+        {
+            alpha = vl;
+        }
+    }
+    return TrickResult<int>{false, {}};
+}
+
+TrickResult<int> mateDistancePruning(Board &board, int alpha, int &beta)
+{
+    const int vlDistanceMate = INF - board.distance;
+    if (vlDistanceMate < beta)
+    {
+        beta = vlDistanceMate;
+        if (alpha >= vlDistanceMate)
+        {
+            return TrickResult<int>(true, {vlDistanceMate});
+        }
+    }
+    return TrickResult<int>(false, {});
+}
+
+TrickResult<int> futilityPruning(Board &board, int beta, int depth)
+{
+    if (depth == 1)
+    {
+        int vl = board.evaluate();
+        if (vl <= beta - FUTILITY_PRUNING_MARGIN)
+        {
+            return TrickResult<int>{true, {vl}};
+        }
+        if (vl >= beta + FUTILITY_PRUNING_MARGIN)
+        {
+            return TrickResult<int>{true, {vl}};
+        }
+    }
+    return TrickResult<int>{false, {}};
+}
+
+TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
+{
+    if (depth % 4 == 0)
+    {
+        const double vlScale = (double)vlPawn / 100.0;
+        const double a = 1.02 * vlScale;
+        const double b = 2.36 * vlScale;
+        const double sigma = 82.0 * vlScale;
+        const double t = 1.5;
+        const int upperBound = int((t * sigma + beta - b) / a);
+        const int lowerBound = int((-t * sigma + alpha - b) / a);
+        if (search->searchCut(board, depth - 2, upperBound) >= upperBound)
+        {
+            return TrickResult<int>{true, {beta}};
+        }
+        else if (search->searchCut(board, depth - 2, lowerBound + 1) <= lowerBound && searchType == PV)
+        {
+            return TrickResult<int>{true, {alpha}};
+        }
+    }
+
+    return TrickResult<int>{false, {}};
 }
 
 Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
@@ -356,19 +434,15 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     if (depth <= 0)
     {
         int vl = Search::searchQ(board, alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-        this->pTransportation->add(board, Move{}, vl, EXACT_TYPE, depth); // add to transportation table
+        this->pTransportation->add(board, Move{}, vl, EXACT_TYPE, depth);
         return vl;
     }
 
     // mate distance pruning
-    const int vlDistanceMate = INF - board.distance;
-    if (vlDistanceMate < beta)
+    TrickResult<int> result = mateDistancePruning(board, alpha, beta);
+    if (result.isSuccess)
     {
-        beta = vlDistanceMate;
-        if (alpha >= vlDistanceMate)
-        {
-            return vlDistanceMate;
-        }
+        return result.data[0];
     }
 
     // variables
@@ -381,36 +455,17 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     if (!mChecking)
     {
         // futility pruning
-        if (depth == 1)
+        TrickResult<int> futilityResult = futilityPruning(board, beta, depth);
+        if (futilityResult.isSuccess)
         {
-            int vl = board.evaluate();
-            if (vl <= beta - futilityPruningMargin)
-            {
-                return vl;
-            }
-            if (vl >= beta + futilityPruningMargin)
-            {
-                return vl;
-            }
+            return futilityResult.data[0];
         }
+
         // multi probCut
-        if (depth % 4 == 0)
+        TrickResult<int> probCutResult = mutiProbcut(board, this, PV, alpha, beta, depth);
+        if (probCutResult.isSuccess)
         {
-            const double vlScale = (double)vlPawn / 100.0;
-            const double a = 1.02 * vlScale;
-            const double b = 2.36 * vlScale;
-            const double sigma = 82.0 * vlScale;
-            const double t = 1.5;
-            const int upperBound = int((t * sigma + beta - b) / a);
-            const int lowerBound = int((-t * sigma + alpha - b) / a);
-            if (searchCut(board, depth - 2, upperBound) >= upperBound)
-            {
-                return beta;
-            }
-            else if (searchCut(board, depth - 2, lowerBound + 1) <= lowerBound)
-            {
-                return alpha;
-            }
+            return probCutResult.data[0];
         }
     }
 
@@ -551,15 +606,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
 
     // mate distance pruning
-    const int vlDistanceMate = INF - board.distance;
-    const int vlOriginAlpha = beta - 1;
-    if (vlDistanceMate < beta)
+    TrickResult<int> trickresult = mateDistancePruning(board, beta - 1, beta);
+    if (trickresult.isSuccess)
     {
-        beta = vlDistanceMate;
-        if (vlOriginAlpha >= vlDistanceMate)
-        {
-            return vlDistanceMate;
-        }
+        return trickresult.data[0];
     }
 
     // variables
@@ -572,17 +622,10 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (!mChecking)
     {
         // futility pruning
-        if (depth == 1)
+        TrickResult<int> futilityResult = futilityPruning(board, beta, depth);
+        if (futilityResult.isSuccess)
         {
-            int vl = board.evaluate();
-            if (vl <= beta - futilityPruningMargin)
-            {
-                return vl;
-            }
-            if (vl >= beta + futilityPruningMargin)
-            {
-                return vl;
-            }
+            return futilityResult.data[0];
         }
         // multi probCut and null pruning
         if (!banNullMove)
@@ -605,17 +648,12 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 }
             }
         }
-        else if (depth % 4 == 0)
+        else
         {
-            const double vlScale = (double)vlPawn / 100.0;
-            const double a = 1.02 * vlScale;
-            const double b = 2.36 * vlScale;
-            const double sigma = 82.0 * vlScale;
-            const double t = 1.5;
-            const int upperBound = int((t * sigma + beta - b) / a);
-            if (searchCut(board, depth - 2, upperBound) >= upperBound)
+            TrickResult<int> probCutResult = mutiProbcut(board, this, CUT, 0, beta, depth);
+            if (probCutResult.isSuccess)
             {
-                return beta;
+                return probCutResult.data[0];
             }
         }
     }
@@ -752,14 +790,10 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     }
 
     // mate distance pruning
-    const int vlDistanceMate = INF - board.distance;
-    if (vlDistanceMate < beta)
+    TrickResult<int> trickresult = mateDistancePruning(board, alpha, beta);
+    if (trickresult.isSuccess)
     {
-        beta = vlDistanceMate;
-        if (alpha >= vlDistanceMate)
-        {
-            return vlDistanceMate;
-        }
+        return trickresult.data[0];
     }
 
     // variables
@@ -770,30 +804,14 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     setCheckingMove(board, mChecking);
 
     // null and delta pruning
-    if (!mChecking)
+    TrickResult<int> nullDeltaResult = nullAndDeltaPruning(board, mChecking, alpha, beta, vlBest);
+    if (nullDeltaResult.isSuccess)
     {
-        int vl = board.evaluate();
-        if (vl >= beta)
-        {
-            return vl;
-        }
-        // delta pruning
-        if (vl <= alpha - deltaPruningMargin)
-        {
-            return alpha;
-        }
-        vlBest = vl;
-        if (vl > alpha)
-        {
-            alpha = vl;
-        }
+        return nullDeltaResult.data[0];
     }
 
     // 搜索
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
-
-    // 若检测到被将军则避免送将着法
-    avoidInvalidMoves(board, mChecking, availableMoves);
 
     for (const Move &move : availableMoves)
     {

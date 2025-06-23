@@ -313,6 +313,6 @@ int vlPawn = 0;
 
 // 剪裁的边界参数
 
-const int maxSearchDistance = 64;
-const int deltaPruningMargin = 300;
-const int futilityPruningMargin = 400;
+const int MAX_SEARCH_DISTANCE = 64;
+const int DELTA_PRUNING_MARGIN = 300;
+const int FUTILITY_PRUNING_MARGIN = 400;

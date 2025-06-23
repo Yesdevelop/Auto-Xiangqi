@@ -180,6 +180,16 @@ public:
     int val = 0;
 };
 
+template <typename T>
+class TrickResult
+{
+public:
+    TrickResult(bool isSuccess, std::vector<T> data)
+        : isSuccess(isSuccess), data(std::move(data)) {}
+    bool isSuccess = false;
+    std::vector<T> data;
+};
+
 enum MOVE_TYPE
 {
     NORMAL = 0,
@@ -195,6 +205,14 @@ enum NODE_TYPE
     ALPHA_TYPE = 1,
     BETA_TYPE = 2,
     EXACT_TYPE = 3,
+};
+
+enum SEARCH_TYPE
+{
+    ROOT = 0,
+    PV = 1,
+    CUT = 2,
+    QUIESC = 3
 };
 
 struct TransItem
