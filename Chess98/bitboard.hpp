@@ -63,7 +63,6 @@ public:
     BITARRAY_X xBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0};
     BITARRAY_Y yBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-private:
     friend class Board;
 
     int getBit(BITLINE bitline, int index) const

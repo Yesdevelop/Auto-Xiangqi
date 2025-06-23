@@ -141,7 +141,6 @@ public:
     int32 hashLock = 0;
     std::map<PIECEID, std::vector<Piece *>> pieceRegistry{};
 
-private:
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
     std::vector<PIECE_INDEX> redPieces{};

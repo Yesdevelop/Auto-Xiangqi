@@ -12,7 +12,6 @@ public:
     void add(Move move, int depth);
     void reset();
 
-private:
     std::array<std::array<std::array<int, 90>, 90>, 2> historyTable{};
 
     int toIndex(int x, int y) const
@@ -70,7 +69,6 @@ public:
     void add(Board &board, Move move);
     MOVES get(Board &board);
 
-private:
     std::array<std::array<Move, 2>, 128> killerMoves{};
 };
 
@@ -103,15 +101,83 @@ void KillerTable::add(Board &board, Move move)
 void captureSort(Board &board, MOVES &moves)
 {
     const std::map<PIECEID, int> weightPairs{
-        {R_KING, 4},
-        {R_ROOK, 4},
-        {R_CANNON, 3},
+        {R_KING, 5},
+        {R_ROOK, 5},
+        {R_CANNON, 4},
         {R_KNIGHT, 3},
         {R_BISHOP, 2},
         {R_GUARD, 2},
         {R_PAWN, 1},
     };
-    // TODO:
+    // 分离吃子着法和非吃子着法
+    MOVES captureMoves{};
+    MOVES normalMoves{};
+    for (const Move &move : moves)
+    {
+        if (move.captured.pieceid != 0)
+        {
+            captureMoves.emplace_back(move);
+        }
+        else
+        {
+            normalMoves.emplace_back(move);
+        }
+    }
+    // 对吃子着法排序
+    MOVES result{};
+    result.reserve(captureMoves.size() + normalMoves.size());
+    std::array<std::vector<Move>, 9> orderMap{};
+    for (const Move &move : captureMoves)
+    {
+        int score = 0;
+
+        Piece attacker = board.piecePosition(move.x1, move.y1);
+        Piece captured = board.piecePosition(move.x2, move.y2);
+        int a = weightPairs.at(abs(captured.pieceid));
+        int b = weightPairs.at(abs(attacker.pieceid));
+        if (relationship_hasProtector(board, captured.x, captured.y))
+        {
+            if (a == b)
+            {
+                PIECEID pieceid = abs(captured.pieceid);
+                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK)
+                {
+                    score = 1;
+                }
+                if (isRiveredPawn(board, captured.x, captured.y))
+                {
+                    score = 1;
+                }
+            }
+            else
+            {
+                score = a - b + 1;
+            }
+        }
+        else
+        {
+            score = a + 1;
+        }
+        if (score >= 1)
+        {
+            orderMap[score].emplace_back(move);
+        }
+    }
+
+    for (int score = 8; score >= 1; score--)
+    {
+        for (Move &move : orderMap[score])
+        {
+            move.attacker = board.piecePosition(move.x1, move.y1);
+            move.captured = board.piecePosition(move.x2, move.y2);
+            result.emplace_back(move);
+        }
+    }
+    for (const Move &move : normalMoves)
+    {
+        result.emplace_back(move);
+	}
+    moves = result;
 }
 
 // 置换表启发
@@ -131,7 +197,6 @@ public:
     Move getMove(Board &board);
     int vlAdjust(int vl, int nDistance);
 
-private:
     std::vector<tItem> pList{};
     int hashMask = 0;
     int hashSize = 0;
