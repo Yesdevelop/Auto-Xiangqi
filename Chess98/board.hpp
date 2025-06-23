@@ -38,16 +38,24 @@ public:
                 if (i == -1)
                 {
                     if (j == -1)
+                    {
                         std::cout << "X ";
+                    }
                     else
+                    {
                         std::cout << j << " ";
+                    }
                 }
                 else
                 {
                     if (j == -1)
+                    {
                         std::cout << i << " ";
+                    }
                     else
+                    {
                         std::cout << PIECE_NAME_PAIRS.at(this->pieceidOn(i, j));
+                    }
                 }
             }
             std::cout << "\n";
@@ -96,7 +104,7 @@ public:
     {
         if (this->historyMoves.size() >= 5 &&
             this->historyMoves[this->historyMoves.size() - 5] == this->historyMoves.back() &&
-            this->historyMoves[this->historyMoves.size() - 5].isCheckingMove == true && 
+            this->historyMoves[this->historyMoves.size() - 5].isCheckingMove == true &&
             historyMoves.back().isCheckingMove == true)
         {
             return true;
@@ -105,6 +113,19 @@ public:
         {
             return false;
         }
+    }
+
+    PIECES getLivePiecesById(PIECEID pieceid) const
+    {
+        PIECES result{};
+        for (const Piece *piece : this->pieceRegistry.at(pieceid))
+        {
+            if (piece->isLive)
+            {
+                result.emplace_back(*piece);
+            }
+        }
+        return result;
     }
 
     MOVES historyMoves{};
@@ -118,6 +139,7 @@ public:
     int vlBlack = 0;
     int32 hashKey = 0;
     int32 hashLock = 0;
+    std::map<PIECEID, std::vector<Piece *>> pieceRegistry{};
 
 private:
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
@@ -156,6 +178,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
                     this->isRedKingLive = true;
                 if (pieceid == B_KING)
                     this->isBlackKingLive = true;
+                this->pieceRegistry[pieceid].emplace_back(&this->pieces.back());
             }
             else
             {
@@ -167,7 +190,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
     initEvaluate();
     // 初始化局面哈希
     initHashInfo();
-    // 双方将帅的位置
+    // 双方各个棋子的位置
     for (const Piece &piece : this->getAllLivePieces())
     {
         if (piece.pieceid == R_KING)

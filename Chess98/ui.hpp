@@ -12,8 +12,8 @@ FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0
     {
         std::cerr << "Failed to open file: " << filename << std::endl;
         std::cerr << "UI cannot run, please check the file path and permissions." << std::endl;
-		system("pause");
-		throw std::runtime_error("Failed to open file after multiple attempts.");
+        system("pause");
+        throw std::runtime_error("Failed to open file after multiple attempts.");
     }
     if (result != 0)
     {
@@ -120,7 +120,8 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     Search s{};
 
     // 界面
-    std::thread uiServerThread([&]() { system(std::string("node " + serverDir).c_str()); });
+    std::thread uiServerThread([&]()
+                               { system(std::string("node " + serverDir).c_str()); });
     uiServerThread.detach();
     setBoardCode(board);
     std::string moveFileContent = "____";
@@ -171,7 +172,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
                     Move move{x1, y1, x2, y2};
                     board.doMove(move);
                 }
-				catch (std::exception& e)
+                catch (std::exception &e)
                 {
                     // 避免转换失败导致崩溃
                     std::cerr << "Invalid move: " << moveFileContent << std::endl;

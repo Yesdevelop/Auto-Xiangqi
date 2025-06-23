@@ -254,7 +254,7 @@ Result Search::searchRoot(Board &board, int depth)
             }
         }
 
-		// adjust vlBest when the move is not a repeat
+        // adjust vlBest when the move is not a repeat
         if (vl > vlBest && board.isRepeatStatus() == false)
         {
             vlBest = vl;
@@ -331,7 +331,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     if (depth <= 0)
     {
         int vl = Search::searchQ(board, alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-		this->pTransportation->add(board, Move{}, vl, exactType, depth); // add to transportation table
+        this->pTransportation->add(board, Move{}, vl, exactType, depth); // add to transportation table
         return vl;
     }
 
@@ -439,15 +439,15 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             MOVES moves{};
             for (auto &move : availableMoves)
             {
-				Piece eaten = board.doMove(move);
+                Piece eaten = board.doMove(move);
                 board.team = -board.team;
                 if (!inCheck(board))
                 {
-					moves.emplace_back(move);
-				}
+                    moves.emplace_back(move);
+                }
                 board.team = -board.team;
                 board.undoMove(move, eaten);
-			}
+            }
             availableMoves = moves;
         }
 
@@ -458,12 +458,12 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         {
             Piece eaten = board.doMove(move);
 
-			// 避免重复局面
+            // 避免重复局面
             if (board.isRepeatStatus())
             {
                 board.undoMove(move, eaten);
                 continue;
-			}
+            }
 
             if (vlBest == -INF)
             {
@@ -480,7 +480,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
             board.undoMove(move, eaten);
 
-			// 更新最佳值
+            // 更新最佳值
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -562,7 +562,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     const bool mChecking = inCheck(board);
 
     // 验证上一步是否是将军着法
-	if (mChecking)
+    if (mChecking)
     {
         if (board.historyMoves.size() > 0)
         {
@@ -672,14 +672,14 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // 搜索
     if (type != betaType)
     {
-		// 获取所有可行着法
+        // 获取所有可行着法
         MOVES availableMoves = Moves::getMoves(board);
 
         // 若检测到被将军则避免送将着法
         if (mChecking)
         {
             MOVES moves{};
-            for (auto& move : availableMoves)
+            for (auto &move : availableMoves)
             {
                 Piece eaten = board.doMove(move);
                 board.team = -board.team;
@@ -723,7 +723,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
             board.undoMove(move, eaten);
 
-			// 更新最佳值
+            // 更新最佳值
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -756,7 +756,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-	// 检测将帅是否在棋盘上
+    // 检测将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
         return board.isKingLive(board.team) == false ? -INF : INF;
@@ -783,7 +783,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     const bool mChecking = inCheck(board);
     int vlBest = -INF;
 
-	// 验证上一步是否是将军着法
+    // 验证上一步是否是将军着法
     if (mChecking)
     {
         if (board.historyMoves.size() > 0)
