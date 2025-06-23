@@ -320,7 +320,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         this->isBlackKingLive = false;
     }
-    this->bitboard->doMove(x1, y1, x2, y2);
+        this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
     if (attackStarter.team() == RED)
     {

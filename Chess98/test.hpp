@@ -3,7 +3,7 @@
 
 void testByUI()
 {
-    std::string serverDir = "../Tests/UI/server.js";
+    std::string serverDir = "../Tools/UI/server.js";
     TEAM team = RED;
     int maxDepth = 20;
     int maxTime = 3;
