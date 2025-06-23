@@ -37,6 +37,34 @@ public:
     TransportationTable *pTransportation = new TransportationTable{};
 };
 
+inline void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
+{
+    if (mChecking)
+    {
+        MOVES moves{};
+        for (const Move &move : availableMoves)
+        {
+            Piece eaten = board.doMove(move);
+            board.team = -board.team;
+            if (!inCheck(board))
+            {
+                moves.emplace_back(move);
+            }
+            board.team = -board.team;
+            board.undoMove(move, eaten);
+        }
+        availableMoves = moves;
+    }
+}
+
+inline void setCheckingMove(Board &board, bool mChecking)
+{
+    if (mChecking && board.historyMoves.size() > 0)
+    {
+        board.historyMoves.back().isCheckingMove = true;
+    }
+}
+
 Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 {
     if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
@@ -210,22 +238,7 @@ Result Search::searchRoot(Board &board, int depth)
     int vlBest = -INF;
 
     // 若检测到被将军则避免送将着法
-    if (inCheck(board))
-    {
-        MOVES moves{};
-        for (const Move &move : this->rootMoves)
-        {
-            Piece eaten = board.doMove(move);
-            board.team = -board.team;
-            if (!inCheck(board))
-            {
-                moves.emplace_back(move);
-            }
-            board.team = -board.team;
-            board.undoMove(move, eaten);
-        }
-        this->rootMoves = moves;
-    }
+    avoidInvalidMoves(board, inCheck(board), rootMoves);
 
     for (const Move &move : rootMoves)
     {
@@ -278,7 +291,7 @@ Result Search::searchRoot(Board &board, int depth)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, vlBest, exactType, depth);
+        this->pTransportation->add(board, bestMove, vlBest, EXACT_TYPE, depth);
     }
 
     // 历史启发调整根节点似乎更快
@@ -343,7 +356,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     if (depth <= 0)
     {
         int vl = Search::searchQ(board, alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-        this->pTransportation->add(board, Move{}, vl, exactType, depth); // add to transportation table
+        this->pTransportation->add(board, Move{}, vl, EXACT_TYPE, depth); // add to transportation table
         return vl;
     }
 
@@ -362,13 +375,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     const bool mChecking = inCheck(board);
 
     // 验证上一步是否是将军着法
-    if (mChecking)
-    {
-        if (board.historyMoves.size() > 0)
-        {
-            board.historyMoves.back().isCheckingMove = true;
-        }
-    }
+    setCheckingMove(board, mChecking);
 
     // tricks
     if (!mChecking)
@@ -410,7 +417,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // variables
     int vlBest = -INF;
     Move bestMove{};
-    nodeType type = alphaType;
+    NODE_TYPE type = ALPHA_TYPE;
 
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
@@ -430,38 +437,23 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         bestMove = goodMove;
         if (vlBest >= beta)
         {
-            type = betaType;
+            type = BETA_TYPE;
         }
         if (vlBest > alpha)
         {
-            type = exactType;
+            type = EXACT_TYPE;
             alpha = vlBest;
         }
     }
 
     // 搜索
-    if (type != betaType)
+    if (type != BETA_TYPE)
     {
         int vl = -INF;
         MOVES availableMoves = Moves::getMoves(board);
 
         // 若检测到被将军则避免送将着法
-        if (mChecking)
-        {
-            MOVES moves{};
-            for (const Move &move : availableMoves)
-            {
-                Piece eaten = board.doMove(move);
-                board.team = -board.team;
-                if (!inCheck(board))
-                {
-                    moves.emplace_back(move);
-                }
-                board.team = -board.team;
-                board.undoMove(move, eaten);
-            }
-            availableMoves = moves;
-        }
+        avoidInvalidMoves(board, mChecking, availableMoves);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -499,12 +491,12 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
                 bestMove = move;
                 if (vl >= beta)
                 {
-                    type = betaType;
+                    type = BETA_TYPE;
                     break;
                 }
                 if (vl > alpha)
                 {
-                    type = exactType;
+                    type = EXACT_TYPE;
                     alpha = vl;
                 }
             }
@@ -516,7 +508,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         vlBest += board.distance;
     }
-    else if (type != alphaType)
+    else if (type != ALPHA_TYPE)
     {
         this->pHistory->add(bestMove, depth);
         this->pTransportation->add(board, bestMove, vlBest, type, depth);
@@ -574,13 +566,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     const bool mChecking = inCheck(board);
 
     // 验证上一步是否是将军着法
-    if (mChecking)
-    {
-        if (board.historyMoves.size() > 0)
-        {
-            board.historyMoves.back().isCheckingMove = true;
-        }
-    }
+    setCheckingMove(board, mChecking);
 
     // tricks
     if (!mChecking)
@@ -637,7 +623,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // variables
     int vlBest = -INF;
     Move bestMove{};
-    nodeType type = alphaType;
+    NODE_TYPE type = ALPHA_TYPE;
     int searchedCnt = 0;
 
     // 置换表着法
@@ -653,13 +639,13 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             vlBest = vl;
             if (vl >= beta)
             {
-                type = betaType;
+                type = BETA_TYPE;
             }
         }
     }
 
     // 杀手启发
-    if (type != betaType)
+    if (type != BETA_TYPE)
     {
         MOVES killerAvailableMoves = this->pKiller->get(board);
         MOVES _moves = Moves::getMoves(board);
@@ -674,7 +660,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 bestMove = move;
                 if (vl >= beta)
                 {
-                    type = betaType;
+                    type = BETA_TYPE;
                     break;
                 }
             }
@@ -682,28 +668,13 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
 
     // 搜索
-    if (type != betaType)
+    if (type != BETA_TYPE)
     {
         // 获取所有可行着法
         MOVES availableMoves = Moves::getMoves(board);
 
         // 若检测到被将军则避免送将着法
-        if (mChecking)
-        {
-            MOVES moves{};
-            for (const Move &move : availableMoves)
-            {
-                Piece eaten = board.doMove(move);
-                board.team = -board.team;
-                if (!inCheck(board))
-                {
-                    moves.emplace_back(move);
-                }
-                board.team = -board.team;
-                board.undoMove(move, eaten);
-            }
-            availableMoves = moves;
-        }
+        avoidInvalidMoves(board, mChecking, availableMoves);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -742,7 +713,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 bestMove = move;
                 if (vl >= beta)
                 {
-                    type = betaType;
+                    type = BETA_TYPE;
                     break;
                 }
             }
@@ -756,7 +727,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         vlBest += board.distance;
     }
-    else if (type == betaType)
+    else if (type == BETA_TYPE)
     {
         this->pHistory->add(bestMove, depth);
         this->pKiller->add(board, bestMove);
@@ -796,13 +767,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     int vlBest = -INF;
 
     // 验证上一步是否是将军着法
-    if (mChecking)
-    {
-        if (board.historyMoves.size() > 0)
-        {
-            board.historyMoves.back().isCheckingMove = true;
-        }
-    }
+    setCheckingMove(board, mChecking);
 
     // null and delta pruning
     if (!mChecking)
@@ -813,9 +778,8 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
             return vl;
         }
         // delta pruning
-        if (vl <= alpha - deltaPruningMargin && board.nullSafe())
+        if (vl <= alpha - deltaPruningMargin)
         {
-            // For safety reasons, delta pruning should be switched off in the late endgame
             return alpha;
         }
         vlBest = vl;
@@ -827,6 +791,10 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
     // 搜索
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
+
+    // 若检测到被将军则避免送将着法
+    avoidInvalidMoves(board, mChecking, availableMoves);
+
     for (const Move &move : availableMoves)
     {
         Piece eaten = board.doMove(move);

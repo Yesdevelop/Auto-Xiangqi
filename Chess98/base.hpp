@@ -180,24 +180,24 @@ public:
     int val = 0;
 };
 
-enum moveType
+enum MOVE_TYPE
 {
-    normal = 0,
-    capture = 1,
-    history = 2,
-    killer = 3,
-    hash = 4
+    NORMAL = 0,
+    CAPTURE = 1,
+    HISTORY = 2,
+    KILLER = 3,
+    HASH = 4
 };
 
-enum nodeType
+enum NODE_TYPE
 {
-    noneType = 0,
-    alphaType = 1,
-    betaType = 2,
-    exactType = 3,
+    NONE_TYPE = 0,
+    ALPHA_TYPE = 1,
+    BETA_TYPE = 2,
+    EXACT_TYPE = 3,
 };
 
-struct tItem
+struct TransItem
 {
     Move goodMove{};
     int32 depth = 0;

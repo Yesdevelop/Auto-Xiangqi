@@ -24,13 +24,13 @@ void HistoryHeuristic::sort(MOVES &moves) const
 {
     for (Move &move : moves)
     {
-        if (move.moveType <= history)
+        if (move.moveType <= HISTORY)
         {
             int pos1 = this->toIndex(move.x1, move.y1);
             int pos2 = this->toIndex(move.x2, move.y2);
             int teamID = (move.attacker.team() + 1) >> 1;
             assert(teamID >= 0 && teamID <= 1);
-            move.moveType = history;
+            move.moveType = HISTORY;
             move.val = historyTable[teamID][pos1][pos2];
         }
     }
@@ -197,14 +197,14 @@ public:
     Move getMove(Board &board);
     int vlAdjust(int vl, int nDistance);
 
-    std::vector<tItem> pList{};
+    std::vector<TransItem> pList{};
     int hashMask = 0;
     int hashSize = 0;
 };
 
 void TransportationTable::reset()
 {
-    this->pList = std::vector<tItem>{};
+    this->pList = std::vector<TransItem>{};
     this->pList.resize(this->hashSize);
 }
 
@@ -227,7 +227,7 @@ int TransportationTable::vlAdjust(int vl, int nDistance)
 void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-    tItem &t = this->pList.at(pos);
+    TransItem &t = this->pList.at(pos);
     if (t.hashLock == 0 || depth >= t.depth)
     {
         t.hashLock = board.hashLock;
@@ -241,20 +241,20 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
 int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int depth)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-    tItem &t = this->pList.at(pos);
+    TransItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
         if (t.depth >= depth)
         {
-            if (t.type == exactType)
+            if (t.type == EXACT_TYPE)
             {
                 return this->vlAdjust(t.vl, board.distance);
             }
-            else if (t.type == alphaType && t.vl <= vlApha)
+            else if (t.type == ALPHA_TYPE && t.vl <= vlApha)
             {
                 return vlApha;
             }
-            else if (t.type == betaType && t.vl >= vlBeta)
+            else if (t.type == BETA_TYPE && t.vl >= vlBeta)
             {
                 return vlBeta;
             }
@@ -266,7 +266,7 @@ int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int dept
 Move TransportationTable::getMove(Board &board)
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-    tItem &t = this->pList.at(pos);
+    TransItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
         if (isValidMoveInSituation(board, t.goodMove))
