@@ -148,6 +148,7 @@ async function doMoveOnWeb(driver) {
         webLastBoard[9 - x1][y1] = 1
         webLastBoard[9 - x2][y2] = 0
         console.error("步进失败，尝试重新步进")
+        await driver.sleep(400)
         await doMoveOnWeb(driver)
     }
 }
@@ -220,6 +221,10 @@ async function updateXiangqiaiChangeToChess98UI(driver, move) {
     const x2 = String(9 - move.x2)
     const y2 = String(move.y2)
     const moveString = y1 + x1 + y2 + x2
+    if (moveString.match(/-/g)) {
+        console.error("步进失败，坐标不合法", moveString)
+        return await getChess98LastMove(driver)
+    }
     console.log("着法被发送至服务器", moveString)
     http.request({
         hostname: "127.0.0.1",
@@ -254,23 +259,25 @@ function printBoard(board) {
 }
 
 async function run() {
-    // exec(`cd ${CPPFILE_RELATIVE_PATH_DIRECTORY} && g++ main.cpp -Ofast -o a.exe && start a.exe`)
-
     exec(`taskkill /F /IM msedge.exe`, async () => {
         console.log("开始执行")
         const driver = await init()
 
-        await driver.get("https://play.xiangqi.com/")
+        try {
+            await driver.get("https://play.xiangqi.com/")
+            const playComputer = await driver.findElement(By.css("div.btn-list > div:nth-child(2)"))
+            await playComputer.click()
 
-        const playComputer = await driver.findElement(By.css("div.btn-list > div:nth-child(2)"))
-        await playComputer.click()
+            const bot = await driver.findElement(By.css(`.all-bots :nth-child(${OPPONENT_LEVEL})`))
+            await bot.click()
 
-        const bot = await driver.findElement(By.css(`.all-bots :nth-child(${OPPONENT_LEVEL})`))
-        await bot.click()
-
-        const playButton = await driver.findElement(By.css(".button-wrapper button:nth-child(1)"))
-        await playButton.click()
-
+            const playButton = await driver.findElement(By.css(".button-wrapper button:nth-child(1)"))
+            await playButton.click()
+        } catch (error) {
+            console.error("无法访问网站")
+            driver.quit()
+            return
+        }
         const wait = async () => {
             try {
                 const element = await driver.findElement(By.css(".body"))

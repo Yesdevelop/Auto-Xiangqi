@@ -1,0 +1,9 @@
+{
+    "VSCodeCounter.include": [
+        "Chess98/**/*.cpp",
+        "Chess98/**/*.hpp",
+        "Tests/Auto/*.js",
+        "Tests/UI/*",
+        "Tools/ChessMatrixConvert/**/*"
+    ]
+}
