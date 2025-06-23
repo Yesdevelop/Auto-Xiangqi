@@ -14,7 +14,17 @@
 #include <array>
 #include <map>
 #include <cmath>
+#ifdef _MSC_VER
 #include <thread>
+#else
+#if __has_include(<mingw.thread.h>)
+#include <mingw.thread.h>
+#else
+#error "g++ and clang++ may not support std::thread in win32 mode, please download mingw-std-threads"
+#error "download https://github.com/meganz/mingw-std-threads/releases/tag/1.0.0"
+#error "and put it in your include path or the same directory as your source code"
+#endif
+#endif
 
 const int INF = 1000000;
 const int BAN = INF - 2000;
