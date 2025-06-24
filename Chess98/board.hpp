@@ -6,7 +6,15 @@
 class Board
 {
 public:
-    Board(PIECEID_MAP pieceidMap, int initTeam);
+    Board(PIECEID_MAP pieceidMap, TEAM initTeam);
+    static Board reset(Board &board)
+    {
+        Board newBoard{board.pieceidMap, board.team};
+        newBoard.historyMoves = board.historyMoves;
+        newBoard.hashKeyList = board.hashKeyList;
+        newBoard.hashLockList = board.hashLockList;
+        return newBoard;
+    }
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
     Piece piecePosition(int x, int y);
@@ -105,7 +113,8 @@ public:
         if (this->historyMoves.size() >= 5 &&
             this->historyMoves[this->historyMoves.size() - 5] == this->historyMoves.back() &&
             this->historyMoves[this->historyMoves.size() - 5].isCheckingMove == true &&
-            historyMoves.back().isCheckingMove == true)
+            this->historyMoves[this->historyMoves.size() - 4].x1 == this->historyMoves[this->historyMoves.size() - 2].x2 &&
+            this->historyMoves[this->historyMoves.size() - 4].y1 == this->historyMoves[this->historyMoves.size() - 2].y2)
         {
             return true;
         }
@@ -129,7 +138,6 @@ public:
     }
 
     MOVES historyMoves{};
-    PIECES historyEatens{};
     TEAM team = -1;
     Piece *pieceRedKing = nullptr;
     Piece *pieceBlackKing = nullptr;
@@ -153,7 +161,7 @@ public:
     int isRepeat = 0;
 };
 
-Board::Board(PIECEID_MAP pieceidMap, int initTeam)
+Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
 {
     this->distance = 0;
     this->team = initTeam;
@@ -319,7 +327,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     {
         this->isBlackKingLive = false;
     }
-        this->bitboard->doMove(x1, y1, x2, y2);
+    this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
     if (attackStarter.team() == RED)
     {
@@ -363,7 +371,6 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyMoves.back().attacker = attackStarter;
     this->historyMoves.back().captured = eaten;
-    this->historyEatens.emplace_back(eaten);
     return eaten;
 }
 
@@ -378,7 +385,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
-    this->historyEatens.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
 
     Piece attackStarter = this->piecePosition(x2, y2);

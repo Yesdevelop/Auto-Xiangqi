@@ -102,7 +102,7 @@ bool inCheck(Board &board)
     return false;
 }
 
-bool relationship_hasProtector(Board &board, int x, int y)
+bool hasProtector(Board &board, int x, int y)
 {
     TEAM team = -board.teamOn(x, y);
 

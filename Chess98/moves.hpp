@@ -692,23 +692,17 @@ MOVES Moves::getCaptureMoves(Board &board)
         Piece captured = board.piecePosition(move.x2, move.y2);
         int a = weightPairs.at(abs(captured.pieceid));
         int b = weightPairs.at(abs(attacker.pieceid));
-        if (relationship_hasProtector(board, captured.x, captured.y))
+        if (hasProtector(board, captured.x, captured.y))
         {
-            if (a == b)
+            score = a - b + 1;
+
+            if (score < 1)
             {
-                PIECEID pieceid = abs(captured.pieceid);
-                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK)
+                PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
+                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK || isRiveredPawn(board, captured.x, captured.y))
                 {
                     score = 1;
                 }
-                if (isRiveredPawn(board, captured.x, captured.y))
-                {
-                    score = 1;
-                }
-            }
-            else
-            {
-                score = a - b + 1;
             }
         }
         else

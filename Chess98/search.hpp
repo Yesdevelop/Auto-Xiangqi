@@ -22,6 +22,7 @@ public:
         this->pHistory->reset();
         this->pKiller->reset();
         this->pTransportation->reset();
+        board = Board::reset(board);
     }
 
     Result searchMain(Board &board, int maxDepth, int maxTime);
@@ -37,6 +38,8 @@ public:
     TransportationTable *pTransportation = new TransportationTable{};
 };
 
+// tricks
+
 void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
 {
     if (mChecking)
@@ -46,7 +49,7 @@ void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
         {
             Piece eaten = board.doMove(move);
             board.team = -board.team;
-            if (!inCheck(board))
+            if (inCheck(board) == false || board.isKingLive(-board.team) == false)
             {
                 moves.emplace_back(move);
             }
@@ -143,6 +146,8 @@ TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchTyp
     return TrickResult<int>{false, {}};
 }
 
+// functions
+
 Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 {
     if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
@@ -160,8 +165,10 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     this->reset(board);
 
-    this->rootMoves = Moves::getMoves(board);
+    std::cout << board.evaluate() << std::endl;
 
+    this->rootMoves = Moves::getMoves(board);
+    
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
 
@@ -314,7 +321,17 @@ Result Search::searchRoot(Board &board, int depth)
     Move bestMove{};
     int vl = -INF;
     int vlBest = -INF;
+    if (board.historyMoves.size() > 4)
+    {
+        Move lastMove = board.historyMoves.back();
+        board.undoMove(lastMove, lastMove.captured);
+        if (board.isRepeatStatus())
+        {
+            std::cout << "e" << std::endl;
+        }
 
+        board.doMove(lastMove);
+    }
     // 若检测到被将军则避免送将着法
     avoidInvalidMoves(board, inCheck(board), rootMoves);
 
@@ -385,12 +402,18 @@ Result Search::searchRoot(Board &board, int depth)
     }
 }
 
+// core
+
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
     // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
         return board.isKingLive(board.team) == false ? -INF : INF;
+    }
+    if (board.isRepeatStatus())
+    {
+        return INF * 2;
     }
 
     // 置换表分数
@@ -574,6 +597,10 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
+    if (board.isRepeatStatus())
+    {
+        return INF * 2;
+    }
     // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
@@ -784,7 +811,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     }
 
     // 返回评估结果
-    if (board.distance >= maxDistance)
+    if (board.distance > maxDistance || true)
     {
         return board.evaluate();
     }

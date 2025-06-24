@@ -118,6 +118,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     int count = 0;
     Board board = Board(pieceidMap, RED);
     Search s{};
+    board.print();
 
     // 界面
     std::thread uiServerThread([&]()
@@ -147,12 +148,12 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             std::string content = readFile("./_move_.txt");
 
             // 悔棋
-            if (content == "undo" && board.historyEatens.size() > 1)
+            if (content == "undo" && board.historyMoves.size() > 1)
             {
                 count--;
                 std::cout << "undo" << std::endl;
-                board.undoMove(board.historyMoves.back(), board.historyEatens.back());
-                board.undoMove(board.historyMoves.back(), board.historyEatens.back());
+                board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
+                board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
 
                 writeFile("./_move_.txt", moveFileContent);
                 setBoardCode(board);
