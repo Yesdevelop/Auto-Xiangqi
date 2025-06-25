@@ -3,9 +3,6 @@
 #include "heuristic.hpp"
 #include "utils.hpp"
 #include "book.hpp"
-#ifndef NO_COUNT
-int nodecount = 0;
-#endif
 
 class Search
 {
@@ -26,6 +23,7 @@ public:
         this->pKiller->reset();
         this->pTransportation->reset();
         board = Board::reset(board);
+        this->nodecount = 0;
     }
 
     Result searchMain(Board &board, int maxDepth, int maxTime);
@@ -39,115 +37,119 @@ public:
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
     TransportationTable *pTransportation = new TransportationTable{};
+    int nodecount = 0;
 };
 
 // tricks
-
-void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
+class SearchTricks
 {
-    if (mChecking)
+public:
+    static void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
     {
-        MOVES moves{};
-        for (const Move &move : availableMoves)
+        if (mChecking)
         {
-            Piece eaten = board.doMove(move);
-            board.team = -board.team;
-            if (inCheck(board) == false || board.isKingLive(-board.team) == false)
+            MOVES moves{};
+            for (const Move &move : availableMoves)
             {
-                moves.emplace_back(move);
+                Piece eaten = board.doMove(move);
+                board.team = -board.team;
+                if (inCheck(board) == false || board.isKingLive(-board.team) == false)
+                {
+                    moves.emplace_back(move);
+                }
+                board.team = -board.team;
+                board.undoMove(move, eaten);
             }
-            board.team = -board.team;
-            board.undoMove(move, eaten);
+            availableMoves = moves;
         }
-        availableMoves = moves;
     }
-}
 
-void setCheckingMove(Board &board, bool mChecking)
-{
-    if (mChecking && board.historyMoves.size() > 0)
+    static void setCheckingMove(Board &board, bool mChecking)
     {
-        board.historyMoves.back().isCheckingMove = true;
+        if (mChecking && board.historyMoves.size() > 0)
+        {
+            board.historyMoves.back().isCheckingMove = true;
+        }
     }
-}
 
-TrickResult<int> nullAndDeltaPruning(Board &board, bool mChecking, int &alpha, int &beta, int &vlBest)
-{
-    if (!mChecking)
+    static TrickResult<int> nullAndDeltaPruning(Board &board, bool mChecking, int &alpha, int &beta, int &vlBest)
     {
-        int vl = board.evaluate();
-        if (vl >= beta)
+        if (!mChecking)
         {
-            return TrickResult<int>{true, {vl}};
+            int vl = board.evaluate();
+            if (vl >= beta)
+            {
+                return TrickResult<int>{true, {vl}};
+            }
+            // delta pruning
+            if (vl <= alpha - DELTA_PRUNING_MARGIN)
+            {
+                return TrickResult<int>{true, {alpha}};
+            }
+            vlBest = vl;
+            if (vl > alpha)
+            {
+                alpha = vl;
+            }
         }
-        // delta pruning
-        if (vl <= alpha - DELTA_PRUNING_MARGIN)
-        {
-            return TrickResult<int>{true, {alpha}};
-        }
-        vlBest = vl;
-        if (vl > alpha)
-        {
-            alpha = vl;
-        }
+        return TrickResult<int>{false, {}};
     }
-    return TrickResult<int>{false, {}};
-}
 
-TrickResult<int> mateDistancePruning(Board &board, int alpha, int &beta)
-{
-    const int vlDistanceMate = INF - board.distance;
-    if (vlDistanceMate < beta)
+    static TrickResult<int> mateDistancePruning(Board &board, int alpha, int &beta)
     {
-        beta = vlDistanceMate;
-        if (alpha >= vlDistanceMate)
+        const int vlDistanceMate = INF - board.distance;
+        if (vlDistanceMate < beta)
         {
-            return TrickResult<int>(true, {vlDistanceMate});
+            beta = vlDistanceMate;
+            if (alpha >= vlDistanceMate)
+            {
+                return TrickResult<int>(true, {vlDistanceMate});
+            }
         }
+        return TrickResult<int>(false, {});
     }
-    return TrickResult<int>(false, {});
-}
 
-TrickResult<int> futilityPruning(Board &board, int beta, int depth)
-{
-    if (depth == 1)
+    static TrickResult<int> futilityPruning(Board &board, int beta, int depth)
     {
-        int vl = board.evaluate();
-        if (vl <= beta - FUTILITY_PRUNING_MARGIN)
+        if (depth == 1)
         {
-            return TrickResult<int>{true, {vl}};
+            int vl = board.evaluate();
+            if (vl <= beta - FUTILITY_PRUNING_MARGIN)
+            {
+                return TrickResult<int>{true, {vl}};
+            }
+            if (vl >= beta + FUTILITY_PRUNING_MARGIN)
+            {
+                return TrickResult<int>{true, {vl}};
+            }
         }
-        if (vl >= beta + FUTILITY_PRUNING_MARGIN)
-        {
-            return TrickResult<int>{true, {vl}};
-        }
+        return TrickResult<int>{false, {}};
     }
-    return TrickResult<int>{false, {}};
-}
 
-TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
-{
-    if (depth % 4 == 0)
+    static TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
     {
-        const double vlScale = (double)vlPawn / 100.0;
-        const double a = 1.02 * vlScale;
-        const double b = 2.36 * vlScale;
-        const double sigma = 82.0 * vlScale;
-        const double t = 1.5;
-        const int upperBound = int((t * sigma + beta - b) / a);
-        const int lowerBound = int((-t * sigma + alpha - b) / a);
-        if (search->searchCut(board, depth - 2, upperBound) >= upperBound)
+        if (depth % 4 == 0)
         {
-            return TrickResult<int>{true, {beta}};
+            const double vlScale = (double)vlPawn / 100.0;
+            const double a = 1.02 * vlScale;
+            const double b = 2.36 * vlScale;
+            const double sigma = 82.0 * vlScale;
+            const double t = 1.5;
+            const int upperBound = int((t * sigma + beta - b) / a);
+            const int lowerBound = int((-t * sigma + alpha - b) / a);
+            if (search->searchCut(board, depth - 2, upperBound) >= upperBound)
+            {
+                return TrickResult<int>{true, {beta}};
+            }
+            else if (search->searchCut(board, depth - 2, lowerBound + 1) <= lowerBound && searchType == PV)
+            {
+                return TrickResult<int>{true, {alpha}};
+            }
         }
-        else if (search->searchCut(board, depth - 2, lowerBound + 1) <= lowerBound && searchType == PV)
-        {
-            return TrickResult<int>{true, {alpha}};
-        }
-    }
 
-    return TrickResult<int>{false, {}};
-}
+        return TrickResult<int>{false, {}};
+    }
+};
 
 // functions
 
@@ -185,12 +187,10 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         std::cout << " | vl: " << bestNode.val;
         std::cout << " | moveid: " << bestNode.move.id;
         std::cout << " | duration(ms): " << clock() - start;
-#ifndef NO_ANALISIS
         std::cout << " | count: " << nodecount;
         std::cout << " | nps: " << nodecount / (clock() - start + 1) * 1000;
-        nodecount = 0;
-#endif
         std::cout << std::endl;
+
         // timeout break
         if (clock() - start >= maxTime * 1000 / 3)
         {
@@ -344,7 +344,7 @@ Result Search::searchRoot(Board &board, int depth)
         board.doMove(lastMove);
     }
     // 若检测到被将军则避免送将着法
-    avoidInvalidMoves(board, inCheck(board), rootMoves);
+    SearchTricks::avoidInvalidMoves(board, inCheck(board), rootMoves);
 
     for (const Move &move : rootMoves)
     {
@@ -417,9 +417,8 @@ Result Search::searchRoot(Board &board, int depth)
 
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
-#ifndef NO_ANALISIS
     nodecount++;
-#endif
+
     // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
@@ -476,7 +475,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
 
     // mate distance pruning
-    TrickResult<int> result = mateDistancePruning(board, alpha, beta);
+    TrickResult<int> result = SearchTricks::mateDistancePruning(board, alpha, beta);
     if (result.isSuccess)
     {
         return result.data[0];
@@ -486,20 +485,20 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     const bool mChecking = inCheck(board);
 
     // 验证上一步是否是将军着法
-    setCheckingMove(board, mChecking);
+    SearchTricks::setCheckingMove(board, mChecking);
 
     // tricks
     if (!mChecking)
     {
         // futility pruning
-        TrickResult<int> futilityResult = futilityPruning(board, beta, depth);
+        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta, depth);
         if (futilityResult.isSuccess)
         {
             return futilityResult.data[0];
         }
 
         // multi probCut
-        TrickResult<int> probCutResult = mutiProbcut(board, this, PV, alpha, beta, depth);
+        TrickResult<int> probCutResult = SearchTricks::mutiProbcut(board, this, PV, alpha, beta, depth);
         if (probCutResult.isSuccess)
         {
             return probCutResult.data[0];
@@ -545,7 +544,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         MOVES availableMoves = Moves::getMoves(board);
 
         // 若检测到被将军则避免送将着法
-        avoidInvalidMoves(board, mChecking, availableMoves);
+        SearchTricks::avoidInvalidMoves(board, mChecking, availableMoves);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -611,9 +610,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-#ifndef NO_ANALISIS
     nodecount++;
-#endif
+
     // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
@@ -646,7 +644,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     }
 
     // mate distance pruning
-    TrickResult<int> trickresult = mateDistancePruning(board, beta - 1, beta);
+    TrickResult<int> trickresult = SearchTricks::mateDistancePruning(board, beta - 1, beta);
     if (trickresult.isSuccess)
     {
         return trickresult.data[0];
@@ -656,13 +654,13 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     const bool mChecking = inCheck(board);
 
     // 验证上一步是否是将军着法
-    setCheckingMove(board, mChecking);
+    SearchTricks::setCheckingMove(board, mChecking);
 
     // tricks
     if (!mChecking)
     {
         // futility pruning
-        TrickResult<int> futilityResult = futilityPruning(board, beta, depth);
+        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta, depth);
         if (futilityResult.isSuccess)
         {
             return futilityResult.data[0];
@@ -690,7 +688,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
         else
         {
-            TrickResult<int> probCutResult = mutiProbcut(board, this, CUT, 0, beta, depth);
+            TrickResult<int> probCutResult = SearchTricks::mutiProbcut(board, this, CUT, 0, beta, depth);
             if (probCutResult.isSuccess)
             {
                 return probCutResult.data[0];
@@ -752,7 +750,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         MOVES availableMoves = Moves::getMoves(board);
 
         // 若检测到被将军则避免送将着法
-        avoidInvalidMoves(board, mChecking, availableMoves);
+        SearchTricks::avoidInvalidMoves(board, mChecking, availableMoves);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -817,9 +815,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-#ifndef NO_ANALISIS
     nodecount++;
-#endif
 
     // 返回评估结果
     if (board.distance > maxDistance || true)
@@ -828,7 +824,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     }
 
     // mate distance pruning
-    TrickResult<int> trickresult = mateDistancePruning(board, alpha, beta);
+    TrickResult<int> trickresult = SearchTricks::mateDistancePruning(board, alpha, beta);
     if (trickresult.isSuccess)
     {
         return trickresult.data[0];
@@ -839,10 +835,10 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     int vlBest = -INF;
 
     // 验证上一步是否是将军着法
-    setCheckingMove(board, mChecking);
+    SearchTricks::setCheckingMove(board, mChecking);
 
     // null and delta pruning
-    TrickResult<int> nullDeltaResult = nullAndDeltaPruning(board, mChecking, alpha, beta, vlBest);
+    TrickResult<int> nullDeltaResult = SearchTricks::nullAndDeltaPruning(board, mChecking, alpha, beta, vlBest);
     if (nullDeltaResult.isSuccess)
     {
         return nullDeltaResult.data[0];

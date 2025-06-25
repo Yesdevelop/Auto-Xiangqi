@@ -292,21 +292,21 @@ std::string boardToFen(Board board)
 {
     std::string result = "";
     int spaceCount = 0;
-    std::map<PIECEID, std::string> pairs{
-        {R_KING, "K"},
-        {R_GUARD, "A"},
-        {R_BISHOP, "B"},
-        {R_KNIGHT, "N"},
-        {R_ROOK, "R"},
-        {R_CANNON, "C"},
-        {R_PAWN, "P"},
-        {B_KING, "k"},
-        {B_GUARD, "a"},
-        {B_BISHOP, "b"},
-        {B_KNIGHT, "n"},
-        {B_ROOK, "r"},
-        {B_CANNON, "c"},
-        {B_PAWN, "p"}};
+    std::map<PIECEID, char> pairs{
+        {R_KING, 'K'},
+        {R_GUARD, 'A'},
+        {R_BISHOP, 'B'},
+        {R_KNIGHT, 'N'},
+        {R_ROOK, 'R'},
+        {R_CANNON, 'C'},
+        {R_PAWN, 'P'},
+        {B_KING, 'k'},
+        {B_GUARD, 'a'},
+        {B_BISHOP, 'b'},
+        {B_KNIGHT, 'n'},
+        {B_ROOK, 'r'},
+        {B_CANNON, 'c'},
+        {B_PAWN, 'p'}};
     for (int x = 0; x < 10; x++)
     {
         for (int y = 0; y < 9; y++)
