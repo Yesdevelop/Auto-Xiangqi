@@ -790,7 +790,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     nodecount++;
 
     // 返回评估结果
-    if (board.distance > maxDistance || true)
+    if (board.distance > maxDistance)
     {
         return board.evaluate();
     }

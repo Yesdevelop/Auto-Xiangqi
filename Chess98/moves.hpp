@@ -659,6 +659,10 @@ MOVES Moves::getMoves(Board &board)
         {
             move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
+            if (move.captured.pieceid != EMPTY_PIECEID)
+            {
+                move.moveType = CAPTURE;
+            }
             result.emplace_back(move);
         }
     }

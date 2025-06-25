@@ -202,8 +202,8 @@ public:
 enum MOVE_TYPE
 {
     NORMAL = 0,
-    CAPTURE = 1,
-    HISTORY = 2,
+    HISTORY = 1,
+    CAPTURE = 2,
     KILLER = 3,
     HASH = 4
 };
