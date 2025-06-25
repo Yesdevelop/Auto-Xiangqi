@@ -121,7 +121,8 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     board.print();
 
     // 界面
-    system(std::string("node " + serverDir).c_str());
+    std::string cmd = "node " + serverDir + " >nul 2>&1";
+    system(cmd.c_str());
     setBoardCode(board);
     std::string moveFileContent = "____";
     while (true)
