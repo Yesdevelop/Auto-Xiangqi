@@ -110,6 +110,7 @@ public:
 
     bool isRepeatStatus() const
     {
+        return false;
         if (this->historyMoves.size() >= 5)
         {
             const MOVES &hm = this->historyMoves;

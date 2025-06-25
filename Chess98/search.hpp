@@ -163,12 +163,12 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     {
         bestNode = searchRoot(board, depth);
         // log
-        std::cout << "depth: " << depth + 1;
-        std::cout << "vl: " << bestNode.val;
-        std::cout << "moveid: " << bestNode.move.id;
-        std::cout << "duration(ms): " << clock() - start;
-        std::cout << "count: " << nodecount;
-        std::cout << "nps: " << nodecount / (clock() - start + 1) * 1000;
+        std::cout << " depth: " << depth + 1;
+        std::cout << " vl: " << bestNode.val;
+        std::cout << " moveid: " << bestNode.move.id;
+        std::cout << " duration(ms): " << clock() - start;
+        std::cout << " count: " << nodecount;
+        std::cout << " nps: " << nodecount / (clock() - start + 1) * 1000;
         std::cout << std::endl;
 
         // timeout break
