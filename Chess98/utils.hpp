@@ -243,60 +243,45 @@ MOVES getCaptureMoves(Board &board, MOVES moves)
 
 PIECEID_MAP fenToPieceidMap(std::string fenCode)
 {
-    PIECEID_MAP pieceidMap = PIECEID_MAP{{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                                          {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}};
+    PIECEID_MAP pieceidMap{};
+    std::map<char, PIECEID> pairs{
+        {'k', R_KING},
+        {'a', R_GUARD},
+        {'b', R_BISHOP},
+        {'n', R_KNIGHT},
+        {'r', R_ROOK},
+        {'c', R_CANNON},
+        {'p', R_PAWN},
+        {'K', B_KING},
+        {'A', B_GUARD},
+        {'B', B_BISHOP},
+        {'N', B_KNIGHT},
+        {'R', B_ROOK},
+        {'C', B_CANNON},
+        {'P', B_PAWN}};
     int colNum = 9;
     int rowNum = 0;
     for (int i = 0; i < fenCode.size(); i++)
     {
-        if (fenCode[i] >= '1' && fenCode[i] <= '9')
-        {
-            rowNum += fenCode[i] - '0';
-            continue;
-        }
-        else if (fenCode[i] == 'R')
-            pieceidMap[rowNum][colNum] = R_ROOK;
-        else if (fenCode[i] == 'N' || fenCode[i] == 'H')
-            pieceidMap[rowNum][colNum] = R_KNIGHT;
-        else if (fenCode[i] == 'B' || fenCode[i] == 'E')
-            pieceidMap[rowNum][colNum] = R_BISHOP;
-        else if (fenCode[i] == 'G' || fenCode[i] == 'A')
-            pieceidMap[rowNum][colNum] = R_GUARD;
-        else if (fenCode[i] == 'K')
-            pieceidMap[rowNum][colNum] = R_KING;
-        else if (fenCode[i] == 'C')
-            pieceidMap[rowNum][colNum] = R_CANNON;
-        else if (fenCode[i] == 'P')
-            pieceidMap[rowNum][colNum] = R_PAWN;
-        else if (fenCode[i] == 'r')
-            pieceidMap[rowNum][colNum] = B_ROOK;
-        else if (fenCode[i] == 'n' || fenCode[i] == 'h')
-            pieceidMap[rowNum][colNum] = B_KNIGHT;
-        else if (fenCode[i] == 'b' || fenCode[i] == 'e')
-            pieceidMap[rowNum][colNum] = B_BISHOP;
-        else if (fenCode[i] == 'g' || fenCode[i] == 'a')
-            pieceidMap[rowNum][colNum] = B_GUARD;
-        else if (fenCode[i] == 'k')
-            pieceidMap[rowNum][colNum] = B_KING;
-        else if (fenCode[i] == 'c')
-            pieceidMap[rowNum][colNum] = B_CANNON;
-        else if (fenCode[i] == 'p')
-            pieceidMap[rowNum][colNum] = B_PAWN;
-        else if (fenCode[i] == '/')
+        if (fenCode[i] == '/')
         {
             rowNum = 0;
             colNum--;
             continue;
         }
+        if (fenCode[i] >= '1' && fenCode[i] <= '9')
+        {
+            rowNum += fenCode[i] - '0';
+            continue;
+        }
         else if (fenCode[i] == ' ')
+        {
             break;
+        }
+        else
+        {
+            pieceidMap[rowNum][9 - colNum] = pairs.at(fenCode[i]);
+        }
         rowNum++;
     }
 
@@ -309,14 +294,14 @@ std::string boardToFen(Board board)
     int spaceCount = 0;
     std::map<PIECEID, std::string> pairs{
         {R_KING, "K"},
-        {R_GUARD, "G"},
+        {R_GUARD, "A"},
         {R_BISHOP, "B"},
         {R_KNIGHT, "N"},
         {R_ROOK, "R"},
         {R_CANNON, "C"},
         {R_PAWN, "P"},
         {B_KING, "k"},
-        {B_GUARD, "g"},
+        {B_GUARD, "a"},
         {B_BISHOP, "b"},
         {B_KNIGHT, "n"},
         {B_ROOK, "r"},

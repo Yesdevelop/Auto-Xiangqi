@@ -112,15 +112,14 @@ public:
     {
         if (this->historyMoves.size() >= 5)
         {
-            const MOVES& hm = this->historyMoves;
+            const MOVES &hm = this->historyMoves;
             const PIECEID attackerPieceid = abs(hm.back().attacker.pieceid);
             const PIECEID enemyPieceid = abs(hm[hm.size() - 2].attacker.pieceid);
             if (hm[hm.size() - 5] == hm.back() &&
                 (attackerPieceid == R_ROOK) &&
                 (enemyPieceid != R_ROOK) && // 这里写得很不完备，只考虑了车的长捉情况
                 hm[hm.size() - 4].x1 == hm[hm.size() - 2].x2 &&
-                hm[hm.size() - 4].y1 == hm[hm.size() - 2].y2
-                )
+                hm[hm.size() - 4].y1 == hm[hm.size() - 2].y2)
             {
                 return true;
             }

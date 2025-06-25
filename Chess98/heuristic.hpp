@@ -100,7 +100,6 @@ void KillerTable::add(Board &board, Move move)
 // 吃子启发
 void captureSort(Board &board, MOVES &moves)
 {
-    
 }
 
 // 置换表启发
