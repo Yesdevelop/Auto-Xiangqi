@@ -155,7 +155,6 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
                 board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
                 board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
 
-                writeFile("./_move_.txt", moveFileContent);
                 setBoardCode(board);
                 moveFileContent = "____";
             }
