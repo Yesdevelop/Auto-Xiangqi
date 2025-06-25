@@ -44,26 +44,6 @@ public:
 class SearchTricks
 {
 public:
-    static void avoidInvalidMoves(Board &board, bool mChecking, MOVES &availableMoves)
-    {
-        if (mChecking)
-        {
-            MOVES moves{};
-            for (const Move &move : availableMoves)
-            {
-                Piece eaten = board.doMove(move);
-                board.team = -board.team;
-                if (inCheck(board) == false || board.isKingLive(-board.team) == false)
-                {
-                    moves.emplace_back(move);
-                }
-                board.team = -board.team;
-                board.undoMove(move, eaten);
-            }
-            availableMoves = moves;
-        }
-    }
-
     static void setCheckingMove(Board &board, bool mChecking)
     {
         if (mChecking && board.historyMoves.size() > 0)
@@ -184,11 +164,11 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         bestNode = searchRoot(board, depth);
         // log
         std::cout << "depth: " << depth + 1;
-        std::cout << " | vl: " << bestNode.val;
-        std::cout << " | moveid: " << bestNode.move.id;
-        std::cout << " | duration(ms): " << clock() - start;
-        std::cout << " | count: " << nodecount;
-        std::cout << " | nps: " << nodecount / (clock() - start + 1) * 1000;
+        std::cout << "vl: " << bestNode.val;
+        std::cout << "moveid: " << bestNode.move.id;
+        std::cout << "duration(ms): " << clock() - start;
+        std::cout << "count: " << nodecount;
+        std::cout << "nps: " << nodecount / (clock() - start + 1) * 1000;
         std::cout << std::endl;
 
         // timeout break
@@ -343,8 +323,6 @@ Result Search::searchRoot(Board &board, int depth)
 
         board.doMove(lastMove);
     }
-    // 若检测到被将军则避免送将着法
-    SearchTricks::avoidInvalidMoves(board, inCheck(board), rootMoves);
 
     for (const Move &move : rootMoves)
     {
@@ -542,9 +520,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         int vl = -INF;
         MOVES availableMoves = Moves::getMoves(board);
-
-        // 若检测到被将军则避免送将着法
-        SearchTricks::avoidInvalidMoves(board, mChecking, availableMoves);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -748,9 +723,6 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         // 获取所有可行着法
         MOVES availableMoves = Moves::getMoves(board);
-
-        // 若检测到被将军则避免送将着法
-        SearchTricks::avoidInvalidMoves(board, mChecking, availableMoves);
 
         // 历史启发
         this->pHistory->sort(availableMoves);

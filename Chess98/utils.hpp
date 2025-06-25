@@ -243,35 +243,36 @@ MOVES getCaptureMoves(Board &board, MOVES moves)
 
 PIECEID_MAP fenToPieceidMap(std::string fenCode)
 {
-    PIECEID_MAP pieceidMap{};
-    std::map<char, PIECEID> pairs{
-        {'k', R_KING},
-        {'a', R_GUARD},
-        {'b', R_BISHOP},
-        {'n', R_KNIGHT},
-        {'r', R_ROOK},
-        {'c', R_CANNON},
-        {'p', R_PAWN},
-        {'K', B_KING},
-        {'A', B_GUARD},
-        {'B', B_BISHOP},
-        {'N', B_KNIGHT},
-        {'R', B_ROOK},
-        {'C', B_CANNON},
-        {'P', B_PAWN}};
+    PIECEID_MAP pieceidMap = PIECEID_MAP{};
     int colNum = 9;
     int rowNum = 0;
+    std::map<char, PIECEID> pairs{
+        {'R', R_ROOK},
+        {'N', R_KNIGHT}, {'H', R_KNIGHT},
+        {'B', R_BISHOP}, {'E', R_BISHOP},
+        {'G', R_GUARD},  {'A', R_GUARD},
+        {'K', R_KING},
+        {'C', R_CANNON},
+        {'P', R_PAWN},
+        {'r', B_ROOK},
+        {'n', B_KNIGHT}, {'h', B_KNIGHT},
+        {'b', B_BISHOP}, {'e', B_BISHOP},
+        {'g', B_GUARD},  {'a', B_GUARD},
+        {'k', B_KING},
+        {'c', B_CANNON},
+        {'p', B_PAWN}
+    };
     for (int i = 0; i < fenCode.size(); i++)
     {
-        if (fenCode[i] == '/')
-        {
-            rowNum = 0;
-            colNum--;
-            continue;
-        }
         if (fenCode[i] >= '1' && fenCode[i] <= '9')
         {
             rowNum += fenCode[i] - '0';
+            continue;
+        }
+        else if (fenCode[i] == '/')
+        {
+            rowNum = 0;
+            colNum--;
             continue;
         }
         else if (fenCode[i] == ' ')
@@ -280,7 +281,7 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
         }
         else
         {
-            pieceidMap[rowNum][9 - colNum] = pairs.at(fenCode[i]);
+            pieceidMap[rowNum][colNum] = pairs.at(fenCode[i]);
         }
         rowNum++;
     }
@@ -307,7 +308,7 @@ std::string boardToFen(Board board)
         {B_ROOK, 'r'},
         {B_CANNON, 'c'},
         {B_PAWN, 'p'}};
-    for (int x = 0; x < 10; x++)
+    for (int x = 9; x >= 0; x--)
     {
         for (int y = 0; y < 9; y++)
         {
@@ -333,6 +334,7 @@ std::string boardToFen(Board board)
         }
         result += "/";
     }
+    result.pop_back();
     result += board.team == RED ? " w" : " b";
     result += " - - 0 1";
 
