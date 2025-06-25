@@ -3,6 +3,9 @@
 #include "heuristic.hpp"
 #include "utils.hpp"
 #include "book.hpp"
+#ifndef NO_COUNT
+int nodecount = 0;
+#endif
 
 class Search
 {
@@ -165,10 +168,10 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     this->reset(board);
 
-    std::cout << board.evaluate() << std::endl;
+    std::cout << "evaluate: " << board.evaluate() << std::endl;
 
     this->rootMoves = Moves::getMoves(board);
-    
+
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
 
@@ -179,7 +182,13 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
         std::cout << "depth: " << depth + 1;
         std::cout << " | vl: " << bestNode.val;
         std::cout << " | moveid: " << bestNode.move.id;
-        std::cout << " | duration(ms): " << clock() - start << std::endl;
+        std::cout << " | duration(ms): " << clock() - start;
+#ifndef NO_ANALISIS
+        std::cout << " | count: " << nodecount;
+        std::cout << " | nps: " << nodecount / (clock() - start + 1) * 1000;
+        nodecount = 0;
+#endif
+        std::cout << std::endl;
         // timeout break
         if (clock() - start >= maxTime * 1000 / 3)
         {
@@ -406,6 +415,9 @@ Result Search::searchRoot(Board &board, int depth)
 
 int Search::searchPV(Board &board, int depth, int alpha, int beta)
 {
+#ifndef NO_ANALISIS
+    nodecount++;
+#endif
     // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
@@ -597,10 +609,9 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
 int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 {
-    if (board.isRepeatStatus())
-    {
-        return INF * 2;
-    }
+#ifndef NO_ANALISIS
+    nodecount++;
+#endif
     // 检查将帅是否在棋盘上
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
@@ -804,11 +815,9 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
-    // 检测将帅是否在棋盘上
-    if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
-    {
-        return board.isKingLive(board.team) == false ? -INF : INF;
-    }
+#ifndef NO_ANALISIS
+    nodecount++;
+#endif
 
     // 返回评估结果
     if (board.distance > maxDistance || true)
