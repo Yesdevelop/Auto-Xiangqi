@@ -26,6 +26,15 @@
 #endif
 #endif
 
+void wait(int ms)
+{
+#ifdef _WIN32
+    Sleep(ms);
+#elif __unix__
+    sleep(ms / 1000);
+#endif
+}
+
 const int INF = 1000000;
 const int BAN = INF - 2000;
 const int ILLEGAL_VAL = INF * 2;

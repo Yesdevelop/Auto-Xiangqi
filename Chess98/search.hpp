@@ -168,6 +168,8 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     this->reset(board);
 
+    // situation info
+    std::cout << "situation: " << boardToFen(board) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
 
     this->rootMoves = Moves::getMoves(board);

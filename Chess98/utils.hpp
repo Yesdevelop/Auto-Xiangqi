@@ -1,15 +1,6 @@
 #pragma once
 #include "board.hpp"
 
-void wait(int ms)
-{
-#ifdef _WIN32
-    Sleep(ms);
-#elif __unix__
-    sleep(ms / 1000);
-#endif
-}
-
 bool inCheck(Board &board)
 {
     Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
@@ -310,6 +301,57 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     }
 
     return pieceidMap;
+}
+
+std::string boardToFen(Board board)
+{
+    std::string result = "";
+    int spaceCount = 0;
+    std::map<PIECEID, std::string> pairs{
+        {R_KING, "K"},
+        {R_GUARD, "G"},
+        {R_BISHOP, "B"},
+        {R_KNIGHT, "N"},
+        {R_ROOK, "R"},
+        {R_CANNON, "C"},
+        {R_PAWN, "P"},
+        {B_KING, "k"},
+        {B_GUARD, "g"},
+        {B_BISHOP, "b"},
+        {B_KNIGHT, "n"},
+        {B_ROOK, "r"},
+        {B_CANNON, "c"},
+        {B_PAWN, "p"}};
+    for (int x = 0; x < 10; x++)
+    {
+        for (int y = 0; y < 9; y++)
+        {
+            PIECEID pieceid = board.pieceidOn(y, x);
+            if (pieceid == EMPTY_PIECEID)
+            {
+                spaceCount++;
+            }
+            else
+            {
+                if (spaceCount > 0)
+                {
+                    result += std::to_string(spaceCount);
+                    spaceCount = 0;
+                }
+                result += pairs.at(pieceid);
+            }
+        }
+        if (spaceCount > 0)
+        {
+            result += std::to_string(spaceCount);
+            spaceCount = 0;
+        }
+        result += "/";
+    }
+    result += board.team == RED ? " w" : " b";
+    result += " - - 0 1";
+
+    return result;
 }
 
 bool isValidMoveInSituation(Board &board, Move move)
