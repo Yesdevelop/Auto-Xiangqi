@@ -819,11 +819,6 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     // 搜索
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
 
-    if (mChecking)
-    {
-        this->pHistory->sort(availableMoves);
-    }
-
     for (const Move &move : availableMoves)
     {
         Piece eaten = board.doMove(move);
