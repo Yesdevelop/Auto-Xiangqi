@@ -598,7 +598,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (vlHash != -INF)
     {
         int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-        if (vlHash >= beta && statisValue >= beta && board.distance + QUIESCENCE_EXTEND_DEPTH)
+        if (vlHash >= beta && statisValue >= beta)
         {
             return vlHash;
         }
