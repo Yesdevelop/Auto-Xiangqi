@@ -116,7 +116,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
     // variables
     int count = 0;
-    Board board = Board(pieceidMap, RED);
+    Board board = Board(pieceidMap, team);
     Search s{};
     board.print();
 
@@ -135,6 +135,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             // 人机做出决策
             Result node = s.searchMain(board, maxDepth, maxTime);
             board.doMove(node.move);
+            s.searchMain(board, maxDepth, maxTime);
             if (inCheck(board) == true)
                 board.historyMoves.back().isCheckingMove = true;
 
