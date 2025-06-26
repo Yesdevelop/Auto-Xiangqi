@@ -1,6 +1,9 @@
 #pragma once
 #include "board.hpp"
 
+/// @brief 是否被将军
+/// @param board
+/// @return
 bool inCheck(Board &board)
 {
     Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
@@ -93,6 +96,11 @@ bool inCheck(Board &board)
     return false;
 }
 
+/// @brief 是否有保护
+/// @param board
+/// @param x
+/// @param y
+/// @return
 bool hasProtector(Board &board, int x, int y)
 {
     TEAM team = -board.teamOn(x, y);
@@ -218,6 +226,11 @@ bool hasProtector(Board &board, int x, int y)
     return false;
 }
 
+/// @brief 判断一个兵是否过河
+/// @param board
+/// @param x
+/// @param y
+/// @return
 bool isRiveredPawn(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);
@@ -232,15 +245,9 @@ bool isRiveredPawn(Board &board, int x, int y)
     return false;
 }
 
-MOVES getCaptureMoves(Board &board, MOVES moves)
-{
-    MOVES captureMoves;
-    for (const Move &move : moves)
-        if (board.pieceidOn(move.x2, move.y2) != 0)
-            captureMoves.emplace_back(move);
-    return captureMoves;
-}
-
+/// @brief fen转pieceidmap
+/// @param fenCode
+/// @return
 PIECEID_MAP fenToPieceidMap(std::string fenCode)
 {
     PIECEID_MAP pieceidMap = PIECEID_MAP{};
@@ -294,6 +301,9 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
+/// @brief board转fen串
+/// @param board
+/// @return
 std::string boardToFen(Board board)
 {
     std::string result = "";
@@ -346,6 +356,10 @@ std::string boardToFen(Board board)
     return result;
 }
 
+/// @brief 检查一个着法在当前局面是否合法
+/// @param board
+/// @param move
+/// @return
 bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
@@ -415,5 +429,35 @@ bool isValidMoveInSituation(Board &board, Move move)
             return false;
     }
 
+    return true;
+}
+
+/// @brief 检查两个在同行或同列的坐标之间是否存在障碍物（要求这两个位置上必须有子）
+/// @param board
+/// @param x1
+/// @param y1
+/// @param x2
+/// @param y2
+/// @return
+bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
+{
+    if (x1 == x2)
+    {
+        BITLINE bitlineX = board.getBitLineX(x1);
+        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y1, 9);
+        if (y2 >= regionX[0] && y2 <= regionX[1])
+        {
+            return false;
+        }
+    }
+    else
+    {
+        BITLINE bitlineY = board.getBitLineY(y1);
+        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x1, 8);
+        if (x2 >= regionY[0] && x2 <= regionY[1])
+        {
+            return false;
+        }
+    }
     return true;
 }
