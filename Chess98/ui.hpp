@@ -121,7 +121,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     board.print();
 
     // 界面
-    std::string cmd = "node " + serverDir + " >nul 2>&1";
+    std::string cmd = "start node " + serverDir;
     system(cmd.c_str());
     setBoardCode(board);
     std::string moveFileContent = "____";
@@ -135,7 +135,6 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             // 人机做出决策
             Result node = s.searchMain(board, maxDepth, maxTime);
             board.doMove(node.move);
-            s.searchMain(board, maxDepth, maxTime);
             if (inCheck(board) == true)
                 board.historyMoves.back().isCheckingMove = true;
 

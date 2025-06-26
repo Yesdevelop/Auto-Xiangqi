@@ -5,7 +5,7 @@ void testByUI()
 {
     std::string serverDir = "../Tools/UI/server.js";
     TEAM team = RED;
-    int maxDepth = 2;
+    int maxDepth = 20;
     int maxTime = 3;
     std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
 
@@ -16,6 +16,7 @@ void testByUI()
     // fenCode = "2bakabr1/6r2/1cn4cn/p3p3C/2p3P2/9/P1P1P3P/1CN3N2/9/R1BAKABR1 w - - 0 1";
     // fenCode = "rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR w - - 0 1";
 
+    fenCode = "9/3k5/9/1P1N1c2P/4N4/9/9/8B/3p4r/3AK1B2 w - - 0 1";
 
     ui(serverDir, team, maxDepth, maxTime, fenCode);
 }
