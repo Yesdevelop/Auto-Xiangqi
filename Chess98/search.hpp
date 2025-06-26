@@ -159,11 +159,11 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
 
-    for (int depth = 0; depth <= maxDepth; depth++)
+    for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(board, depth);
         // log
-        std::cout << " depth: " << depth + 1;
+        std::cout << " depth: " << depth;
         std::cout << " vl: " << bestNode.val;
         std::cout << " moveid: " << bestNode.move.id;
         std::cout << " duration(ms): " << clock() - start;
@@ -312,17 +312,6 @@ Result Search::searchRoot(Board &board, int depth)
     Move bestMove{};
     int vl = -INF;
     int vlBest = -INF;
-    if (board.historyMoves.size() > 4)
-    {
-        Move lastMove = board.historyMoves.back();
-        board.undoMove(lastMove, lastMove.captured);
-        if (board.isRepeatStatus())
-        {
-            std::cout << "e" << std::endl;
-        }
-
-        board.doMove(lastMove);
-    }
 
     for (const Move &move : rootMoves)
     {
