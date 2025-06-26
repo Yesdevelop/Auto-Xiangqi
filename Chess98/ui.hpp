@@ -121,7 +121,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     board.print();
 
     // 界面
-    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle min node " + serverDir + "}\"";
+    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";
     system(cmd.c_str());
     setBoardCode(board);
     std::string moveFileContent = "____";
