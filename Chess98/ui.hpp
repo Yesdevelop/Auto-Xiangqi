@@ -121,7 +121,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     board.print();
 
     // 界面
-    std::string cmd = "start node " + serverDir;
+    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle min node " + serverDir + "}\"";
     system(cmd.c_str());
     setBoardCode(board);
     std::string moveFileContent = "____";
@@ -155,11 +155,11 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
                 board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
 
                 setBoardCode(board);
-                moveFileContent = "____";
+                writeFile("./_move_.txt", "wait");
             }
 
             // 如果内容和上次内容不一致，则执行步进
-            if (content != "undo" && content != moveFileContent)
+            if (content != "wait" && content != "undo" && content != moveFileContent)
             {
                 try
                 {

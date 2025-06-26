@@ -15,7 +15,7 @@ void testByUI()
     // fenCode = "2bakabr1/9/4c1n2/p3p3p/1rpn2pc1/2PR5/P3P1P1P/C1N3N1C/9/2BAKABR1 w - - 0 1";
     // fenCode = "2bakabr1/6r2/1cn4cn/p3p3C/2p3P2/9/P1P1P3P/1CN3N2/9/R1BAKABR1 w - - 0 1";
     // fenCode = "rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR w - - 0 1";
-    // fenCode = "9/3N1k3/9/1P3N2P/9/9/5r3/8B/3p5/3AK1B2 w - - 0 1" // 绝杀搜索耗时过长
+    // fenCode = "9/3N1k3/9/1P3N2P/9/9/5r3/8B/3p5/3AK1B2 w - - 0 1"
 
     fenCode = "9/3k5/9/1P1N1c2P/4N4/9/9/8B/3p4r/3AK1B2 w - - 0 1";
 

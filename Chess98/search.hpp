@@ -398,41 +398,41 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
 
     // 置换表分数
-     const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
-     if (vlHash != -INF)
-     {
-         if (vlHash >= beta)
-         {
-             if (Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
-             {
-                 return vlHash;
-             }
-             else if (depth <= 0)
-             {
-                 return beta;
-             }
-         }
-         else if (vlHash <= alpha)
-         {
-             if (Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
-             {
-                 return vlHash;
-             }
-             else if (depth <= 0)
-             {
-                 return alpha;
-             }
-         }
-         else
-         {
-             const int vl1 = Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
-             const int vl2 = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-             if (vl1 > alpha && vl2 < beta)
-             {
-                 return vlHash;
-             }
-         }
-     }
+    const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
+    if (vlHash != -INF)
+    {
+        if (vlHash >= beta)
+        {
+            if (Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
+            {
+                return vlHash;
+            }
+            else if (depth <= 0)
+            {
+                return beta;
+            }
+        }
+        else if (vlHash <= alpha)
+        {
+            if (Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
+            {
+                return vlHash;
+            }
+            else if (depth <= 0)
+            {
+                return alpha;
+            }
+        }
+        else
+        {
+            const int vl1 = Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
+            const int vl2 = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+            if (vl1 > alpha && vl2 < beta)
+            {
+                return vlHash;
+            }
+        }
+    }
 
     // 静态搜索
     if (depth <= 0)
@@ -458,19 +458,19 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // tricks
     if (!mChecking)
     {
-       // futility pruning
-       TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta, depth);
-       if (futilityResult.isSuccess)
-       {
-           return futilityResult.data[0];
-       }
+        // futility pruning
+        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta, depth);
+        if (futilityResult.isSuccess)
+        {
+            return futilityResult.data[0];
+        }
 
-       // multi probCut
-       TrickResult<int> probCutResult = SearchTricks::mutiProbcut(board, this, PV, alpha, beta, depth);
-       if (probCutResult.isSuccess)
-       {
-           return probCutResult.data[0];
-       }
+        // multi probCut
+        TrickResult<int> probCutResult = SearchTricks::mutiProbcut(board, this, PV, alpha, beta, depth);
+        if (probCutResult.isSuccess)
+        {
+            return probCutResult.data[0];
+        }
     }
 
     // variables
