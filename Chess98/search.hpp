@@ -319,7 +319,7 @@ Result Search::searchRoot(Board &board, int depth)
         Piece eaten = board.doMove(move);
 
         // 避免重复局面
-        if (board.isRepeatStatus())
+        if (board.isIllegalRepeat())
         {
             board.undoMove(move, eaten);
             continue;
@@ -392,7 +392,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         return board.isKingLive(board.team) == false ? -INF : INF;
     }
-    if (board.isRepeatStatus())
+    if (board.isIllegalRepeat())
     {
         return INF * 2;
     }
@@ -518,7 +518,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         {
             Piece eaten = board.doMove(move);
             // 避免重复局面
-            if (board.isRepeatStatus())
+            if (board.isIllegalRepeat())
             {
                 board.undoMove(move, eaten);
                 continue;
@@ -722,7 +722,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             int vl = -INF;
 
             // 避免重复局面
-            if (board.isRepeatStatus())
+            if (board.isIllegalRepeat())
             {
                 board.undoMove(move, eaten);
                 continue;
@@ -776,6 +776,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
 int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 {
+    return board.evaluate();
     nodecount++;
 
     // 返回评估结果
@@ -813,7 +814,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         Piece eaten = board.doMove(move);
 
         // 避免重复局面
-        if (board.isRepeatStatus())
+        if (board.isIllegalRepeat())
         {
             board.undoMove(move, eaten);
             continue;

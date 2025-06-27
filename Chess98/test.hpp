@@ -18,6 +18,8 @@ void testByUI()
     // fenCode = "9/3N1k3/9/1P3N2P/9/9/5r3/8B/3p5/3AK1B2 w - - 0 1" // 绝杀搜索耗时过长
 
     // fenCode = "9/3k5/9/1P1N1c2P/4N4/9/9/8B/3p4r/3AK1B2 w - - 0 1";
+    // fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
+    // fenCode = "2baka1r1/3R5/c1n1b1cCn/p1p1p2R1/1r4p1p/1CP6/P3P1P1P/2N3N2/9/2BAKAB2 w - - 0 1"; // 节点数暴增
 
     ui(serverDir, team, maxDepth, maxTime, fenCode);
 }
