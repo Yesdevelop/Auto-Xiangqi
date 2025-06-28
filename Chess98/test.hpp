@@ -15,11 +15,13 @@ void testByUI()
     // fenCode = "2bakabr1/9/4c1n2/p3p3p/1rpn2pc1/2PR5/P3P1P1P/C1N3N1C/9/2BAKABR1 w - - 0 1";
     // fenCode = "2bakabr1/6r2/1cn4cn/p3p3C/2p3P2/9/P1P1P3P/1CN3N2/9/R1BAKABR1 w - - 0 1";
     // fenCode = "rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR w - - 0 1";
-    // fenCode = "9/3N1k3/9/1P3N2P/9/9/5r3/8B/3p5/3AK1B2 w - - 0 1" // 绝杀搜索耗时过长
+    // fenCode = "9/3N1k3/9/1P3N2P/9/9/5r3/8B/3p5/3AK1B2 w - - 0 1"; // 绝杀搜索耗时过长
 
     // fenCode = "9/3k5/9/1P1N1c2P/4N4/9/9/8B/3p4r/3AK1B2 w - - 0 1";
     // fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
     // fenCode = "2baka1r1/3R5/c1n1b1cCn/p1p1p2R1/1r4p1p/1CP6/P3P1P1P/2N3N2/9/2BAKAB2 w - - 0 1"; // 节点数暴增
-
+    // fenCode = "1nbaka1n1/r8/4b1c2/p1p3N2/4p3p/2P6/P3P3P/1CNCB4/4A4/R1BAK2c1 w - - 0 1";
+    // fenCode = "4ka3/4aRP2/2n1b3b/p3p3p/9/4P4/P5r1P/4B4/c2CARN2/2rAK4 w - - 0 1";
+    
     ui(serverDir, team, maxDepth, maxTime, fenCode);
 }

@@ -140,6 +140,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
             setBoardCode(board);
             moveFileContent = readFile("./_move_.txt");
+            s.searchMain(board, maxDepth, maxTime);
         }
         else
         {
@@ -156,6 +157,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
                 setBoardCode(board);
                 writeFile("./_move_.txt", "wait");
+                moveFileContent = "wait";
             }
 
             // 如果内容和上次内容不一致，则执行步进
