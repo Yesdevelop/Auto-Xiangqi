@@ -279,3 +279,12 @@ int vlPawn = 0;
 const int MAX_SEARCH_DISTANCE = 64;
 const int DELTA_PRUNING_MARGIN = 300;
 const int FUTILITY_PRUNING_MARGIN = 400;
+
+class Evaluator
+{
+public:
+    Evaluator(PIECEID_MAP pieceidMap) : pieceidMap(pieceidMap) {}
+
+private:
+    PIECEID_MAP pieceidMap;
+};

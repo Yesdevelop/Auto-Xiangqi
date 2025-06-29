@@ -6,6 +6,7 @@
 class Board
 {
 public:
+    Board() = default;
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
     static Board reset(Board &board)
     {
@@ -24,8 +25,7 @@ public:
     PIECES getPiecesByTeam(TEAM team);
     Piece doMove(int x1, int y1, int x2, int y2);
     Piece doMove(Move move);
-    void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
-    void undoMove(Move move, Piece eaten);
+    void undoMove();
     void initEvaluate();
     void vlOpenCalculator(int &vlOpen);
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
@@ -383,15 +383,21 @@ Piece Board::doMove(Move move)
     return this->doMove(move.x1, move.y1, move.x2, move.y2);
 }
 
-void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
+void Board::undoMove()
 {
+    const int x1 = this->historyMoves.back().x1;
+    const int x2 = this->historyMoves.back().x2;
+    const int y1 = this->historyMoves.back().y1;
+    const int y2 = this->historyMoves.back().y2;
+    const Piece eaten = this->historyMoves.back().captured;
+    const Piece attackStarter = this->historyMoves.back().attacker;
+
     // 其他
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
 
-    Piece attackStarter = this->piecePosition(x2, y2);
 
     // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
@@ -438,11 +444,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
-}
-
-void Board::undoMove(Move move, Piece eaten)
-{
-    this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
 }
 
 void Board::initEvaluate()

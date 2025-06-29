@@ -152,8 +152,8 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             {
                 count--;
                 std::cout << "undo" << std::endl;
-                board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
-                board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
+                board.undoMove();
+                board.undoMove();
 
                 setBoardCode(board);
                 writeFile("./_move_.txt", "wait");

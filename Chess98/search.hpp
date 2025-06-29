@@ -321,7 +321,7 @@ Result Search::searchRoot(Board &board, int depth)
         // 避免重复局面
         if (board.isIllegalRepeat())
         {
-            board.undoMove(move, eaten);
+            board.undoMove();
             continue;
         }
 
@@ -355,7 +355,7 @@ Result Search::searchRoot(Board &board, int depth)
             }
         }
 
-        board.undoMove(move, eaten);
+        board.undoMove();
     }
 
     if (bestMove.id == -1)
@@ -492,7 +492,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         Piece eaten = board.doMove(goodMove);
         vlBest = -searchPV(board, depth - 1, -beta, -alpha);
-        board.undoMove(goodMove, eaten);
+        board.undoMove();
         bestMove = goodMove;
         if (vlBest >= beta)
         {
@@ -520,7 +520,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
             // 避免重复局面
             if (board.isIllegalRepeat())
             {
-                board.undoMove(move, eaten);
+                board.undoMove();
                 continue;
             }
 
@@ -537,7 +537,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
                 }
             }
 
-            board.undoMove(move, eaten);
+            board.undoMove();
 
             // 更新最佳值
             if (vl > vlBest)
@@ -672,7 +672,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     {
         Piece eaten = board.doMove(goodMove);
         int vl = -searchCut(board, depth - 1, -beta + 1);
-        board.undoMove(goodMove, eaten);
+        board.undoMove();
         bestMove = goodMove;
         if (vl > vlBest)
         {
@@ -693,7 +693,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         {
             Piece eaten = board.doMove(move);
             int vl = -searchCut(board, depth - 1, -beta + 1);
-            board.undoMove(move, eaten);
+            board.undoMove();
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -724,7 +724,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             // 避免重复局面
             if (board.isIllegalRepeat())
             {
-                board.undoMove(move, eaten);
+                board.undoMove();
                 continue;
             }
 
@@ -741,7 +741,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                 vl = -searchCut(board, depth - 1, -beta + 1);
             }
 
-            board.undoMove(move, eaten);
+            board.undoMove();
 
             // 更新最佳值
             if (vl > vlBest)
@@ -816,12 +816,12 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
         // 避免重复局面
         if (board.isIllegalRepeat())
         {
-            board.undoMove(move, eaten);
+            board.undoMove();
             continue;
         }
 
         int vl = -Search::searchQ(board, -beta, -alpha, maxDistance - 1);
-        board.undoMove(move, eaten);
+        board.undoMove();
         if (vl > vlBest)
         {
             if (vl >= beta)
