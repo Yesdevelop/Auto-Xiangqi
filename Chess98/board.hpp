@@ -454,7 +454,7 @@ void Board::initEvaluate()
     this->vlOpenCalculator(vlOpen);
     this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
 
-    pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
+    pieceWeights = getBasicEvaluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
     vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
 

@@ -4,7 +4,8 @@
 class WeightMap
 {
 public:
-    WeightMap(){
+    WeightMap()
+    {
         data.fill({0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
     }
     WeightMap(std::array<std::array<int, 10>, 5> data) : data(data) {}
@@ -146,11 +147,11 @@ const int OPEN_PAWN_VAL = 20;
 const int END_PAWN_VAL = 40;
 
 /// @brief 实时计算红方视角的估值权重
-/// @param vlOpen 
-/// @param vlRedAttack 
-/// @param vlBlackAttack 
-/// @return 
-std::map<PIECEID, WeightMap> getBasicEvluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack)
+/// @param vlOpen
+/// @param vlRedAttack
+/// @param vlBlackAttack
+/// @return
+std::map<PIECEID, WeightMap> getBasicEvaluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack)
 {
     // 兵，帅
     WeightMap RED_KING_PAWN_WEIGHT;
