@@ -6,16 +6,7 @@
 class Board
 {
 public:
-    Board() = default;
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
-    static Board reset(Board &board)
-    {
-        Board newBoard{board.pieceidMap, board.team};
-        newBoard.historyMoves = board.historyMoves;
-        newBoard.hashKeyList = board.hashKeyList;
-        newBoard.hashLockList = board.hashLockList;
-        return newBoard;
-    }
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
     Piece piecePosition(int x, int y);
@@ -23,8 +14,7 @@ public:
     TEAM teamOn(int x, int y);
     PIECES getAllLivePieces();
     PIECES getPiecesByTeam(TEAM team);
-    Piece doMove(int x1, int y1, int x2, int y2);
-    Piece doMove(Move move);
+    void doMove(Move move);
     void undoMove();
     void initEvaluate();
     void vlOpenCalculator(int &vlOpen);
@@ -36,40 +26,6 @@ public:
     {
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
-
-    void print()
-    {
-        for (int i = -1; i <= 8; i++)
-        {
-            for (int j = -1; j <= 9; j++)
-            {
-                if (i == -1)
-                {
-                    if (j == -1)
-                    {
-                        std::cout << "X ";
-                    }
-                    else
-                    {
-                        std::cout << j << " ";
-                    }
-                }
-                else
-                {
-                    if (j == -1)
-                    {
-                        std::cout << i << " ";
-                    }
-                    else
-                    {
-                        std::cout << PIECE_NAME_PAIRS.at(this->pieceidOn(i, j));
-                    }
-                }
-            }
-            std::cout << "\n";
-        }
-        std::cout << std::endl;
-    };
 
     int evaluate() const
     {
@@ -106,26 +62,6 @@ public:
     BITLINE getBitLineY(int y) const
     {
         return this->bitboard->yBitBoard[y];
-    }
-
-    bool isIllegalRepeat() const
-    {
-        return false;
-        if (this->historyMoves.size() >= 5)
-        {
-            const MOVES &history = this->historyMoves;
-            const PIECEID attacker = abs(history.back().attacker.pieceid);
-            const PIECEID enemy = abs(history[history.size() - 2].attacker.pieceid);
-            if (
-                // 重复局面
-                history[history.size() - 5] == history.back() &&
-                history[history.size() - 4].x1 == history[history.size() - 2].x2 &&
-                history[history.size() - 4].y1 == history[history.size() - 2].y2)
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     PIECES getLivePiecesById(PIECEID pieceid) const
@@ -307,10 +243,16 @@ PIECES Board::getPiecesByTeam(TEAM team)
     return result;
 }
 
-Piece Board::doMove(int x1, int y1, int x2, int y2)
+/// @brief 步进
+/// @param move
+void Board::doMove(Move move)
 {
-    Piece eaten = this->piecePosition(x2, y2);
-    Piece attackStarter = this->piecePosition(x1, y1);
+    const int x1 = move.x1;
+    const int x2 = move.x2;
+    const int y1 = move.y1;
+    const int y2 = move.y2;
+    const Piece eaten = this->piecePosition(x2, y2);
+    const Piece attackStarter = this->piecePosition(x1, y1);
 
     // 维护棋盘的棋子追踪
     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
@@ -371,18 +313,12 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     // 更新棋盘数据
     this->team = -this->team;
     this->distance += 1;
-    // 记录历史走法
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyMoves.back().attacker = attackStarter;
     this->historyMoves.back().captured = eaten;
-    return eaten;
 }
 
-Piece Board::doMove(Move move)
-{
-    return this->doMove(move.x1, move.y1, move.x2, move.y2);
-}
-
+/// @brief 撤销上一次步进
 void Board::undoMove()
 {
     const int x1 = this->historyMoves.back().x1;
@@ -392,13 +328,11 @@ void Board::undoMove()
     const Piece eaten = this->historyMoves.back().captured;
     const Piece attackStarter = this->historyMoves.back().attacker;
 
-    // 其他
+    // 更新棋盘数据
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
-
-
     // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
     this->pieceidMap[x2][y2] = eaten.pieceid;

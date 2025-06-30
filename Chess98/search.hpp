@@ -22,7 +22,6 @@ public:
         this->pHistory->reset();
         this->pKiller->reset();
         this->pTransportation->reset();
-        board = Board::reset(board);
         this->nodecount = 0;
     }
 
@@ -33,6 +32,7 @@ public:
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
 
+private:
     MOVES rootMoves{};
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
@@ -316,14 +316,7 @@ Result Search::searchRoot(Board &board, int depth)
 
     for (const Move &move : rootMoves)
     {
-        Piece eaten = board.doMove(move);
-
-        // 避免重复局面
-        if (board.isIllegalRepeat())
-        {
-            board.undoMove();
-            continue;
-        }
+        board.doMove(move);
 
         if (vlBest == -INF)
         {
@@ -391,10 +384,6 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
     {
         return board.isKingLive(board.team) == false ? -INF : INF;
-    }
-    if (board.isIllegalRepeat())
-    {
-        return INF * 2;
     }
 
     // 置换表分数
@@ -490,7 +479,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     }
     if (goodMove.id != -1)
     {
-        Piece eaten = board.doMove(goodMove);
+        board.doMove(goodMove);
         vlBest = -searchPV(board, depth - 1, -beta, -alpha);
         board.undoMove();
         bestMove = goodMove;
@@ -516,13 +505,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
         for (const Move &move : availableMoves)
         {
-            Piece eaten = board.doMove(move);
-            // 避免重复局面
-            if (board.isIllegalRepeat())
-            {
-                board.undoMove();
-                continue;
-            }
+            board.doMove(move);
 
             if (vlBest == -INF)
             {
@@ -670,7 +653,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id != -1)
     {
-        Piece eaten = board.doMove(goodMove);
+        board.doMove(goodMove);
         int vl = -searchCut(board, depth - 1, -beta + 1);
         board.undoMove();
         bestMove = goodMove;
@@ -691,7 +674,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         MOVES _moves = Moves::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
-            Piece eaten = board.doMove(move);
+            board.doMove(move);
             int vl = -searchCut(board, depth - 1, -beta + 1);
             board.undoMove();
             if (vl > vlBest)
@@ -718,19 +701,12 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
 
         for (Move &move : availableMoves)
         {
-            Piece eaten = board.doMove(move);
+            board.doMove(move);
             int vl = -INF;
-
-            // 避免重复局面
-            if (board.isIllegalRepeat())
-            {
-                board.undoMove();
-                continue;
-            }
 
             // lmr pruning
             if (!mChecking &&
-                eaten.pieceid == EMPTY_PIECEID &&
+                board.historyMoves.back().captured.pieceid == EMPTY_PIECEID &&
                 depth >= 3 &&
                 searchedCnt >= 4)
             {
@@ -811,14 +787,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
 
     for (const Move &move : availableMoves)
     {
-        Piece eaten = board.doMove(move);
-
-        // 避免重复局面
-        if (board.isIllegalRepeat())
-        {
-            board.undoMove();
-            continue;
-        }
+        board.doMove(move);
 
         int vl = -Search::searchQ(board, -beta, -alpha, maxDistance - 1);
         board.undoMove();

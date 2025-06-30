@@ -118,7 +118,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     int count = 0;
     Board board = Board(pieceidMap, team);
     Search s{};
-    board.print();
+    printPieceidMap(board.pieceidMap);
 
     // 界面
     std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";

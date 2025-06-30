@@ -22,6 +22,6 @@ void testByUI()
     // fenCode = "2baka1r1/3R5/c1n1b1cCn/p1p1p2R1/1r4p1p/1CP6/P3P1P1P/2N3N2/9/2BAKAB2 w - - 0 1"; // 节点数暴增
     // fenCode = "1nbaka1n1/r8/4b1c2/p1p3N2/4p3p/2P6/P3P3P/1CNCB4/4A4/R1BAK2c1 w - - 0 1";
     // fenCode = "4ka3/4aRP2/2n1b3b/p3p3p/9/4P4/P5r1P/4B4/c2CARN2/2rAK4 w - - 0 1";
-    
+
     ui(serverDir, team, maxDepth, maxTime, fenCode);
 }

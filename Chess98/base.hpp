@@ -233,4 +233,38 @@ struct TransItem
     int32 type = Unknown;
 };
 
+void printPieceidMap(PIECEID_MAP pieceidMap)
+{
+    for (int i = -1; i <= 8; i++)
+    {
+        for (int j = -1; j <= 9; j++)
+        {
+            if (i == -1)
+            {
+                if (j == -1)
+                {
+                    std::cout << "X ";
+                }
+                else
+                {
+                    std::cout << j << " ";
+                }
+            }
+            else
+            {
+                if (j == -1)
+                {
+                    std::cout << i << " ";
+                }
+                else
+                {
+                    std::cout << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
+};
+
 const int QUIESCENCE_EXTEND_DEPTH = 2;
