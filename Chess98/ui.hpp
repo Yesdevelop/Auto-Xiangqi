@@ -27,8 +27,10 @@ std::string readFile(const std::string &filename)
 {
     FILE *file = openFile(filename, "r");
     if (!file)
+    {
         return "";
-
+    }
+    
     fseek(file, 0, SEEK_END);
     long length = ftell(file);
     fseek(file, 0, SEEK_SET);
@@ -43,7 +45,9 @@ void writeFile(const std::string &filename, const std::string &content)
 {
     FILE *file = openFile(filename, "w+");
     if (!file)
+    {
         return;
+    }
 
     fwrite(content.c_str(), 1, content.size(), file);
     fclose(file);
@@ -82,22 +86,22 @@ PIECEID_MAP decode(BOARD_CODE code)
 void setBoardCode(Board board)
 {
     const BOARD_CODE code = generateCode(board);
-    const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
-    const std::string jsPutCode =
-        "\
+    const std::string historyMovesBack =
+        board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
+    const std::string jsPutCode = "\
         const http = require('http')\n\
         const options = {\n\
             hostname: '127.0.0.1',\n\
-            path: '/?boardcode=" +
-        code + "',\n\
+            path: '/?boardcode=" + code +
+                                  "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\
         http.request(options).end();\n\
         const options2 = {\n\
             hostname: '127.0.0.1',\n\
-            path: '/?move=" +
-        historyMovesBack + "',\n\
+            path: '/?move=" + historyMovesBack +
+                                  "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\

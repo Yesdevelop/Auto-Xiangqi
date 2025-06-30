@@ -106,12 +106,10 @@ bool hasProtector(Board &board, int x, int y)
     TEAM team = -board.teamOn(x, y);
 
     // 兵、将
-    if ((abs(board.pieceidOn(x + 1, y)) == R_PAWN ||
-         abs(board.pieceidOn(x + 1, y) == R_KING)) &&
+    if ((abs(board.pieceidOn(x + 1, y)) == R_PAWN || abs(board.pieceidOn(x + 1, y) == R_KING)) &&
         board.teamOn(x + 1, y) != team)
         return true;
-    if ((abs(board.pieceidOn(x - 1, y)) == R_PAWN ||
-         abs(board.pieceidOn(x - 1, y) == R_KING)) &&
+    if ((abs(board.pieceidOn(x - 1, y)) == R_PAWN || abs(board.pieceidOn(x - 1, y) == R_KING)) &&
         board.teamOn(x - 1, y) != team)
         return true;
     if (abs(board.pieceidOn(x, (team == RED) ? y - 1 : y + 1)) == R_PAWN &&
@@ -125,78 +123,62 @@ bool hasProtector(Board &board, int x, int y)
     // 马
     if (board.pieceidOn(x + 1, y) == 0)
     {
-        if (abs(board.pieceidOn(x + 2, y + 1)) == R_KNIGHT &&
-            board.teamOn(x + 2, y + 1) != team)
+        if (abs(board.pieceidOn(x + 2, y + 1)) == R_KNIGHT && board.teamOn(x + 2, y + 1) != team)
             return true;
-        if (abs(board.pieceidOn(x + 2, y - 1)) == R_KNIGHT &&
-            board.teamOn(x + 2, y - 1) != team)
+        if (abs(board.pieceidOn(x + 2, y - 1)) == R_KNIGHT && board.teamOn(x + 2, y - 1) != team)
             return true;
     }
     if (board.pieceidOn(x - 1, y) == 0)
     {
-        if (abs(board.pieceidOn(x - 2, y + 1)) == R_KNIGHT &&
-            board.teamOn(x - 2, y + 1) != team)
+        if (abs(board.pieceidOn(x - 2, y + 1)) == R_KNIGHT && board.teamOn(x - 2, y + 1) != team)
             return true;
-        if (abs(board.pieceidOn(x - 2, y - 1)) == R_KNIGHT &&
-            board.teamOn(x - 2, y - 1) != team)
+        if (abs(board.pieceidOn(x - 2, y - 1)) == R_KNIGHT && board.teamOn(x - 2, y - 1) != team)
             return true;
     }
     if (board.pieceidOn(x, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 1, y + 2)) == R_KNIGHT &&
-            board.teamOn(x + 1, y + 2) != team)
+        if (abs(board.pieceidOn(x + 1, y + 2)) == R_KNIGHT && board.teamOn(x + 1, y + 2) != team)
             return true;
-        if (abs(board.pieceidOn(x - 1, y + 2)) == R_KNIGHT &&
-            board.teamOn(x - 1, y + 2) != team)
+        if (abs(board.pieceidOn(x - 1, y + 2)) == R_KNIGHT && board.teamOn(x - 1, y + 2) != team)
             return true;
     }
     if (board.pieceidOn(x, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 1, y - 2)) == R_KNIGHT &&
-            board.teamOn(x + 1, y - 2) != team)
+        if (abs(board.pieceidOn(x + 1, y - 2)) == R_KNIGHT && board.teamOn(x + 1, y - 2) != team)
             return true;
-        if (abs(board.pieceidOn(x - 1, y - 2)) == R_KNIGHT &&
-            board.teamOn(x - 1, y - 2) != team)
+        if (abs(board.pieceidOn(x - 1, y - 2)) == R_KNIGHT && board.teamOn(x - 1, y - 2) != team)
             return true;
     }
 
     // 士、象
     if (board.pieceidOn(x + 1, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 2, y + 2)) == R_BISHOP &&
-            board.teamOn(x + 2, y + 2) != team)
+        if (abs(board.pieceidOn(x + 2, y + 2)) == R_BISHOP && board.teamOn(x + 2, y + 2) != team)
             return true;
     }
     if (board.pieceidOn(x - 1, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(x - 2, y + 2)) == R_BISHOP &&
-            board.teamOn(x - 2, y + 2) != team)
+        if (abs(board.pieceidOn(x - 2, y + 2)) == R_BISHOP && board.teamOn(x - 2, y + 2) != team)
             return true;
     }
     if (board.pieceidOn(x + 1, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 2, y - 2)) == R_BISHOP &&
-            board.teamOn(x + 2, y - 2) != team)
+        if (abs(board.pieceidOn(x + 2, y - 2)) == R_BISHOP && board.teamOn(x + 2, y - 2) != team)
             return true;
     }
     if (board.pieceidOn(x - 1, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(x - 2, y - 2)) == R_BISHOP &&
-            board.teamOn(x - 2, y - 2) != team)
+        if (abs(board.pieceidOn(x - 2, y - 2)) == R_BISHOP && board.teamOn(x - 2, y - 2) != team)
             return true;
     }
 
-    if (abs(board.pieceidOn(x + 1, y + 1)) == R_GUARD &&
-        board.teamOn(x + 1, y + 1) != team)
+    if (abs(board.pieceidOn(x + 1, y + 1)) == R_GUARD && board.teamOn(x + 1, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(x - 1, y + 1)) == R_GUARD &&
-        board.teamOn(x - 1, y + 1) != team)
+    if (abs(board.pieceidOn(x - 1, y + 1)) == R_GUARD && board.teamOn(x - 1, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(x + 1, y - 1)) == R_GUARD &&
-        board.teamOn(x + 1, y - 1) != team)
+    if (abs(board.pieceidOn(x + 1, y - 1)) == R_GUARD && board.teamOn(x + 1, y - 1) != team)
         return true;
-    if (abs(board.pieceidOn(x - 1, y - 1)) == R_GUARD &&
-        board.teamOn(x - 1, y - 1) != team)
+    if (abs(board.pieceidOn(x - 1, y - 1)) == R_GUARD && board.teamOn(x - 1, y - 1) != team)
         return true;
 
     // 车、炮
@@ -253,27 +235,10 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     PIECEID_MAP pieceidMap = PIECEID_MAP{};
     int colNum = 9;
     int rowNum = 0;
-    std::map<char, PIECEID> pairs{
-        {'R', R_ROOK},
-        {'N', R_KNIGHT},
-        {'H', R_KNIGHT},
-        {'B', R_BISHOP},
-        {'E', R_BISHOP},
-        {'G', R_GUARD},
-        {'A', R_GUARD},
-        {'K', R_KING},
-        {'C', R_CANNON},
-        {'P', R_PAWN},
-        {'r', B_ROOK},
-        {'n', B_KNIGHT},
-        {'h', B_KNIGHT},
-        {'b', B_BISHOP},
-        {'e', B_BISHOP},
-        {'g', B_GUARD},
-        {'a', B_GUARD},
-        {'k', B_KING},
-        {'c', B_CANNON},
-        {'p', B_PAWN}};
+    std::map<char, PIECEID> pairs{{'R', R_ROOK},  {'N', R_KNIGHT}, {'H', R_KNIGHT}, {'B', R_BISHOP}, {'E', R_BISHOP},
+                                  {'G', R_GUARD}, {'A', R_GUARD},  {'K', R_KING},   {'C', R_CANNON}, {'P', R_PAWN},
+                                  {'r', B_ROOK},  {'n', B_KNIGHT}, {'h', B_KNIGHT}, {'b', B_BISHOP}, {'e', B_BISHOP},
+                                  {'g', B_GUARD}, {'a', B_GUARD},  {'k', B_KING},   {'c', B_CANNON}, {'p', B_PAWN}};
     for (int i = 0; i < fenCode.size(); i++)
     {
         if (fenCode[i] >= '1' && fenCode[i] <= '9')
@@ -308,21 +273,9 @@ std::string boardToFen(Board board)
 {
     std::string result = "";
     int spaceCount = 0;
-    std::map<PIECEID, char> pairs{
-        {R_KING, 'K'},
-        {R_GUARD, 'A'},
-        {R_BISHOP, 'B'},
-        {R_KNIGHT, 'N'},
-        {R_ROOK, 'R'},
-        {R_CANNON, 'C'},
-        {R_PAWN, 'P'},
-        {B_KING, 'k'},
-        {B_GUARD, 'a'},
-        {B_BISHOP, 'b'},
-        {B_KNIGHT, 'n'},
-        {B_ROOK, 'r'},
-        {B_CANNON, 'c'},
-        {B_PAWN, 'p'}};
+    std::map<PIECEID, char> pairs{{R_KING, 'K'},   {R_GUARD, 'A'}, {R_BISHOP, 'B'}, {R_KNIGHT, 'N'}, {R_ROOK, 'R'},
+                                  {R_CANNON, 'C'}, {R_PAWN, 'P'},  {B_KING, 'k'},   {B_GUARD, 'a'},  {B_BISHOP, 'b'},
+                                  {B_KNIGHT, 'n'}, {B_ROOK, 'r'},  {B_CANNON, 'c'}, {B_PAWN, 'p'}};
     for (int x = 9; x >= 0; x--)
     {
         for (int y = 0; y < 9; y++)
@@ -370,7 +323,8 @@ bool isValidMoveInSituation(Board &board, Move move)
     if (move.attacker.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
         return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
-    if (captured != 0 && board.teamOn(move.x2, move.y2) == board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
+    if (captured != 0 && board.teamOn(move.x2, move.y2) ==
+                             board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
         return false;
 
     // 分类

@@ -1,12 +1,12 @@
 #pragma once
-#include "moves.hpp"
-#include "heuristic.hpp"
-#include "utils.hpp"
 #include "book.hpp"
+#include "heuristic.hpp"
+#include "moves.hpp"
+#include "utils.hpp"
 
 class Search
 {
-public:
+  public:
     Search() = default;
     ~Search()
     {
@@ -32,7 +32,7 @@ public:
     int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
     int searchQ(Board &board, int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
 
-private:
+  private:
     MOVES rootMoves{};
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
@@ -44,7 +44,7 @@ private:
 
 class SearchTricks
 {
-public:
+  public:
     static void setCheckingMove(Board &board, bool mChecking)
     {
         if (mChecking && board.historyMoves.size() > 0)
@@ -107,7 +107,8 @@ public:
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
+    static TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,
+                                        int depth)
     {
         if (depth % 4 == 0)
         {
@@ -277,9 +278,7 @@ Result Search::searchOpenBook(Board &board)
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(),
-              [](Move &a, Move &b)
-              { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b) { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
@@ -705,9 +704,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             int vl = -INF;
 
             // lmr pruning
-            if (!mChecking &&
-                board.historyMoves.back().captured.pieceid == EMPTY_PIECEID &&
-                depth >= 3 &&
+            if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 3 &&
                 searchedCnt >= 4)
             {
                 vl = -searchCut(board, depth - 2 - static_cast<int>(depth >= 4), -beta + 1);

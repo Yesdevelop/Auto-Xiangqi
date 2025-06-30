@@ -1,11 +1,11 @@
 #pragma once
+#include "bitboard.hpp"
 #include "evaluate.hpp"
 #include "hash.hpp"
-#include "bitboard.hpp"
 
 class Board
 {
-public:
+  public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
