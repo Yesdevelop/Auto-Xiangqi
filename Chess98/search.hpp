@@ -176,7 +176,6 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
             break;
         }
     }
-    std::cout << ___;
 
     return bestNode;
 }
