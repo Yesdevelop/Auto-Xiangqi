@@ -2,6 +2,7 @@
 #include "base.hpp"
 #include "board.hpp"
 #include "hash.hpp"
+#include "utils.hpp"
 
 // 历史启发
 class HistoryHeuristic

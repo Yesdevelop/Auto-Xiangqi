@@ -4,16 +4,21 @@
 #include "moves.hpp"
 #include "utils.hpp"
 
+// Search
+
 class Search
 {
   public:
-    Search() = default;
-    ~Search()
-    {
-        delete pHistory;
-        delete pKiller;
-        delete pTransportation;
-    }
+    Search(Board board) : board(board) {};
+
+    Result searchMain(int maxDepth, int maxTime);
+    Result searchOpenBook();
+    Result searchRoot(int depth);
+    int searchPV(int depth, int alpha, int beta);
+    int searchCut(int depth, int beta, bool banNullMove = false);
+    int searchQ(int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
+
+  private:
     void reset(Board &board)
     {
         this->rootMoves = MOVES{};
@@ -24,15 +29,7 @@ class Search
         this->pTransportation->reset();
         this->nodecount = 0;
     }
-
-    Result searchMain(Board &board, int maxDepth, int maxTime);
-    Result searchOpenBook(Board &board);
-    Result searchRoot(Board &board, int depth);
-    int searchPV(Board &board, int depth, int alpha, int beta);
-    int searchCut(Board &board, int depth, int beta, bool banNullMove = false);
-    int searchQ(Board &board, int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
-
-  private:
+    Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
@@ -119,11 +116,11 @@ class SearchTricks
             const double t = 1.5;
             const int upperBound = int((t * sigma + beta - b) / a);
             const int lowerBound = int((-t * sigma + alpha - b) / a);
-            if (search->searchCut(board, depth - 2, upperBound) >= upperBound)
+            if (search->searchCut(depth - 2, upperBound) >= upperBound)
             {
                 return TrickResult<int>{true, {beta}};
             }
-            else if (search->searchCut(board, depth - 2, lowerBound + 1) <= lowerBound && searchType == PV)
+            else if (search->searchCut(depth - 2, lowerBound + 1) <= lowerBound && searchType == PV)
             {
                 return TrickResult<int>{true, {alpha}};
             }
@@ -135,7 +132,7 @@ class SearchTricks
 
 // functions
 
-Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
+Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
     if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
     {
@@ -143,7 +140,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
     }
 
     // openbook search
-    Result openbookResult = Search::searchOpenBook(board);
+    Result openbookResult = Search::searchOpenBook();
     if (openbookResult.val != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
@@ -163,7 +160,7 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
 
     for (int depth = 1; depth <= maxDepth; depth++)
     {
-        bestNode = searchRoot(board, depth);
+        bestNode = searchRoot(depth);
         // log
         std::cout << " depth: " << depth;
         std::cout << " vl: " << bestNode.val;
@@ -179,11 +176,12 @@ Result Search::searchMain(Board &board, int maxDepth, int maxTime = 3)
             break;
         }
     }
+    std::cout << ___;
 
     return bestNode;
 }
 
-Result Search::searchOpenBook(Board &board)
+Result Search::searchOpenBook()
 {
     BookStruct bk;
     BookFileStruct *pBookFileStruct = new BookFileStruct{};
@@ -307,7 +305,7 @@ Result Search::searchOpenBook(Board &board)
     return Result{bookMove, 1};
 }
 
-Result Search::searchRoot(Board &board, int depth)
+Result Search::searchRoot(int depth)
 {
     Move bestMove{};
     int vl = -INF;
@@ -319,14 +317,14 @@ Result Search::searchRoot(Board &board, int depth)
 
         if (vlBest == -INF)
         {
-            vl = -searchPV(board, depth - 1, -INF, -vlBest);
+            vl = -searchPV(depth - 1, -INF, -vlBest);
         }
         else
         {
-            vl = -searchCut(board, depth - 1, -vlBest);
+            vl = -searchCut(depth - 1, -vlBest);
             if (vl > vlBest)
             {
-                vl = -searchPV(board, depth - 1, -INF, -vlBest);
+                vl = -searchPV(depth - 1, -INF, -vlBest);
             }
         }
         if (vl > vlBest)
@@ -375,7 +373,7 @@ Result Search::searchRoot(Board &board, int depth)
 
 // core
 
-int Search::searchPV(Board &board, int depth, int alpha, int beta)
+int Search::searchPV(int depth, int alpha, int beta)
 {
     nodecount++;
 
@@ -391,7 +389,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     {
         if (vlHash >= beta)
         {
-            if (Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
+            if (Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
             {
                 return vlHash;
             }
@@ -402,7 +400,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
         else if (vlHash <= alpha)
         {
-            if (Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
+            if (Search::searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
             {
                 return vlHash;
             }
@@ -413,8 +411,8 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         }
         else
         {
-            const int vl1 = Search::searchQ(board, alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
-            const int vl2 = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+            const int vl1 = Search::searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
+            const int vl2 = Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
             if (vl1 > alpha && vl2 < beta)
             {
                 return vlHash;
@@ -425,7 +423,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     // 静态搜索
     if (depth <= 0)
     {
-        int vl = Search::searchQ(board, alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+        int vl = Search::searchQ(alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
         this->pTransportation->add(board, Move{}, vl, EXACT_TYPE, depth);
         return vl;
     }
@@ -470,16 +468,16 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id == -1 && depth >= 2)
     {
-        if (searchPV(board, depth / 2, alpha, beta) <= alpha)
+        if (searchPV(depth / 2, alpha, beta) <= alpha)
         {
-            searchPV(board, depth / 2, -INF, beta);
+            searchPV(depth / 2, -INF, beta);
         }
         goodMove = this->pTransportation->getMove(board);
     }
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        vlBest = -searchPV(board, depth - 1, -beta, -alpha);
+        vlBest = -searchPV(depth - 1, -beta, -alpha);
         board.undoMove();
         bestMove = goodMove;
         if (vlBest >= beta)
@@ -508,14 +506,14 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
 
             if (vlBest == -INF)
             {
-                vl = -searchPV(board, depth - 1, -beta, -alpha);
+                vl = -searchPV(depth - 1, -beta, -alpha);
             }
             else
             {
-                vl = -searchCut(board, depth - 1, -alpha);
+                vl = -searchCut(depth - 1, -alpha);
                 if (vl > alpha && vl < beta)
                 {
-                    vl = -searchPV(board, depth - 1, -beta, -alpha);
+                    vl = -searchPV(depth - 1, -beta, -alpha);
                 }
             }
 
@@ -554,7 +552,7 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
     return vlBest;
 }
 
-int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
+int Search::searchCut(int depth, int beta, bool banNullMove)
 {
     nodecount++;
 
@@ -568,7 +566,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
     if (vlHash != -INF)
     {
-        int statisValue = Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+        int statisValue = Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
         if (vlHash >= beta && statisValue >= beta && board.distance + QUIESCENCE_EXTEND_DEPTH)
         {
             return vlHash;
@@ -586,7 +584,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // 静态搜索
     if (depth <= 0)
     {
-        return Search::searchQ(board, beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+        return Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
     }
 
     // mate distance pruning
@@ -617,7 +615,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             if (board.nullOkay())
             {
                 board.doNullMove();
-                int vl = -searchCut(board, depth - 3, -beta + 1, true);
+                int vl = -searchCut(depth - 3, -beta + 1, true);
                 board.undoNullMove();
                 if (vl >= beta)
                 {
@@ -625,7 +623,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
                     {
                         return vl;
                     }
-                    else if (searchCut(board, depth - 2, beta, true) >= beta)
+                    else if (searchCut(depth - 2, beta, true) >= beta)
                     {
                         return vl;
                     }
@@ -653,7 +651,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        int vl = -searchCut(board, depth - 1, -beta + 1);
+        int vl = -searchCut(depth - 1, -beta + 1);
         board.undoMove();
         bestMove = goodMove;
         if (vl > vlBest)
@@ -674,7 +672,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            int vl = -searchCut(board, depth - 1, -beta + 1);
+            int vl = -searchCut(depth - 1, -beta + 1);
             board.undoMove();
             if (vl > vlBest)
             {
@@ -707,11 +705,11 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
             if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 3 &&
                 searchedCnt >= 4)
             {
-                vl = -searchCut(board, depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
+                vl = -searchCut(depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
             }
             else
             {
-                vl = -searchCut(board, depth - 1, -beta + 1);
+                vl = -searchCut(depth - 1, -beta + 1);
             }
 
             board.undoMove();
@@ -747,7 +745,7 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     return vlBest;
 }
 
-int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
+int Search::searchQ(int alpha, int beta, int maxDistance)
 {
     return board.evaluate();
     nodecount++;
@@ -786,7 +784,7 @@ int Search::searchQ(Board &board, int alpha, int beta, int maxDistance)
     {
         board.doMove(move);
 
-        int vl = -Search::searchQ(board, -beta, -alpha, maxDistance - 1);
+        int vl = -Search::searchQ(-beta, -alpha, maxDistance - 1);
         board.undoMove();
         if (vl > vlBest)
         {

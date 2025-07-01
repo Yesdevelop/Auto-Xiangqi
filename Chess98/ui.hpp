@@ -30,7 +30,7 @@ std::string readFile(const std::string &filename)
     {
         return "";
     }
-    
+
     fseek(file, 0, SEEK_END);
     long length = ftell(file);
     fseek(file, 0, SEEK_SET);
@@ -121,7 +121,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     // variables
     int count = 0;
     Board board = Board(pieceidMap, team);
-    Search s{};
+    Search s{board};
     printPieceidMap(board.pieceidMap);
 
     // 界面
@@ -137,14 +137,14 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             std::cout << count << "---------------------" << std::endl;
 
             // 人机做出决策
-            Result node = s.searchMain(board, maxDepth, maxTime);
+            Result node = s.searchMain(maxDepth, maxTime);
             board.doMove(node.move);
             if (inCheck(board) == true)
                 board.historyMoves.back().isCheckingMove = true;
 
             setBoardCode(board);
             moveFileContent = readFile("./_move_.txt");
-            s.searchMain(board, maxDepth, maxTime);
+            s.searchMain(maxDepth, maxTime);
         }
         else
         {
