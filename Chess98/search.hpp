@@ -97,7 +97,7 @@ public:
 	{
 		if (depth == 1 && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
 		{
-			int vl = board.evaluate(alpha, beta);
+			int vl = board.evaluate(alpha, beta, false);
 			if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
 			{
 				return TrickResult<int>{true, { vl }};
