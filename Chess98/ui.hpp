@@ -131,7 +131,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     std::string moveFileContent = "____";
     while (true)
     {
-        if (board.team == team)
+        if (s.board.team == team)
         {
             count++;
             std::cout << count << "---------------------" << std::endl;
