@@ -5,7 +5,7 @@
 
 const int ROOK_EXTEND = 1;
 const int ROOK_EXTEND_MARGIN = ROOK_EXTEND * 18 * 2;
-const int KNIGHT_EXTEND = 2;
+const int KNIGHT_EXTEND = 1;
 const int KNIGHT_EXTEND_MARGIN = KNIGHT_EXTEND * 8 * 2;
 
 const int LazyMargin_1 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
