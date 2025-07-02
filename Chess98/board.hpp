@@ -3,6 +3,8 @@
 #include "evaluate.hpp"
 #include "hash.hpp"
 
+int getExtendVal(Board board);
+
 class Board
 {
   public:
@@ -29,7 +31,7 @@ class Board
 
     int evaluate() const
     {
-        return this->team == RED ? (vlRed - vlBlack) + vlAdvanced : (vlBlack - vlRed) + vlAdvanced;
+        return this->team == RED ? (vlRed - vlBlack + vlAdvanced + getExtendVal(*this)) : (vlBlack - vlRed - vlAdvanced - getExtendVal(*this));
     }
 
     void doNullMove()
@@ -67,11 +69,11 @@ class Board
     PIECES getLivePiecesById(PIECEID pieceid) const
     {
         PIECES result{};
-        for (const Piece *piece : this->pieceRegistry.at(pieceid))
+        for (const Piece &piece : this->pieceRegistry.at(pieceid))
         {
-            if (piece->isLive)
+            if (piece.isLive)
             {
-                result.emplace_back(*piece);
+                result.emplace_back(piece);
             }
         }
         return result;
@@ -87,7 +89,7 @@ class Board
     int vlBlack = 0;
     int32 hashKey = 0;
     int32 hashLock = 0;
-    std::map<PIECEID, std::vector<Piece *>> pieceRegistry{};
+    std::map<PIECEID, std::vector<Piece>> pieceRegistry{};
 
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
@@ -125,7 +127,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
                     this->isRedKingLive = true;
                 if (pieceid == B_KING)
                     this->isBlackKingLive = true;
-                this->pieceRegistry[pieceid].emplace_back(&this->pieces.back());
+                this->pieceRegistry[pieceid].emplace_back(this->pieces.back());
             }
             else
             {
@@ -582,4 +584,115 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
+}
+
+int getExtendVal(Board board)
+{
+    int result = 0;
+
+    // 车的机动性
+    const int ROOK_EXTEND = 1;
+    for (const Piece& rook : board.pieceRegistry[board.team * R_ROOK])
+    {
+        const int x = rook.x;
+        const int y = rook.y;
+        BITLINE bitlineX = board.getBitLineX(x);
+        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
+        BITLINE bitlineY = board.getBitLineY(y);
+        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
+        result += ROOK_EXTEND * (regionY[1] - regionY[0] + regionX[1] - regionX[0] - 2);
+        if (board.teamOn(x, regionX[1]) != board.team)
+        {
+            result += ROOK_EXTEND;
+        }
+        if (board.teamOn(x, regionX[0]) != board.team)
+        {
+            result += ROOK_EXTEND;
+        }
+        if (board.teamOn(regionY[1], y) != board.team)
+        {
+            result += ROOK_EXTEND;
+        }
+        if (board.teamOn(regionY[1], y) != board.team)
+        {
+            result += ROOK_EXTEND;
+        }
+    }
+    // 马的灵活性
+    const int KNIGHT_EXTEND = 2;
+    for (const Piece& knight : board.pieceRegistry[board.team * R_KNIGHT])
+    {
+        const int x = knight.x;
+        const int y = knight.y;
+        if (board.pieceidOn(x - 1, y) == EMPTY_PIECEID)
+        {
+            if (board.teamOn(x - 2, y - 1) != board.team && board.teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
+            {
+                if (x - 2 != 0 && x - 2 != 8 && y - 1 != 0 && y - 1 != 9 && x - 2 != 4 && y - 1 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (board.teamOn(x - 2, y + 1) != board.team && board.teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
+            {
+                if (x - 2 != 0 && x - 2 != 8 && y + 1 != 0 && y + 1 != 9 && x - 2 != 4 && y + 1 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+        if (board.pieceidOn(x + 1, y) == EMPTY_PIECEID)
+        {
+            if (board.teamOn(x + 2, y - 1) != board.team && board.teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
+            {
+                if (x + 2 != 0 && x + 2 != 8 && y - 1 != 0 && y - 1 != 9 && x + 2 != 4 && y - 1 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (board.teamOn(x + 2, y + 1) != board.team && board.teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
+            {
+                if (x + 2 != 0 && x + 2 != 8 && y + 1 != 0 && y + 1 != 9 && x + 2 != 4 && y + 1 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+        if (board.pieceidOn(x, y - 1) == EMPTY_PIECEID)
+        {
+            if (board.teamOn(x - 1, y - 2) != board.team && board.teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
+            {
+                if (x - 1 != 0 && x - 1 != 8 && y - 2 != 0 && y - 2 != 9 && x - 1 != 4 && y - 2 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (board.teamOn(x + 1, y - 2) != board.team && board.teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
+            {
+                if (x + 1 != 0 && x + 1 != 8 && y - 2 != 0 && y - 2 != 9 && x + 1 != 4 && y - 2 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+        if (board.pieceidOn(x, y + 1) == EMPTY_PIECEID)
+        {
+            if (board.teamOn(x - 1, y + 2) != board.team && board.teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
+            {
+                if (x - 1 != 0 && x - 1 != 8 && y + 2 != 0 && y + 2 != 9 && x - 1 != 4 && y + 2 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (board.teamOn(x + 1, y + 2) != board.team && board.teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
+            {
+                if (x + 1 != 0 && x + 1 != 8 && y + 2 != 0 && y + 2 != 9 && x + 1 != 4 && y + 2 != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+    }
+
+    return result;
 }

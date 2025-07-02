@@ -17,6 +17,7 @@
 #include <vector>
 #ifdef _MSC_VER
 #include <thread>
+#include <functional>
 #endif
 
 void wait(int ms)

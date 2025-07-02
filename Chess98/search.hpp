@@ -89,14 +89,10 @@ class SearchTricks
 
     static TrickResult<int> futilityPruning(Board &board, int beta, int depth)
     {
-        if (depth == 1)
+        if (depth == 1 && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
         {
             int vl = board.evaluate();
-            if (vl <= beta - FUTILITY_PRUNING_MARGIN)
-            {
-                return TrickResult<int>{true, {vl}};
-            }
-            if (vl >= beta + FUTILITY_PRUNING_MARGIN)
+            if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
             {
                 return TrickResult<int>{true, {vl}};
             }

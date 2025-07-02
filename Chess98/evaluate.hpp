@@ -71,11 +71,11 @@ WeightMap DANGER_GUARD_BISHOP_WEIGHT({{
 }});
 
 WeightMap OPEN_KNIGHT_WEIGHT({{
-    {224, 215, 230, 236, 230, 230, 239, 236, 230, 230},
-    {215, 230, 236, 242, 254, 260, 284, 254, 248, 230},
-    {230, 236, 232, 254, 263, 257, 260, 257, 269, 230},
-    {224, 239, 245, 245, 266, 269, 281, 269, 251, 248},
-    {230, 194, 236, 254, 269, 272, 260, 257, 242, 230},
+    {264, 255, 270, 276, 270, 270, 279, 276, 270, 270},
+    {255, 270, 276, 282, 294, 300, 324, 294, 288, 270},
+    {270, 276, 282, 294, 303, 297, 300, 297, 309, 270},
+    {264, 279, 285, 285, 306, 309, 321, 309, 291, 288},
+    {270, 234, 276, 294, 309, 312, 300, 297, 282, 270},
 }});
 
 WeightMap END_KNIGHT_WEIGHT({{
@@ -260,14 +260,3 @@ int vlPawn = 0;
 const int MAX_SEARCH_DISTANCE = 64;
 const int DELTA_PRUNING_MARGIN = 300;
 const int FUTILITY_PRUNING_MARGIN = 400;
-
-class Evaluator
-{
-  public:
-    Evaluator(PIECEID_MAP pieceidMap) : pieceidMap(pieceidMap)
-    {
-    }
-
-  private:
-    PIECEID_MAP pieceidMap;
-};
