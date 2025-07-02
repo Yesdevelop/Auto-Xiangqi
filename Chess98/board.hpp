@@ -596,7 +596,7 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
 int Board::rookMobility() const
 {
     int result = 0;
-    for (const Piece& rook : this->pieceRegistry.at(this->team* R_ROOK))
+    for (const Piece& rook : this->pieceRegistry.at(this->team * R_ROOK))
     {
         const int x = rook.x;
         const int y = rook.y;
@@ -630,7 +630,7 @@ int Board::rookMobility() const
 int Board::knightMobility() const
 {
     int result = 0;
-    for (const Piece& knight : this->pieceRegistry.at(this->team* R_KNIGHT))
+    for (const Piece& knight : this->pieceRegistry.at(this->team * R_KNIGHT))
     {
         const int x = knight.x;
         const int y = knight.y;
