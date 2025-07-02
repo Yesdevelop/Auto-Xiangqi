@@ -723,10 +723,6 @@ int Board::evaluate(int vlAlpha,int vlBeta,bool useKnowledge = true) const
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
-    if (!useKnowledge)
-    {
-        return vlEvaluate;
-    }
     if (vlEvaluate <= vlAlpha - LazyMargin_1)
     {
         return vlAlpha - LazyMargin_1;
@@ -734,6 +730,11 @@ int Board::evaluate(int vlAlpha,int vlBeta,bool useKnowledge = true) const
     else if (vlEvaluate >= vlBeta + LazyMargin_1)
     {
         return vlBeta + LazyMargin_1;
+    }
+    // Quick Exit
+    if (!useKnowledge)
+    {
+        return vlEvaluate;
     }
     // Level 2
     vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();

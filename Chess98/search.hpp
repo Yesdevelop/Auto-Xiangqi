@@ -95,9 +95,9 @@ public:
 
 	static TrickResult<int> futilityPruning(Board& board, int alpha, int beta, int depth)
 	{
-		if (depth == 1 && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
+		if (depth == 1)
 		{
-			int vl = board.evaluate(alpha, beta, false);
+			int vl = board.evaluate(alpha, beta);
 			if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
 			{
 				return TrickResult<int>{true, { vl }};
@@ -108,7 +108,7 @@ public:
 
 	static TrickResult<int> multiProbCut(Board& board, Search* search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
 	{
-		if (depth % 4 == 0)
+		if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
 		{
 			const double vlScale = (double)vlPawn / 100.0;
 			const double a = 1.02 * vlScale;
@@ -444,13 +444,6 @@ int Search::searchPV(int depth, int alpha, int beta)
 	// tricks
 	if (!mChecking)
 	{
-		// futility pruning
-		TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, alpha, beta, depth);
-		if (futilityResult.isSuccess)
-		{
-			return futilityResult.data[0];
-		}
-
 		// multi probCut
 		TrickResult<int> probCutResult = SearchTricks::multiProbCut(board, this, PV, alpha, beta, depth);
 		if (probCutResult.isSuccess)
@@ -603,12 +596,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 	// tricks
 	if (!mChecking)
 	{
-		// futility pruning
-		TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta - 1, beta, depth);
-		if (futilityResult.isSuccess)
-		{
-			return futilityResult.data[0];
-		}
 		// multi probCut and null pruning
 		if (!banNullMove)
 		{
