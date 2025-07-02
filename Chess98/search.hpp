@@ -100,8 +100,7 @@ class SearchTricks
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,
-                                        int depth)
+    static TrickResult<int> mutiProbcut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,int depth)
     {
         if (depth % 4 == 0)
         {
