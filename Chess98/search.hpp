@@ -40,6 +40,7 @@ protected:
 	int nodecount = 0;
 private:
 	friend void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string fenCode);
+	friend void setBoardCode(const Board& board);
 };
 
 // tricks
