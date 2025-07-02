@@ -127,7 +127,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     // 界面
     std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";
     system(cmd.c_str());
-    setBoardCode(board);
+    setBoardCode(s.board);
     std::string moveFileContent = "____";
     while (true)
     {
@@ -138,11 +138,11 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
-            board.doMove(node.move);
-            if (inCheck(board) == true)
-                board.historyMoves.back().isCheckingMove = true;
+            s.board.doMove(node.move);
+            if (inCheck(s.board) == true)
+                s.board.historyMoves.back().isCheckingMove = true;
 
-            setBoardCode(board);
+            setBoardCode(s.board);
             moveFileContent = readFile("./_move_.txt");
         }
         else
@@ -151,14 +151,14 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             std::string content = readFile("./_move_.txt");
 
             // 悔棋
-            if (content == "undo" && board.historyMoves.size() > 1)
+            if (content == "undo" && s.board.historyMoves.size() > 1)
             {
                 count--;
                 std::cout << "undo" << std::endl;
-                board.undoMove();
-                board.undoMove();
+                s.board.undoMove();
+                s.board.undoMove();
 
-                setBoardCode(board);
+                setBoardCode(s.board);
                 writeFile("./_move_.txt", "wait");
                 moveFileContent = "wait";
             }
