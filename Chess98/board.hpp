@@ -18,7 +18,7 @@ class Board
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
     Piece piecePosition(int x, int y);
-    PIECEID pieceidOn(int x, int y);
+    PIECEID pieceidOn(int x, int y) const;
     TEAM teamOn(int x, int y) const;
     PIECES getAllLivePieces();
     PIECES getPiecesByTeam(TEAM team);
@@ -35,9 +35,9 @@ class Board
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    int evaluate(int vlAlpha, int vlBeta);
-    int rookMobility();
-    int knightMobility();
+    int evaluate(int vlAlpha, int vlBeta) const;
+    int rookMobility() const;
+    int knightMobility() const;
 
     void doNullMove()
     {
@@ -186,7 +186,7 @@ Piece Board::piecePosition(int x, int y)
     }
 }
 
-PIECEID Board::pieceidOn(int x, int y)
+PIECEID Board::pieceidOn(int x, int y) const
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -593,10 +593,10 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
 
 
 // 车的机动性
-int Board::rookMobility()
+int Board::rookMobility() const
 {
     int result = 0;
-    for (const Piece& rook : this->pieceRegistry[this->team * R_ROOK])
+    for (const Piece& rook : this->pieceRegistry.at(this->team* R_ROOK))
     {
         const int x = rook.x;
         const int y = rook.y;
@@ -627,10 +627,10 @@ int Board::rookMobility()
 
 
 // 马的灵活性
-int Board::knightMobility()
+int Board::knightMobility() const
 {
     int result = 0;
-    for (const Piece& knight : this->pieceRegistry[this->team * R_KNIGHT])
+    for (const Piece& knight : this->pieceRegistry.at(this->team* R_KNIGHT))
     {
         const int x = knight.x;
         const int y = knight.y;
@@ -707,7 +707,7 @@ int Board::knightMobility()
     return result;
 }
 
-int Board::evaluate(int vlAlpha,int vlBeta)
+int Board::evaluate(int vlAlpha,int vlBeta) const
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
