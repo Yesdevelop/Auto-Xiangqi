@@ -144,7 +144,6 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
             setBoardCode(board);
             moveFileContent = readFile("./_move_.txt");
-            s.searchMain(maxDepth, maxTime);
         }
         else
         {
