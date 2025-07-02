@@ -3,7 +3,13 @@
 #include "evaluate.hpp"
 #include "hash.hpp"
 
-int getExtendVal(Board board);
+const int ROOK_EXTEND = 1;
+const int ROOK_EXTEND_MARGIN = ROOK_EXTEND * 18 * 2;
+const int KNIGHT_EXTEND = 2;
+const int KNIGHT_EXTEND_MARGIN = KNIGHT_EXTEND * 8 * 2;
+
+const int LazyMargin_1 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+const int LazyMargin_2 = KNIGHT_EXTEND_MARGIN;
 
 class Board
 {
@@ -13,7 +19,7 @@ class Board
     Piece pieceIndex(PIECE_INDEX pieceIndex);
     Piece piecePosition(int x, int y);
     PIECEID pieceidOn(int x, int y);
-    TEAM teamOn(int x, int y);
+    TEAM teamOn(int x, int y) const;
     PIECES getAllLivePieces();
     PIECES getPiecesByTeam(TEAM team);
     void doMove(Move move);
@@ -29,10 +35,9 @@ class Board
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    int evaluate() const
-    {
-        return this->team == RED ? (vlRed - vlBlack + vlAdvanced + getExtendVal(*this)) : (vlBlack - vlRed - vlAdvanced - getExtendVal(*this));
-    }
+    int evaluate(int vlAlpha, int vlBeta);
+    int rookMobility();
+    int knightMobility();
 
     void doNullMove()
     {
@@ -193,7 +198,7 @@ PIECEID Board::pieceidOn(int x, int y)
     }
 }
 
-TEAM Board::teamOn(int x, int y)
+TEAM Board::teamOn(int x, int y) const
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -586,54 +591,59 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
     }
 }
 
-int getExtendVal(Board board)
+
+// 车的机动性
+int Board::rookMobility()
 {
     int result = 0;
-
-    // 车的机动性
-    const int ROOK_EXTEND = 1;
-    for (const Piece& rook : board.pieceRegistry[board.team * R_ROOK])
+    for (const Piece& rook : this->pieceRegistry[this->team * R_ROOK])
     {
         const int x = rook.x;
         const int y = rook.y;
-        BITLINE bitlineX = board.getBitLineX(x);
-        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
-        BITLINE bitlineY = board.getBitLineY(y);
-        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
+        BITLINE bitlineX = this->getBitLineX(x);
+        REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, y, 9);
+        BITLINE bitlineY = this->getBitLineY(y);
+        REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, x, 8);
         result += ROOK_EXTEND * (regionY[1] - regionY[0] + regionX[1] - regionX[0] - 2);
-        if (board.teamOn(x, regionX[1]) != board.team)
+        if (this->teamOn(x, regionX[1]) != this->team)
         {
             result += ROOK_EXTEND;
         }
-        if (board.teamOn(x, regionX[0]) != board.team)
+        if (this->teamOn(x, regionX[0]) != this->team)
         {
             result += ROOK_EXTEND;
         }
-        if (board.teamOn(regionY[1], y) != board.team)
+        if (this->teamOn(regionY[1], y) != this->team)
         {
             result += ROOK_EXTEND;
         }
-        if (board.teamOn(regionY[1], y) != board.team)
+        if (this->teamOn(regionY[1], y) != this->team)
         {
             result += ROOK_EXTEND;
         }
     }
-    // 马的灵活性
-    const int KNIGHT_EXTEND = 2;
-    for (const Piece& knight : board.pieceRegistry[board.team * R_KNIGHT])
+    return result;
+}
+
+
+// 马的灵活性
+int Board::knightMobility()
+{
+    int result = 0;
+    for (const Piece& knight : this->pieceRegistry[this->team * R_KNIGHT])
     {
         const int x = knight.x;
         const int y = knight.y;
-        if (board.pieceidOn(x - 1, y) == EMPTY_PIECEID)
+        if (this->pieceidOn(x - 1, y) == EMPTY_PIECEID)
         {
-            if (board.teamOn(x - 2, y - 1) != board.team && board.teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
+            if (this->teamOn(x - 2, y - 1) != this->team && this->teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
             {
                 if (x - 2 != 0 && x - 2 != 8 && y - 1 != 0 && y - 1 != 9 && x - 2 != 4 && y - 1 != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
-            if (board.teamOn(x - 2, y + 1) != board.team && board.teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
+            if (this->teamOn(x - 2, y + 1) != this->team && this->teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
             {
                 if (x - 2 != 0 && x - 2 != 8 && y + 1 != 0 && y + 1 != 9 && x - 2 != 4 && y + 1 != 1)
                 {
@@ -641,16 +651,16 @@ int getExtendVal(Board board)
                 }
             }
         }
-        if (board.pieceidOn(x + 1, y) == EMPTY_PIECEID)
+        if (this->pieceidOn(x + 1, y) == EMPTY_PIECEID)
         {
-            if (board.teamOn(x + 2, y - 1) != board.team && board.teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
+            if (this->teamOn(x + 2, y - 1) != this->team && this->teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
             {
                 if (x + 2 != 0 && x + 2 != 8 && y - 1 != 0 && y - 1 != 9 && x + 2 != 4 && y - 1 != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
-            if (board.teamOn(x + 2, y + 1) != board.team && board.teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
+            if (this->teamOn(x + 2, y + 1) != this->team && this->teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
             {
                 if (x + 2 != 0 && x + 2 != 8 && y + 1 != 0 && y + 1 != 9 && x + 2 != 4 && y + 1 != 1)
                 {
@@ -658,16 +668,16 @@ int getExtendVal(Board board)
                 }
             }
         }
-        if (board.pieceidOn(x, y - 1) == EMPTY_PIECEID)
+        if (this->pieceidOn(x, y - 1) == EMPTY_PIECEID)
         {
-            if (board.teamOn(x - 1, y - 2) != board.team && board.teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
+            if (this->teamOn(x - 1, y - 2) != this->team && this->teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
             {
                 if (x - 1 != 0 && x - 1 != 8 && y - 2 != 0 && y - 2 != 9 && x - 1 != 4 && y - 2 != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
-            if (board.teamOn(x + 1, y - 2) != board.team && board.teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
+            if (this->teamOn(x + 1, y - 2) != this->team && this->teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
             {
                 if (x + 1 != 0 && x + 1 != 8 && y - 2 != 0 && y - 2 != 9 && x + 1 != 4 && y - 2 != 1)
                 {
@@ -675,16 +685,16 @@ int getExtendVal(Board board)
                 }
             }
         }
-        if (board.pieceidOn(x, y + 1) == EMPTY_PIECEID)
+        if (this->pieceidOn(x, y + 1) == EMPTY_PIECEID)
         {
-            if (board.teamOn(x - 1, y + 2) != board.team && board.teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
+            if (this->teamOn(x - 1, y + 2) != this->team && this->teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
             {
                 if (x - 1 != 0 && x - 1 != 8 && y + 2 != 0 && y + 2 != 9 && x - 1 != 4 && y + 2 != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
-            if (board.teamOn(x + 1, y + 2) != board.team && board.teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
+            if (this->teamOn(x + 1, y + 2) != this->team && this->teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
             {
                 if (x + 1 != 0 && x + 1 != 8 && y + 2 != 0 && y + 2 != 9 && x + 1 != 4 && y + 2 != 1)
                 {
@@ -695,4 +705,31 @@ int getExtendVal(Board board)
     }
 
     return result;
+}
+
+int Board::evaluate(int vlAlpha,int vlBeta)
+{
+    // Level 1
+    int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed - vlAdvanced);
+    if (vlEvaluate <= vlAlpha - LazyMargin_1)
+    {
+        return vlAlpha - LazyMargin_1;
+    }
+    else if (vlEvaluate >= vlBeta + LazyMargin_1)
+    {
+        return vlBeta + LazyMargin_1;
+    }
+    // Level 2
+    vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
+    if (vlEvaluate <= vlAlpha - LazyMargin_2)
+    {
+        return vlAlpha - LazyMargin_2;
+    }
+    else if (vlEvaluate >= vlBeta + LazyMargin_2)
+    {
+        return vlBeta + LazyMargin_2;
+    }
+    // Level 3
+    vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
+    return vlEvaluate;
 }

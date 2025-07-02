@@ -54,7 +54,7 @@ class SearchTricks
     {
         if (!mChecking)
         {
-            int vl = board.evaluate();
+            int vl = board.evaluate(alpha,beta);
             if (vl >= beta)
             {
                 return TrickResult<int>{true, {vl}};
@@ -87,11 +87,11 @@ class SearchTricks
         return TrickResult<int>(false, {});
     }
 
-    static TrickResult<int> futilityPruning(Board &board, int beta, int depth)
+    static TrickResult<int> futilityPruning(Board &board,int alpha, int beta, int depth)
     {
         if (depth == 1 && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
         {
-            int vl = board.evaluate();
+            int vl = board.evaluate(alpha,beta);
             if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
             {
                 return TrickResult<int>{true, {vl}};
@@ -147,7 +147,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
     // situation info
     std::cout << "situation: " << boardToFen(board) << std::endl;
-    std::cout << "evaluate: " << board.evaluate() << std::endl;
+    std::cout << "evaluate: " << board.evaluate(-INF,INF) << std::endl;
 
     this->rootMoves = Moves::getMoves(board);
 
@@ -440,7 +440,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (!mChecking)
     {
         // futility pruning
-        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta, depth);
+        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, alpha, beta, depth);
         if (futilityResult.isSuccess)
         {
             return futilityResult.data[0];
@@ -599,7 +599,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     if (!mChecking)
     {
         // futility pruning
-        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta, depth);
+        TrickResult<int> futilityResult = SearchTricks::futilityPruning(board, beta - 1, beta, depth);
         if (futilityResult.isSuccess)
         {
             return futilityResult.data[0];
@@ -742,13 +742,12 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
 int Search::searchQ(int alpha, int beta, int maxDistance)
 {
-    return board.evaluate();
     nodecount++;
 
     // 返回评估结果
     if (board.distance > maxDistance)
     {
-        return board.evaluate();
+        return board.evaluate(alpha,beta);
     }
 
     // mate distance pruning
