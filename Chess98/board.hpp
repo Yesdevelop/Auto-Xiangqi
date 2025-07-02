@@ -710,7 +710,7 @@ int Board::knightMobility()
 int Board::evaluate(int vlAlpha,int vlBeta)
 {
     // Level 1
-    int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed - vlAdvanced);
+    int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
     if (vlEvaluate <= vlAlpha - LazyMargin_1)
     {
         return vlAlpha - LazyMargin_1;
