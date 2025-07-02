@@ -100,29 +100,9 @@ class SearchTricks
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> forwardPruning(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,int depth,bool banNullMove)
+    static TrickResult<int> multiProbCut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,int depth)
     {
-        if (!banNullMove && searchType != PV)
-        {
-            if (board.nullOkay())
-            {
-                board.doNullMove();
-                int vl = -search->searchCut(depth - 3, -beta + 1, true);
-                board.undoNullMove();
-                if (vl >= beta)
-                {
-                    if (board.nullSafe())
-                    {
-                        return TrickResult<int>{true, { vl }};
-                    }
-                    else if (search->searchCut(depth - 2, beta, true) >= beta)
-                    {
-                        return TrickResult<int>{true, { vl }};
-                    }
-                }
-            }
-        }
-        else if (depth % 4 == 0)
+        if (depth % 4 == 0)
         {
             const double vlScale = (double)vlPawn / 100.0;
             const double a = 1.02 * vlScale;
@@ -466,7 +446,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
 
         // multi probCut
-        TrickResult<int> probCutResult = SearchTricks::forwardPruning(board, this, PV, alpha, beta, depth,true);
+        TrickResult<int> probCutResult = SearchTricks::multiProbCut(board, this, PV, alpha, beta, depth);
         if (probCutResult.isSuccess)
         {
             return probCutResult.data[0];
@@ -646,7 +626,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
         else
         {
-            TrickResult<int> probCutResult = SearchTricks::forwardPruning(board, this, CUT, beta - 1, beta, depth,banNullMove);
+            TrickResult<int> probCutResult = SearchTricks::multiProbCut(board, this, CUT, beta - 1, beta, depth);
             if (probCutResult.isSuccess)
             {
                 return probCutResult.data[0];
