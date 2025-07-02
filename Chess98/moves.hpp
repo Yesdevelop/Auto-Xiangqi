@@ -690,15 +690,15 @@ MOVES Moves::getCaptureMoves(Board &board)
         {
             score = a - b + 1;
 
-            //if (score < 1)
-            //{
-            //    PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
-            //    if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK ||
-            //        isRiveredPawn(board, captured.x, captured.y))
-            //    {
-            //        score = 1;
-            //    }
-            //}
+            if (score < 1)
+            {
+                PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
+                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK ||
+                    isRiveredPawn(board, captured.x, captured.y))
+                {
+                    score = 1;
+                }
+            }
         }
         else
         {
@@ -710,7 +710,7 @@ MOVES Moves::getCaptureMoves(Board &board)
         }
     }
 
-    for (int score = 8; score >= 2; score--)
+    for (int score = 8; score >= 1; score--)
     {
         for (Move &move : orderMap[score])
         {
