@@ -233,4 +233,4 @@ void printPieceidMap(PIECEID_MAP pieceidMap)
     std::cout << std::endl;
 };
 
-const int QUIESCENCE_EXTEND_DEPTH = 6;
+const int QUIESCENCE_EXTEND_DEPTH = 1;
