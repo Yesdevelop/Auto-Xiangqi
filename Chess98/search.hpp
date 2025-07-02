@@ -135,7 +135,7 @@ class SearchTricks
             {
                 return TrickResult<int>{true, { beta }};
             }
-            else if (search->searchCut(depth - 2, lowerBound + 1) <= lowerBound && searchType == PV)
+            else if (searchType == PV && search->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
             {
                 return TrickResult<int>{true, { alpha }};
             }
