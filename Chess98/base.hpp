@@ -4,26 +4,20 @@
 #elif __unix__
 #include <unistd.h>
 #endif
-#include <cassert>
-#include <iostream>
 #include <algorithm>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <cstring>
 #include <ctime>
+#include <iostream>
+#include <map>
+#include <random>
 #include <string>
 #include <vector>
-#include <cstring>
-#include <array>
-#include <map>
-#include <cmath>
 #ifdef _MSC_VER
 #include <thread>
-#else
-#if __has_include(<mingw.thread.h>)
-#include <mingw.thread.h>
-#else
-#error "g++ and clang++ may not support std::thread in win32 mode, please download mingw-std-threads"
-#error "download https://github.com/meganz/mingw-std-threads/releases/tag/1.0.0"
-#error "and put it in your include path or the same directory as your source code"
-#endif
+#include <functional>
 #endif
 
 void wait(int ms)
@@ -71,50 +65,24 @@ const TEAM OVERFLOW_TEAM = 2;
 
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
-    {R_KING, "RK"},
-    {R_GUARD, "RG"},
-    {R_BISHOP, "RB"},
-    {R_KNIGHT, "RN"},
-    {R_ROOK, "RR"},
-    {R_CANNON, "RC"},
-    {R_PAWN, "RP"},
-    {B_KING, "BK"},
-    {B_GUARD, "BG"},
-    {B_BISHOP, "BB"},
-    {B_KNIGHT, "BN"},
-    {B_ROOK, "BR"},
-    {B_CANNON, "BC"},
-    {B_PAWN, "BP"},
-    {EMPTY_PIECEID, "__"},
-    {OVERFLOW_PIECEID, "  "}};
+    {R_KING, "RK"},   {R_GUARD, "RG"},  {R_BISHOP, "RB"},      {R_KNIGHT, "RN"},
+    {R_ROOK, "RR"},   {R_CANNON, "RC"}, {R_PAWN, "RP"},        {B_KING, "BK"},
+    {B_GUARD, "BG"},  {B_BISHOP, "BB"}, {B_KNIGHT, "BN"},      {B_ROOK, "BR"},
+    {B_CANNON, "BC"}, {B_PAWN, "BP"},   {EMPTY_PIECEID, "__"}, {OVERFLOW_PIECEID, "  "}};
 
 std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
-    {"RK", R_KING},
-    {"RG", R_GUARD},
-    {"RB", R_BISHOP},
-    {"RN", R_KNIGHT},
-    {"RR", R_ROOK},
-    {"RC", R_CANNON},
-    {"RP", R_PAWN},
-    {"BK", B_KING},
-    {"BG", B_GUARD},
-    {"BB", B_BISHOP},
-    {"BN", B_KNIGHT},
-    {"BR", B_ROOK},
-    {"BC", B_CANNON},
-    {"BP", B_PAWN},
-    {"__", EMPTY_PIECEID},
-    {"  ", OVERFLOW_PIECEID}};
+    {"RK", R_KING},   {"RG", R_GUARD},  {"RB", R_BISHOP},      {"RN", R_KNIGHT},
+    {"RR", R_ROOK},   {"RC", R_CANNON}, {"RP", R_PAWN},        {"BK", B_KING},
+    {"BG", B_GUARD},  {"BB", B_BISHOP}, {"BN", B_KNIGHT},      {"BR", B_ROOK},
+    {"BC", B_CANNON}, {"BP", B_PAWN},   {"__", EMPTY_PIECEID}, {"  ", OVERFLOW_PIECEID}};
 
 class Piece
 {
-public:
+  public:
     Piece() = default;
-    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
-        : pieceid(pieceid),
-          x(x),
-          y(y),
-          pieceIndex(pieceIndex) {}
+    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex) : pieceid(pieceid), x(x), y(y), pieceIndex(pieceIndex)
+    {
+    }
 
     TEAM team() const
     {
@@ -147,16 +115,12 @@ using PIECES = std::vector<Piece>;
 
 class Move
 {
-public:
+  public:
     Move() = default;
     Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
-        : x1(x1),
-          y1(y1),
-          x2(x2),
-          y2(y2),
-          id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
-          val(val),
-          moveType(moveType) {}
+        : x1(x1), y1(y1), x2(x2), y2(y2), id(x1 * 1000 + y1 * 100 + x2 * 10 + y2), val(val), moveType(moveType)
+    {
+    }
     int id = -1;
     int x1 = -1;
     int y1 = -1;
@@ -183,18 +147,20 @@ using MOVES = std::vector<Move>;
 
 class Result
 {
-public:
-    Result(Move move, int score) : move(move), val(score) {}
+  public:
+    Result(Move move, int score) : move(move), val(score)
+    {
+    }
     Move move{};
     int val = 0;
 };
 
-template <typename T>
-class TrickResult
+template <typename T> class TrickResult
 {
-public:
-    TrickResult(bool isSuccess, std::vector<T> data)
-        : isSuccess(isSuccess), data(std::move(data)) {}
+  public:
+    TrickResult(bool isSuccess, std::vector<T> data) : isSuccess(isSuccess), data(std::move(data))
+    {
+    }
     bool isSuccess = false;
     std::vector<T> data;
 };
@@ -231,6 +197,40 @@ struct TransItem
     int32 hashLock = 0;
     int32 vl = 0;
     int32 type = Unknown;
+};
+
+void printPieceidMap(PIECEID_MAP pieceidMap)
+{
+    for (int i = -1; i <= 8; i++)
+    {
+        for (int j = -1; j <= 9; j++)
+        {
+            if (i == -1)
+            {
+                if (j == -1)
+                {
+                    std::cout << "X ";
+                }
+                else
+                {
+                    std::cout << j << " ";
+                }
+            }
+            else
+            {
+                if (j == -1)
+                {
+                    std::cout << i << " ";
+                }
+                else
+                {
+                    std::cout << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
 };
 
 const int QUIESCENCE_EXTEND_DEPTH = 2;

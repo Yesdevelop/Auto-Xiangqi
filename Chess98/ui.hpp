@@ -27,7 +27,9 @@ std::string readFile(const std::string &filename)
 {
     FILE *file = openFile(filename, "r");
     if (!file)
+    {
         return "";
+    }
 
     fseek(file, 0, SEEK_END);
     long length = ftell(file);
@@ -43,7 +45,9 @@ void writeFile(const std::string &filename, const std::string &content)
 {
     FILE *file = openFile(filename, "w+");
     if (!file)
+    {
         return;
+    }
 
     fwrite(content.c_str(), 1, content.size(), file);
     fclose(file);
@@ -79,25 +83,25 @@ PIECEID_MAP decode(BOARD_CODE code)
     return result;
 }
 
-void setBoardCode(Board board)
+void setBoardCode(const Board& board)
 {
     const BOARD_CODE code = generateCode(board);
-    const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
-    const std::string jsPutCode =
-        "\
+    const std::string historyMovesBack =
+        board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
+    const std::string jsPutCode = "\
         const http = require('http')\n\
         const options = {\n\
             hostname: '127.0.0.1',\n\
-            path: '/?boardcode=" +
-        code + "',\n\
+            path: '/?boardcode=" + code +
+                                  "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\
         http.request(options).end();\n\
         const options2 = {\n\
             hostname: '127.0.0.1',\n\
-            path: '/?move=" +
-        historyMovesBack + "',\n\
+            path: '/?move=" + historyMovesBack +
+                                  "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\
@@ -116,29 +120,28 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
     // variables
     int count = 0;
-    Board board = Board(pieceidMap, RED);
-    Search s{};
-    board.print();
+    Search s = Search(pieceidMap, team);
+    printPieceidMap(s.board.pieceidMap);
 
     // 界面
-    std::string cmd = "start node " + serverDir + " >nul 2>&1";
+    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";
     system(cmd.c_str());
-    setBoardCode(board);
+    setBoardCode(s.board);
     std::string moveFileContent = "____";
     while (true)
     {
-        if (board.team == team)
+        if (s.board.team == team)
         {
             count++;
             std::cout << count << "---------------------" << std::endl;
 
             // 人机做出决策
-            Result node = s.searchMain(board, maxDepth, maxTime);
-            board.doMove(node.move);
-            if (inCheck(board) == true)
-                board.historyMoves.back().isCheckingMove = true;
+            Result node = s.searchMain(maxDepth, maxTime);
+            s.board.doMove(node.move);
+            if (inCheck(s.board) == true)
+                s.board.historyMoves.back().isCheckingMove = true;
 
-            setBoardCode(board);
+            setBoardCode(s.board);
             moveFileContent = readFile("./_move_.txt");
         }
         else
@@ -147,19 +150,20 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             std::string content = readFile("./_move_.txt");
 
             // 悔棋
-            if (content == "undo" && board.historyMoves.size() > 1)
+            if (content == "undo" && s.board.historyMoves.size() > 1)
             {
                 count--;
                 std::cout << "undo" << std::endl;
-                board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
-                board.undoMove(board.historyMoves.back(), board.historyMoves.back().captured);
+                s.board.undoMove();
+                s.board.undoMove();
 
-                setBoardCode(board);
-                moveFileContent = "____";
+                setBoardCode(s.board);
+                writeFile("./_move_.txt", "wait");
+                moveFileContent = "wait";
             }
 
             // 如果内容和上次内容不一致，则执行步进
-            if (content != "undo" && content != moveFileContent)
+            if (content != "wait" && content != "undo" && content != moveFileContent)
             {
                 try
                 {
@@ -169,7 +173,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
                     int x2 = std::stoi(content.substr(2, 1));
                     int y2 = std::stoi(content.substr(3, 1));
                     Move move{x1, y1, x2, y2};
-                    board.doMove(move);
+                    s.board.doMove(move);
                 }
                 catch (std::exception &e)
                 {

@@ -3,6 +3,5 @@
 int main()
 {
     testByUI();
-
     return 0;
 }

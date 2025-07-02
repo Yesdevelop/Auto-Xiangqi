@@ -1,31 +1,29 @@
 #pragma once
+#include "bitboard.hpp"
 #include "evaluate.hpp"
 #include "hash.hpp"
-#include "bitboard.hpp"
+
+const int ROOK_EXTEND = 1;
+const int ROOK_EXTEND_MARGIN = ROOK_EXTEND * 18 * 2;
+const int KNIGHT_EXTEND = 1;
+const int KNIGHT_EXTEND_MARGIN = KNIGHT_EXTEND * 8 * 2;
+
+const int LazyMargin_1 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+const int LazyMargin_2 = KNIGHT_EXTEND_MARGIN;
 
 class Board
 {
-public:
+  public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
-    static Board reset(Board &board)
-    {
-        Board newBoard{board.pieceidMap, board.team};
-        newBoard.historyMoves = board.historyMoves;
-        newBoard.hashKeyList = board.hashKeyList;
-        newBoard.hashLockList = board.hashLockList;
-        return newBoard;
-    }
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
     Piece piecePosition(int x, int y);
-    PIECEID pieceidOn(int x, int y);
-    TEAM teamOn(int x, int y);
+    PIECEID pieceidOn(int x, int y) const;
+    TEAM teamOn(int x, int y) const;
     PIECES getAllLivePieces();
     PIECES getPiecesByTeam(TEAM team);
-    Piece doMove(int x1, int y1, int x2, int y2);
-    Piece doMove(Move move);
-    void undoMove(int x1, int x2, int y1, int y2, Piece eaten);
-    void undoMove(Move move, Piece eaten);
+    void doMove(Move move);
+    void undoMove();
     void initEvaluate();
     void vlOpenCalculator(int &vlOpen);
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
@@ -37,44 +35,9 @@ public:
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    void print()
-    {
-        for (int i = -1; i <= 8; i++)
-        {
-            for (int j = -1; j <= 9; j++)
-            {
-                if (i == -1)
-                {
-                    if (j == -1)
-                    {
-                        std::cout << "X ";
-                    }
-                    else
-                    {
-                        std::cout << j << " ";
-                    }
-                }
-                else
-                {
-                    if (j == -1)
-                    {
-                        std::cout << i << " ";
-                    }
-                    else
-                    {
-                        std::cout << PIECE_NAME_PAIRS.at(this->pieceidOn(i, j));
-                    }
-                }
-            }
-            std::cout << "\n";
-        }
-        std::cout << std::endl;
-    };
-
-    int evaluate() const
-    {
-        return this->team == RED ? (vlRed - vlBlack) + vlAdvanced : (vlBlack - vlRed) + vlAdvanced;
-    }
+    int evaluate(int vlAlpha, int vlBeta, bool useKnowledge) const;
+    int rookMobility() const;
+    int knightMobility() const;
 
     void doNullMove()
     {
@@ -108,38 +71,14 @@ public:
         return this->bitboard->yBitBoard[y];
     }
 
-    bool isRepeatStatus() const
-    {
-        return false;
-        if (this->historyMoves.size() >= 5)
-        {
-            const MOVES &hm = this->historyMoves;
-            const PIECEID attackerPieceid = abs(hm.back().attacker.pieceid);
-            const PIECEID enemyPieceid = abs(hm[hm.size() - 2].attacker.pieceid);
-            if (hm[hm.size() - 5] == hm.back() &&
-                (attackerPieceid == R_ROOK) &&
-                (enemyPieceid != R_ROOK) && // 这里写得很不完备，只考虑了车的长捉情况
-                hm[hm.size() - 4].x1 == hm[hm.size() - 2].x2 &&
-                hm[hm.size() - 4].y1 == hm[hm.size() - 2].y2)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        return false;
-    }
-
     PIECES getLivePiecesById(PIECEID pieceid) const
     {
         PIECES result{};
-        for (const Piece *piece : this->pieceRegistry.at(pieceid))
+        for (const Piece &piece : this->pieceRegistry.at(pieceid))
         {
-            if (piece->isLive)
+            if (piece.isLive)
             {
-                result.emplace_back(*piece);
+                result.emplace_back(piece);
             }
         }
         return result;
@@ -155,7 +94,7 @@ public:
     int vlBlack = 0;
     int32 hashKey = 0;
     int32 hashLock = 0;
-    std::map<PIECEID, std::vector<Piece *>> pieceRegistry{};
+    std::map<PIECEID, std::vector<Piece>> pieceRegistry{};
 
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
@@ -193,7 +132,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
                     this->isRedKingLive = true;
                 if (pieceid == B_KING)
                     this->isBlackKingLive = true;
-                this->pieceRegistry[pieceid].emplace_back(&this->pieces.back());
+                this->pieceRegistry[pieceid].emplace_back(this->pieces.back());
             }
             else
             {
@@ -247,7 +186,7 @@ Piece Board::piecePosition(int x, int y)
     }
 }
 
-PIECEID Board::pieceidOn(int x, int y)
+PIECEID Board::pieceidOn(int x, int y) const
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -259,7 +198,7 @@ PIECEID Board::pieceidOn(int x, int y)
     }
 }
 
-TEAM Board::teamOn(int x, int y)
+TEAM Board::teamOn(int x, int y) const
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -311,10 +250,16 @@ PIECES Board::getPiecesByTeam(TEAM team)
     return result;
 }
 
-Piece Board::doMove(int x1, int y1, int x2, int y2)
+/// @brief 步进
+/// @param move
+void Board::doMove(Move move)
 {
-    Piece eaten = this->piecePosition(x2, y2);
-    Piece attackStarter = this->piecePosition(x1, y1);
+    const int x1 = move.x1;
+    const int x2 = move.x2;
+    const int y1 = move.y1;
+    const int y2 = move.y2;
+    const Piece eaten = this->piecePosition(x2, y2);
+    const Piece attackStarter = this->piecePosition(x1, y1);
 
     // 维护棋盘的棋子追踪
     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
@@ -375,28 +320,26 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
     // 更新棋盘数据
     this->team = -this->team;
     this->distance += 1;
-    // 记录历史走法
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyMoves.back().attacker = attackStarter;
     this->historyMoves.back().captured = eaten;
-    return eaten;
 }
 
-Piece Board::doMove(Move move)
+/// @brief 撤销上一次步进
+void Board::undoMove()
 {
-    return this->doMove(move.x1, move.y1, move.x2, move.y2);
-}
+    const int x1 = this->historyMoves.back().x1;
+    const int x2 = this->historyMoves.back().x2;
+    const int y1 = this->historyMoves.back().y1;
+    const int y2 = this->historyMoves.back().y2;
+    const Piece eaten = this->historyMoves.back().captured;
+    const Piece attackStarter = this->historyMoves.back().attacker;
 
-void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
-{
-    // 其他
+    // 更新棋盘数据
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
-
-    Piece attackStarter = this->piecePosition(x2, y2);
-
     // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
     this->pieceidMap[x2][y2] = eaten.pieceid;
@@ -444,11 +387,6 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLockList.pop_back();
 }
 
-void Board::undoMove(Move move, Piece eaten)
-{
-    this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
-}
-
 void Board::initEvaluate()
 {
     // 更新权重数组
@@ -458,7 +396,7 @@ void Board::initEvaluate()
     this->vlOpenCalculator(vlOpen);
     this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
 
-    pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
+    pieceWeights = getBasicEvaluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
     vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
 
@@ -651,4 +589,164 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
+}
+
+
+// 车的机动性
+int Board::rookMobility() const
+{
+    int result = 0;
+    for (const Piece& rook : this->pieceRegistry.at(this->team * R_ROOK))
+    {
+        const int x = rook.x;
+        const int y = rook.y;
+        BITLINE bitlineX = this->getBitLineX(x);
+        REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, y, 9);
+        BITLINE bitlineY = this->getBitLineY(y);
+        REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, x, 8);
+        result += ROOK_EXTEND * (regionY[1] - regionY[0] + regionX[1] - regionX[0] - 2);
+        if (this->teamOn(x, regionX[1]) != this->team)
+        {
+            result += ROOK_EXTEND;
+        }
+        if (this->teamOn(x, regionX[0]) != this->team)
+        {
+            result += ROOK_EXTEND;
+        }
+        if (this->teamOn(regionY[1], y) != this->team)
+        {
+            result += ROOK_EXTEND;
+        }
+        if (this->teamOn(regionY[1], y) != this->team)
+        {
+            result += ROOK_EXTEND;
+        }
+    }
+    return result;
+}
+
+
+const std::array<std::array<int, 10>, 9> badKnightPosMap = { {
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    } };
+
+// 马的灵活性
+int Board::knightMobility() const
+{
+    int result = 0;
+    for (const Piece& knight : this->pieceRegistry.at(this->team * R_KNIGHT))
+    {
+        const int x = knight.x;
+        const int y = knight.y;
+        if (this->pieceidOn(x - 1, y) == EMPTY_PIECEID)
+        {
+            if (this->teamOn(x - 2, y - 1) != this->team && this->teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x - 2][y - 1] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (this->teamOn(x - 2, y + 1) != this->team && this->teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x - 2][y + 1] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+        if (this->pieceidOn(x + 1, y) == EMPTY_PIECEID)
+        {
+            if (this->teamOn(x + 2, y - 1) != this->team && this->teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x + 2][y - 1] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (this->teamOn(x + 2, y + 1) != this->team && this->teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x + 2][y + 1] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+        if (this->pieceidOn(x, y - 1) == EMPTY_PIECEID)
+        {
+            if (this->teamOn(x - 1, y - 2) != this->team && this->teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x - 1][y - 2] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (this->teamOn(x + 1, y - 2) != this->team && this->teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x + 1][y - 2] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+        if (this->pieceidOn(x, y + 1) == EMPTY_PIECEID)
+        {
+            if (this->teamOn(x - 1, y + 2) != this->team && this->teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x - 1][y + 2] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+            if (this->teamOn(x + 1, y + 2) != this->team && this->teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
+            {
+                if (badKnightPosMap[x + 1][y + 2] != 1)
+                {
+                    result += KNIGHT_EXTEND;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+int Board::evaluate(int vlAlpha,int vlBeta,bool useKnowledge = true) const
+{
+    // Level 1
+    int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
+    if (vlEvaluate <= vlAlpha - LazyMargin_1)
+    {
+        return vlAlpha - LazyMargin_1;
+    }
+    else if (vlEvaluate >= vlBeta + LazyMargin_1)
+    {
+        return vlBeta + LazyMargin_1;
+    }
+    // Quick Exit
+    if (!useKnowledge)
+    {
+        return vlEvaluate;
+    }
+    // Level 2
+    vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
+    if (vlEvaluate <= vlAlpha - LazyMargin_2)
+    {
+        return vlAlpha - LazyMargin_2;
+    }
+    else if (vlEvaluate >= vlBeta + LazyMargin_2)
+    {
+        return vlBeta + LazyMargin_2;
+    }
+    // Level 3
+    vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
+    return vlEvaluate;
 }

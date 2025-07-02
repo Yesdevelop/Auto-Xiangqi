@@ -1,6 +1,9 @@
 #pragma once
 #include "board.hpp"
 
+/// @brief 是否被将军
+/// @param board
+/// @return
 bool inCheck(Board &board)
 {
     Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
@@ -93,17 +96,20 @@ bool inCheck(Board &board)
     return false;
 }
 
+/// @brief 是否有保护
+/// @param board
+/// @param x
+/// @param y
+/// @return
 bool hasProtector(Board &board, int x, int y)
 {
     TEAM team = -board.teamOn(x, y);
 
     // 兵、将
-    if ((abs(board.pieceidOn(x + 1, y)) == R_PAWN ||
-         abs(board.pieceidOn(x + 1, y) == R_KING)) &&
+    if ((abs(board.pieceidOn(x + 1, y)) == R_PAWN || abs(board.pieceidOn(x + 1, y) == R_KING)) &&
         board.teamOn(x + 1, y) != team)
         return true;
-    if ((abs(board.pieceidOn(x - 1, y)) == R_PAWN ||
-         abs(board.pieceidOn(x - 1, y) == R_KING)) &&
+    if ((abs(board.pieceidOn(x - 1, y)) == R_PAWN || abs(board.pieceidOn(x - 1, y) == R_KING)) &&
         board.teamOn(x - 1, y) != team)
         return true;
     if (abs(board.pieceidOn(x, (team == RED) ? y - 1 : y + 1)) == R_PAWN &&
@@ -117,78 +123,62 @@ bool hasProtector(Board &board, int x, int y)
     // 马
     if (board.pieceidOn(x + 1, y) == 0)
     {
-        if (abs(board.pieceidOn(x + 2, y + 1)) == R_KNIGHT &&
-            board.teamOn(x + 2, y + 1) != team)
+        if (abs(board.pieceidOn(x + 2, y + 1)) == R_KNIGHT && board.teamOn(x + 2, y + 1) != team)
             return true;
-        if (abs(board.pieceidOn(x + 2, y - 1)) == R_KNIGHT &&
-            board.teamOn(x + 2, y - 1) != team)
+        if (abs(board.pieceidOn(x + 2, y - 1)) == R_KNIGHT && board.teamOn(x + 2, y - 1) != team)
             return true;
     }
     if (board.pieceidOn(x - 1, y) == 0)
     {
-        if (abs(board.pieceidOn(x - 2, y + 1)) == R_KNIGHT &&
-            board.teamOn(x - 2, y + 1) != team)
+        if (abs(board.pieceidOn(x - 2, y + 1)) == R_KNIGHT && board.teamOn(x - 2, y + 1) != team)
             return true;
-        if (abs(board.pieceidOn(x - 2, y - 1)) == R_KNIGHT &&
-            board.teamOn(x - 2, y - 1) != team)
+        if (abs(board.pieceidOn(x - 2, y - 1)) == R_KNIGHT && board.teamOn(x - 2, y - 1) != team)
             return true;
     }
     if (board.pieceidOn(x, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 1, y + 2)) == R_KNIGHT &&
-            board.teamOn(x + 1, y + 2) != team)
+        if (abs(board.pieceidOn(x + 1, y + 2)) == R_KNIGHT && board.teamOn(x + 1, y + 2) != team)
             return true;
-        if (abs(board.pieceidOn(x - 1, y + 2)) == R_KNIGHT &&
-            board.teamOn(x - 1, y + 2) != team)
+        if (abs(board.pieceidOn(x - 1, y + 2)) == R_KNIGHT && board.teamOn(x - 1, y + 2) != team)
             return true;
     }
     if (board.pieceidOn(x, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 1, y - 2)) == R_KNIGHT &&
-            board.teamOn(x + 1, y - 2) != team)
+        if (abs(board.pieceidOn(x + 1, y - 2)) == R_KNIGHT && board.teamOn(x + 1, y - 2) != team)
             return true;
-        if (abs(board.pieceidOn(x - 1, y - 2)) == R_KNIGHT &&
-            board.teamOn(x - 1, y - 2) != team)
+        if (abs(board.pieceidOn(x - 1, y - 2)) == R_KNIGHT && board.teamOn(x - 1, y - 2) != team)
             return true;
     }
 
     // 士、象
     if (board.pieceidOn(x + 1, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 2, y + 2)) == R_BISHOP &&
-            board.teamOn(x + 2, y + 2) != team)
+        if (abs(board.pieceidOn(x + 2, y + 2)) == R_BISHOP && board.teamOn(x + 2, y + 2) != team)
             return true;
     }
     if (board.pieceidOn(x - 1, y + 1) == 0)
     {
-        if (abs(board.pieceidOn(x - 2, y + 2)) == R_BISHOP &&
-            board.teamOn(x - 2, y + 2) != team)
+        if (abs(board.pieceidOn(x - 2, y + 2)) == R_BISHOP && board.teamOn(x - 2, y + 2) != team)
             return true;
     }
     if (board.pieceidOn(x + 1, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(x + 2, y - 2)) == R_BISHOP &&
-            board.teamOn(x + 2, y - 2) != team)
+        if (abs(board.pieceidOn(x + 2, y - 2)) == R_BISHOP && board.teamOn(x + 2, y - 2) != team)
             return true;
     }
     if (board.pieceidOn(x - 1, y - 1) == 0)
     {
-        if (abs(board.pieceidOn(x - 2, y - 2)) == R_BISHOP &&
-            board.teamOn(x - 2, y - 2) != team)
+        if (abs(board.pieceidOn(x - 2, y - 2)) == R_BISHOP && board.teamOn(x - 2, y - 2) != team)
             return true;
     }
 
-    if (abs(board.pieceidOn(x + 1, y + 1)) == R_GUARD &&
-        board.teamOn(x + 1, y + 1) != team)
+    if (abs(board.pieceidOn(x + 1, y + 1)) == R_GUARD && board.teamOn(x + 1, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(x - 1, y + 1)) == R_GUARD &&
-        board.teamOn(x - 1, y + 1) != team)
+    if (abs(board.pieceidOn(x - 1, y + 1)) == R_GUARD && board.teamOn(x - 1, y + 1) != team)
         return true;
-    if (abs(board.pieceidOn(x + 1, y - 1)) == R_GUARD &&
-        board.teamOn(x + 1, y - 1) != team)
+    if (abs(board.pieceidOn(x + 1, y - 1)) == R_GUARD && board.teamOn(x + 1, y - 1) != team)
         return true;
-    if (abs(board.pieceidOn(x - 1, y - 1)) == R_GUARD &&
-        board.teamOn(x - 1, y - 1) != team)
+    if (abs(board.pieceidOn(x - 1, y - 1)) == R_GUARD && board.teamOn(x - 1, y - 1) != team)
         return true;
 
     // 车、炮
@@ -218,6 +208,11 @@ bool hasProtector(Board &board, int x, int y)
     return false;
 }
 
+/// @brief 判断一个兵是否过河
+/// @param board
+/// @param x
+/// @param y
+/// @return
 bool isRiveredPawn(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);
@@ -232,41 +227,18 @@ bool isRiveredPawn(Board &board, int x, int y)
     return false;
 }
 
-MOVES getCaptureMoves(Board &board, MOVES moves)
-{
-    MOVES captureMoves;
-    for (const Move &move : moves)
-        if (board.pieceidOn(move.x2, move.y2) != 0)
-            captureMoves.emplace_back(move);
-    return captureMoves;
-}
-
+/// @brief fen转pieceidmap
+/// @param fenCode
+/// @return
 PIECEID_MAP fenToPieceidMap(std::string fenCode)
 {
     PIECEID_MAP pieceidMap = PIECEID_MAP{};
     int colNum = 9;
     int rowNum = 0;
-    std::map<char, PIECEID> pairs{
-        {'R', R_ROOK},
-        {'N', R_KNIGHT},
-        {'H', R_KNIGHT},
-        {'B', R_BISHOP},
-        {'E', R_BISHOP},
-        {'G', R_GUARD},
-        {'A', R_GUARD},
-        {'K', R_KING},
-        {'C', R_CANNON},
-        {'P', R_PAWN},
-        {'r', B_ROOK},
-        {'n', B_KNIGHT},
-        {'h', B_KNIGHT},
-        {'b', B_BISHOP},
-        {'e', B_BISHOP},
-        {'g', B_GUARD},
-        {'a', B_GUARD},
-        {'k', B_KING},
-        {'c', B_CANNON},
-        {'p', B_PAWN}};
+    std::map<char, PIECEID> pairs{{'R', R_ROOK},  {'N', R_KNIGHT}, {'H', R_KNIGHT}, {'B', R_BISHOP}, {'E', R_BISHOP},
+                                  {'G', R_GUARD}, {'A', R_GUARD},  {'K', R_KING},   {'C', R_CANNON}, {'P', R_PAWN},
+                                  {'r', B_ROOK},  {'n', B_KNIGHT}, {'h', B_KNIGHT}, {'b', B_BISHOP}, {'e', B_BISHOP},
+                                  {'g', B_GUARD}, {'a', B_GUARD},  {'k', B_KING},   {'c', B_CANNON}, {'p', B_PAWN}};
     for (int i = 0; i < fenCode.size(); i++)
     {
         if (fenCode[i] >= '1' && fenCode[i] <= '9')
@@ -294,25 +266,16 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
+/// @brief board转fen串
+/// @param board
+/// @return
 std::string boardToFen(Board board)
 {
     std::string result = "";
     int spaceCount = 0;
-    std::map<PIECEID, char> pairs{
-        {R_KING, 'K'},
-        {R_GUARD, 'A'},
-        {R_BISHOP, 'B'},
-        {R_KNIGHT, 'N'},
-        {R_ROOK, 'R'},
-        {R_CANNON, 'C'},
-        {R_PAWN, 'P'},
-        {B_KING, 'k'},
-        {B_GUARD, 'a'},
-        {B_BISHOP, 'b'},
-        {B_KNIGHT, 'n'},
-        {B_ROOK, 'r'},
-        {B_CANNON, 'c'},
-        {B_PAWN, 'p'}};
+    std::map<PIECEID, char> pairs{{R_KING, 'K'},   {R_GUARD, 'A'}, {R_BISHOP, 'B'}, {R_KNIGHT, 'N'}, {R_ROOK, 'R'},
+                                  {R_CANNON, 'C'}, {R_PAWN, 'P'},  {B_KING, 'k'},   {B_GUARD, 'a'},  {B_BISHOP, 'b'},
+                                  {B_KNIGHT, 'n'}, {B_ROOK, 'r'},  {B_CANNON, 'c'}, {B_PAWN, 'p'}};
     for (int x = 9; x >= 0; x--)
     {
         for (int y = 0; y < 9; y++)
@@ -346,6 +309,10 @@ std::string boardToFen(Board board)
     return result;
 }
 
+/// @brief 检查一个着法在当前局面是否合法
+/// @param board
+/// @param move
+/// @return
 bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
@@ -356,7 +323,8 @@ bool isValidMoveInSituation(Board &board, Move move)
     if (move.attacker.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
         return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
-    if (captured != 0 && board.teamOn(move.x2, move.y2) == board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
+    if (captured != 0 && board.teamOn(move.x2, move.y2) ==
+                             board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
         return false;
 
     // 分类
@@ -415,5 +383,35 @@ bool isValidMoveInSituation(Board &board, Move move)
             return false;
     }
 
+    return true;
+}
+
+/// @brief 检查两个在同行或同列的坐标之间是否存在障碍物（要求这两个位置上必须有子）
+/// @param board
+/// @param x1
+/// @param y1
+/// @param x2
+/// @param y2
+/// @return
+bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
+{
+    if (x1 == x2)
+    {
+        BITLINE bitlineX = board.getBitLineX(x1);
+        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y1, 9);
+        if (y2 >= regionX[0] && y2 <= regionX[1])
+        {
+            return false;
+        }
+    }
+    else
+    {
+        BITLINE bitlineY = board.getBitLineY(y1);
+        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x1, 8);
+        if (x2 >= regionY[0] && x2 <= regionY[1])
+        {
+            return false;
+        }
+    }
     return true;
 }

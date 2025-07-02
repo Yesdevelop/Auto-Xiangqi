@@ -4,7 +4,7 @@
 
 class Moves
 {
-public:
+  public:
     static MOVES king(TEAM team, Board &board, int x, int y);
 
     static MOVES guard(TEAM team, Board &board, int x, int y);
@@ -596,13 +596,11 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
         if (board.pieceidOn(board.pieceRedKing->x, y) == B_KING)
         {
             if (board.team == RED)
-                return MOVES{
-                    Move{board.pieceRedKing->x, board.pieceRedKing->y,
-                         board.pieceBlackKing->x, board.pieceBlackKing->y}};
+                return MOVES{Move{board.pieceRedKing->x, board.pieceRedKing->y, board.pieceBlackKing->x,
+                                  board.pieceBlackKing->y}};
             else
-                return MOVES{
-                    Move{board.pieceBlackKing->x, board.pieceBlackKing->y,
-                         board.pieceRedKing->x, board.pieceRedKing->y}};
+                return MOVES{Move{board.pieceBlackKing->x, board.pieceBlackKing->y, board.pieceRedKing->x,
+                                  board.pieceRedKing->y}};
         }
         if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
             break;
@@ -631,15 +629,13 @@ MOVES Moves::getMoves(Board &board)
         {
             if (board.team == RED)
             {
-                return MOVES{
-                    Move{board.pieceRedKing->x, board.pieceRedKing->y,
-                         board.pieceBlackKing->x, board.pieceBlackKing->y}};
+                return MOVES{Move{board.pieceRedKing->x, board.pieceRedKing->y, board.pieceBlackKing->x,
+                                  board.pieceBlackKing->y}};
             }
             else
             {
-                return MOVES{
-                    Move{board.pieceBlackKing->x, board.pieceBlackKing->y,
-                         board.pieceRedKing->x, board.pieceRedKing->y}};
+                return MOVES{Move{board.pieceBlackKing->x, board.pieceBlackKing->y, board.pieceRedKing->x,
+                                  board.pieceRedKing->y}};
             }
         }
         if (board.teamOn(board.pieceRedKing->x, y) != EMPTY_TEAM)
@@ -689,13 +685,7 @@ MOVES Moves::getCaptureMoves(Board &board)
     result.reserve(64);
 
     const std::map<PIECEID, int> weightPairs{
-        {R_KING, 4},
-        {R_ROOK, 4},
-        {R_CANNON, 3},
-        {R_KNIGHT, 3},
-        {R_BISHOP, 2},
-        {R_GUARD, 2},
-        {R_PAWN, 1},
+        {R_KING, 4}, {R_ROOK, 4}, {R_CANNON, 3}, {R_KNIGHT, 3}, {R_BISHOP, 2}, {R_GUARD, 2}, {R_PAWN, 1},
     };
     std::array<std::vector<Move>, 9> orderMap{};
 
@@ -714,7 +704,8 @@ MOVES Moves::getCaptureMoves(Board &board)
             if (score < 1)
             {
                 PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
-                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK || isRiveredPawn(board, captured.x, captured.y))
+                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK ||
+                    isRiveredPawn(board, captured.x, captured.y))
                 {
                     score = 1;
                 }
