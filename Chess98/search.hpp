@@ -766,6 +766,12 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
 	// 搜索
 	MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
 
+	//约束将军时的最大搜索深度
+	if (mChecking)
+	{
+		maxDistance = std::min<int>(maxDistance, 4);
+	}
+
 	for (const Move& move : availableMoves)
 	{
 		board.doMove(move);
