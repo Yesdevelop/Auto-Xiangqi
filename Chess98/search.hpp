@@ -646,7 +646,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
         else
         {
-            TrickResult<int> probCutResult = SearchTricks::forwardCut(board, this, CUT, 0, beta, depth,banNullMove);
+            TrickResult<int> probCutResult = SearchTricks::forwardCut(board, this, CUT, beta - 1, beta, depth,banNullMove);
             if (probCutResult.isSuccess)
             {
                 return probCutResult.data[0];
