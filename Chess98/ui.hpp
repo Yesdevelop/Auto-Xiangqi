@@ -120,9 +120,8 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
 
     // variables
     int count = 0;
-    Board board = Board(pieceidMap, team);
-    Search s{board};
-    printPieceidMap(board.pieceidMap);
+    Search s = Search(pieceidMap, team);
+    printPieceidMap(s.board.pieceidMap);
 
     // 界面
     std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";

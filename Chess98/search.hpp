@@ -9,7 +9,9 @@
 class Search
 {
 public:
-	Search(Board board) : board(board) {};
+	Search(PIECEID_MAP pieceidMap,TEAM team){
+		this->board = Board(pieceidMap, team);
+	};
 
 	Result searchMain(int maxDepth, int maxTime);
 	Result searchOpenBook();
