@@ -796,7 +796,6 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     for (const Move &move : availableMoves)
     {
         board.doMove(move);
-
         int vl = -Search::searchQ(-beta, -alpha, maxDistance - 1);
         board.undoMove();
         if (vl > vlBest)
