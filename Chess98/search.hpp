@@ -19,7 +19,7 @@ public:
 	int searchQ(int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
 
 private:
-	void reset(Board& board)
+	void reset()
 	{
 		this->rootMoves = MOVES{};
 		board.distance = 0;
@@ -145,7 +145,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 		return openbookResult;
 	}
 
-	this->reset(board);
+	this->reset();
 
 	// situation info
 	std::cout << "situation: " << boardToFen(board) << std::endl;
