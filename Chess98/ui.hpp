@@ -174,7 +174,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
                     int x2 = std::stoi(content.substr(2, 1));
                     int y2 = std::stoi(content.substr(3, 1));
                     Move move{x1, y1, x2, y2};
-                    board.doMove(move);
+                    s.board.doMove(move);
                 }
                 catch (std::exception &e)
                 {
