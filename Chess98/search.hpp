@@ -100,7 +100,7 @@ class SearchTricks
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> forwardCut(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,int depth,bool banNullMove)
+    static TrickResult<int> forwardPruning(Board &board, Search *search, SEARCH_TYPE searchType, int alpha, int beta,int depth,bool banNullMove)
     {
         if (!banNullMove && searchType != PV)
         {
@@ -466,7 +466,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
 
         // multi probCut
-        TrickResult<int> probCutResult = SearchTricks::forwardCut(board, this, PV, alpha, beta, depth,true);
+        TrickResult<int> probCutResult = SearchTricks::forwardPruning(board, this, PV, alpha, beta, depth,true);
         if (probCutResult.isSuccess)
         {
             return probCutResult.data[0];
@@ -646,7 +646,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
         else
         {
-            TrickResult<int> probCutResult = SearchTricks::forwardCut(board, this, CUT, beta - 1, beta, depth,banNullMove);
+            TrickResult<int> probCutResult = SearchTricks::forwardPruning(board, this, CUT, beta - 1, beta, depth,banNullMove);
             if (probCutResult.isSuccess)
             {
                 return probCutResult.data[0];
