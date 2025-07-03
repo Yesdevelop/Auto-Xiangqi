@@ -99,6 +99,13 @@ void KillerTable::add(Board &board, Move move)
 // 吃子启发
 void captureSort(Board &board, MOVES &moves)
 {
+    std::sort(moves.begin(), moves.end(), [](Move& first, Move& second) -> bool {
+        if (first.moveType != second.moveType)
+        {
+            return first.moveType > second.moveType;
+        }
+        return first.val > second.val;
+        });
 }
 
 // 置换表启发

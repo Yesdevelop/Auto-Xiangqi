@@ -790,6 +790,13 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
 	// 搜索
 	MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
 
+	//吃子启发
+	if (mChecking)
+	{
+		captureSort(board, availableMoves);
+	}
+
+	//搜索
 	for (const Move& move : availableMoves)
 	{
 		board.doMove(move);
