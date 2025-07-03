@@ -8,8 +8,8 @@ const int ROOK_EXTEND_MARGIN = ROOK_EXTEND * 18 * 2;
 const int KNIGHT_EXTEND = 1;
 const int KNIGHT_EXTEND_MARGIN = KNIGHT_EXTEND * 8 * 2;
 
-const int LazyMargin_1 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
-const int LazyMargin_2 = KNIGHT_EXTEND_MARGIN;
+const int LAZY_MARGIN_1 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+const int LAZY_MARGIN_2 = KNIGHT_EXTEND_MARGIN;
 
 class Board
 {
@@ -723,23 +723,23 @@ int Board::evaluate(int vlAlpha,int vlBeta) const
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
-    if (vlEvaluate <= vlAlpha - LazyMargin_1)
+    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_1)
     {
-        return vlAlpha - LazyMargin_1;
+        return vlAlpha - LAZY_MARGIN_1;
     }
-    else if (vlEvaluate >= vlBeta + LazyMargin_1)
+    else if (vlEvaluate >= vlBeta + LAZY_MARGIN_1)
     {
-        return vlBeta + LazyMargin_1;
+        return vlBeta + LAZY_MARGIN_1;
     }
     // Level 2
     vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
-    if (vlEvaluate <= vlAlpha - LazyMargin_2)
+    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_2)
     {
-        return vlAlpha - LazyMargin_2;
+        return vlAlpha - LAZY_MARGIN_2;
     }
-    else if (vlEvaluate >= vlBeta + LazyMargin_2)
+    else if (vlEvaluate >= vlBeta + LAZY_MARGIN_2)
     {
-        return vlBeta + LazyMargin_2;
+        return vlBeta + LAZY_MARGIN_2;
     }
     // Level 3
     vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
