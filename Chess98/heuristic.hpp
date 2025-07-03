@@ -146,7 +146,6 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     TransItem &t = this->pList.at(pos);
-    bool recoardNodeData = false;
     if (t.hashLock == 0 || depth >= t.depth)
     {
         t.hashLock = board.hashLock;
