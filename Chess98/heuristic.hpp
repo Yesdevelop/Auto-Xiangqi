@@ -131,16 +131,13 @@ void TransportationTable::reset()
 
 int TransportationTable::vlAdjust(int vl, int nDistance)
 {
-    if (std::abs(vl) >= BAN)
+    if (vl <= -BAN)
     {
-        if (vl < 0)
-        {
-            return vl + nDistance;
-        }
-        if (vl > 0)
-        {
-            return vl - nDistance;
-        }
+        return vl + nDistance;
+    }
+    if (vl >= BAN)
+    {
+        return vl - nDistance;
     }
     return vl;
 }
