@@ -35,7 +35,7 @@ class Board
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    int evaluate(int vlAlpha, int vlBeta, bool useKnowledge) const;
+    int evaluate(int vlAlpha, int vlBeta) const;
     int rookMobility() const;
     int knightMobility() const;
 
@@ -719,7 +719,7 @@ int Board::knightMobility() const
     return result;
 }
 
-int Board::evaluate(int vlAlpha,int vlBeta,bool useKnowledge = true) const
+int Board::evaluate(int vlAlpha,int vlBeta) const
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
@@ -730,11 +730,6 @@ int Board::evaluate(int vlAlpha,int vlBeta,bool useKnowledge = true) const
     else if (vlEvaluate >= vlBeta + LazyMargin_1)
     {
         return vlBeta + LazyMargin_1;
-    }
-    // Quick Exit
-    if (!useKnowledge)
-    {
-        return vlEvaluate;
     }
     // Level 2
     vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
