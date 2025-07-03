@@ -484,6 +484,29 @@ int Search::searchPV(int depth, int alpha, int beta)
 		}
 	}
 
+	// 杀手启发
+	if (type != BETA_TYPE)
+	{
+		MOVES killerAvailableMoves = this->pKiller->get(board);
+		MOVES _moves = Moves::getMoves(board);
+		for (const Move& move : killerAvailableMoves)
+		{
+			board.doMove(move);
+			vlBest = -searchPV(depth - 1, -beta, -alpha);
+			board.undoMove();
+			bestMove = move;
+			if (vlBest >= beta)
+			{
+				type = BETA_TYPE;
+			}
+			if (vlBest > alpha)
+			{
+				type = EXACT_TYPE;
+				alpha = vlBest;
+			}
+		}
+	}
+
 	// 搜索
 	if (type != BETA_TYPE)
 	{
@@ -540,6 +563,7 @@ int Search::searchPV(int depth, int alpha, int beta)
 	{
 		this->pHistory->add(bestMove, depth);
 		this->pTransportation->add(board, bestMove, vlBest, type, depth);
+		this->pKiller->add(board, bestMove);
 	}
 
 	return vlBest;
