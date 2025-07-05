@@ -112,7 +112,7 @@ void captureSort(Board &board, MOVES &moves)
 class TransportationTable
 {
   public:
-    TransportationTable(int hashLevel = 22)
+    TransportationTable(int hashLevel = 23)
     {
         this->hashSize = (1 << hashLevel);
         this->hashMask = this->hashSize - 1;
@@ -168,12 +168,6 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
             t.vlBeta = vl;
             t.betaMove = goodMove;
         }
-        else
-        {
-            t.alphaDepth = depth;
-            t.vlAlpha = vl;
-            t.alphaMove = goodMove;
-        }
     }
     else if (t.hashLock == board.hashLock)
     {
@@ -188,12 +182,6 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
             t.betaDepth = depth;
             t.vlBeta = vl;
             t.betaMove = goodMove;
-        }
-        else if(type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha)))
-        {
-            t.alphaDepth = depth;
-            t.vlAlpha = vl;
-            t.alphaMove = goodMove;
         }
     }
 }
@@ -212,10 +200,6 @@ int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int dept
         {
             return t.vlBeta;
         }
-        else if (t.alphaDepth >= depth && t.vlAlpha <= vlApha)
-        {
-            return t.vlAlpha;
-        }
     }
     return -INF;
 }
@@ -233,10 +217,6 @@ Move TransportationTable::getMove(Board &board)
         else if (isValidMoveInSituation(board, t.betaMove))
         {
             return t.betaMove;
-        }
-        else if (isValidMoveInSituation(board, t.alphaMove))
-        {
-            return t.alphaMove;
         }
     }
     return Move{};
