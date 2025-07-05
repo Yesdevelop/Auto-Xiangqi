@@ -106,7 +106,7 @@ public:
 		return TrickResult<int>{false, {}};
 	}
 
-	static TrickResult<int> multiProbCut(Board& board, Search* search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
+	static TrickResult<int> multiProbCut(Search* search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
 	{
 		if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
 		{
@@ -445,7 +445,7 @@ int Search::searchPV(int depth, int alpha, int beta)
 	if (!mChecking)
 	{
 		// multi probCut
-		TrickResult<int> probCutResult = SearchTricks::multiProbCut(board, this, PV, alpha, beta, depth);
+		TrickResult<int> probCutResult = SearchTricks::multiProbCut(this, PV, alpha, beta, depth);
 		if (probCutResult.isSuccess)
 		{
 			return probCutResult.data[0];
@@ -574,9 +574,9 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 	nodecount++;
 
 	// 检查将帅是否在棋盘上
-	if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
+	if (!board.isKingLive(board.team) || !board.isKingLive(-board.team))
 	{
-		return board.isKingLive(board.team) == false ? -INF : INF;
+		return !board.isKingLive(board.team) ? -INF : INF;
 	}
 
 	// 置换表分数
@@ -605,10 +605,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 	}
 
 	// mate distance pruning
-	TrickResult<int> trickresult = SearchTricks::mateDistancePruning(board, beta - 1, beta);
-	if (trickresult.isSuccess)
+	TrickResult<int> trickResult = SearchTricks::mateDistancePruning(board, beta - 1, beta);
+	if (trickResult.isSuccess)
 	{
-		return trickresult.data[0];
+		return trickResult.data[0];
 	}
 
 	// variables
@@ -643,7 +643,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 		}
 		else
 		{
-			TrickResult<int> probCutResult = SearchTricks::multiProbCut(board, this, CUT, beta - 1, beta, depth);
+			TrickResult<int> probCutResult = SearchTricks::multiProbCut(this, CUT, beta - 1, beta, depth);
 			if (probCutResult.isSuccess)
 			{
 				return probCutResult.data[0];
