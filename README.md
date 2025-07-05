@@ -2,6 +2,10 @@
 
 一个借鉴了象眼引擎的中国象棋 AI，正在持续开发中。
 
+## CLion编译
+
+需要在CLion中指定程序的工作路径在main.cpp所在目录
+
 ## 使用
 
 1. Node.js 环境(界面要用，很简单，一路next即可)：https://nodejs.org/en/download
