@@ -112,7 +112,7 @@ void captureSort(Board &board, MOVES &moves)
 class TransportationTable
 {
   public:
-    TransportationTable(int hashLevel = 24)
+    TransportationTable(int hashLevel = 22)
     {
         this->hashSize = (1 << hashLevel);
         this->hashMask = this->hashSize - 1;
@@ -153,13 +153,48 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
 {
     const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
     TransItem &t = this->pList.at(pos);
-    if (t.hashLock == 0 || depth >= t.depth)
+    if (t.hashLock == 0)
     {
         t.hashLock = board.hashLock;
-        t.depth = depth;
-        t.goodMove = goodMove;
-        t.vl = vl;
-        t.type = type;
+        if (type == EXACT_TYPE)
+        {
+            t.exactDepth = depth;
+            t.vlExact = vl;
+            t.exactMove = goodMove;
+        }
+        else if (type == BETA_TYPE)
+        {
+            t.betaDepth = depth;
+            t.vlBeta = vl;
+            t.betaMove = goodMove;
+        }
+        else
+        {
+            t.alphaDepth = depth;
+            t.vlAlpha = vl;
+            t.alphaMove = goodMove;
+        }
+    }
+    else if (t.hashLock == board.hashLock)
+    {
+        if (type == EXACT_TYPE && depth > t.exactDepth)
+        {
+            t.exactDepth = depth;
+            t.vlExact = vl;
+            t.exactMove = goodMove;
+        }
+        else if (type == BETA_TYPE && ((depth > t.betaDepth) || (depth == t.betaDepth && vl > t.vlBeta)))
+        {
+            t.betaDepth = depth;
+            t.vlBeta = vl;
+            t.betaMove = goodMove;
+        }
+        else if(type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha)))
+        {
+            t.alphaDepth = depth;
+            t.vlAlpha = vl;
+            t.alphaMove = goodMove;
+        }
     }
 }
 
@@ -169,20 +204,17 @@ int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int dept
     TransItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
-        if (t.depth >= depth)
+        if (t.exactDepth >= depth)
         {
-            if (t.type == EXACT_TYPE)
-            {
-                return this->vlAdjust(t.vl, board.distance);
-            }
-            else if (t.type == ALPHA_TYPE && t.vl <= vlApha)
-            {
-                return vlApha;
-            }
-            else if (t.type == BETA_TYPE && t.vl >= vlBeta)
-            {
-                return vlBeta;
-            }
+            return vlAdjust(t.vlExact, board.distance);
+        }
+        else if (t.betaDepth >= depth && t.vlBeta >= vlBeta)
+        {
+            return t.vlBeta;
+        }
+        else if (t.alphaDepth >= depth && t.vlAlpha <= vlApha)
+        {
+            return t.vlAlpha;
         }
     }
     return -INF;
@@ -194,9 +226,17 @@ Move TransportationTable::getMove(Board &board)
     TransItem &t = this->pList.at(pos);
     if (t.hashLock == board.hashLock)
     {
-        if (isValidMoveInSituation(board, t.goodMove))
+        if (isValidMoveInSituation(board, t.exactMove))
         {
-            return t.goodMove;
+            return t.exactMove;
+        }
+        else if (isValidMoveInSituation(board, t.betaMove))
+        {
+            return t.betaMove;
+        }
+        else if (isValidMoveInSituation(board, t.alphaMove))
+        {
+            return t.alphaMove;
         }
     }
     return Move{};

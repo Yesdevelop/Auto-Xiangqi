@@ -192,11 +192,16 @@ enum SEARCH_TYPE
 
 struct TransItem
 {
-    Move goodMove{};
-    int32 depth = 0;
     int32 hashLock = 0;
-    int32 vl = 0;
-    int32 type = Unknown;
+    int32 vlExact = -INF;
+    int32 vlAlpha = -INF;
+    int32 vlBeta = -INF;
+    int32 exactDepth = 0;
+    int32 alphaDepth = 0;
+    int32 betaDepth = 0;
+    Move exactMove{};
+    Move betaMove{};
+    Move alphaMove{};
 };
 
 void printPieceidMap(PIECEID_MAP pieceidMap)

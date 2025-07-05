@@ -736,7 +736,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 					break;
 				}
 			}
-
 			searchedCnt++;
 		}
 	}
