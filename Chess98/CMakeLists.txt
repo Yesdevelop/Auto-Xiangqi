@@ -22,3 +22,12 @@ add_executable(Chess98 ${SOURCE_CPP_FILES} ${SOURCE_HPP_FILES})
 
 # 添加当前目录为头文件搜索路径
 target_include_directories(Chess98 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# 要求如果有动态链接库，用static方式编译
+# 使用静态链接库
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+
+# 如果你知道具体需要静态链接的库，也可以单独指定它们。
+# 例如，如果需要静态链接 pthread 库：
+# find_library(PTHREAD_LIB pthread REQUIRED)
+# target_link_libraries(Chess98 PRIVATE ${PTHREAD_LIB})
