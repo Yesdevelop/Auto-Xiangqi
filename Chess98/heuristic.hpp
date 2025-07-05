@@ -51,7 +51,8 @@ void HistoryHeuristic::add(Move move, int depth)
     int pos2 = this->toIndex(move.x2, move.y2);
     int teamID = (move.attacker.team() + 1) >> 1;
     assert(teamID >= 0 && teamID <= 1);
-    this->historyTable.at(teamID).at(pos1).at(pos2) += depth * depth;
+    assert(depth >= 0);
+    this->historyTable.at(teamID).at(pos1).at(pos2) += (depth << 1);
 }
 
 void HistoryHeuristic::reset()
