@@ -50,7 +50,7 @@ class SearchTricks
 public:
 	static void setCheckingMove(Board& board, bool mChecking)
 	{
-		if (mChecking && board.historyMoves.size() > 0)
+		if (mChecking && !board.historyMoves.empty())
 		{
 			board.historyMoves.back().isCheckingMove = true;
 		}
@@ -90,7 +90,7 @@ public:
 				return TrickResult<int>(true, { vlDistanceMate });
 			}
 		}
-		return TrickResult<int>(false, {});
+		return {false, {}};
 	}
 
 	static TrickResult<int> futilityPruning(Board& board, int alpha, int beta, int depth)
@@ -135,7 +135,7 @@ public:
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
-	if (board.isKingLive(RED) == false || board.isKingLive(BLACK) == false)
+	if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
 	{
 		exit(0);
 	}
@@ -183,8 +183,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
 Result Search::searchOpenBook()
 {
-	BookStruct bk;
-	BookFileStruct* pBookFileStruct = new BookFileStruct{};
+	BookStruct bk{};
+	auto* pBookFileStruct = new BookFileStruct{};
 
 	if (!pBookFileStruct->open("BOOK.DAT"))
 	{
@@ -332,15 +332,15 @@ Result Search::searchRoot(int depth)
 			vlBest = vl;
 			bestMove = move;
 			// search step
-			for (Move& move : rootMoves)
+			for (Move& _move : rootMoves)
 			{
-				if (bestMove == move)
+				if (bestMove == _move)
 				{
-					move.val = INF;
+                    _move.val = INF;
 				}
 				else
 				{
-					move.val--;
+                    _move.val--;
 				}
 			}
 		}
@@ -378,9 +378,9 @@ int Search::searchPV(int depth, int alpha, int beta)
 	nodecount++;
 
 	// 检查将帅是否在棋盘上
-	if (board.isKingLive(board.team) == false || board.isKingLive(-board.team) == false)
+	if (!board.isKingLive(board.team) || !board.isKingLive(-board.team))
 	{
-		return board.isKingLive(board.team) == false ? -INF : INF;
+		return !board.isKingLive(board.team) ? -INF : INF;
 	}
 
 	// 置换表分数
