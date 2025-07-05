@@ -677,7 +677,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 				type = BETA_TYPE;
 			}
 		}
-	}
+	}else if(!mChecking && depth >= 6)
+    {
+        depth -= (depth / 3);
+    }
 
 	// 杀手启发
 	if (type != BETA_TYPE)
