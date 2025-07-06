@@ -569,16 +569,14 @@ int Search::searchPV(int depth, int alpha, int beta)
     {
         vlBest += board.distance;
     }
-    else if (type != ALPHA_TYPE)
-    {
-        this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, vlBest, type, depth);
-        this->pKiller->add(board, bestMove);
-    }
     else
     {
         this->pHistory->add(bestMove, depth);
         this->pTransportation->add(board, bestMove, vlBest, type, depth);
+        if(type != ALPHA_TYPE)
+        {
+            this->pKiller->add(board, bestMove);
+        }
     }
 
     return vlBest;
@@ -764,16 +762,14 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     {
         vlBest += board.distance;
     }
-    else if (type == BETA_TYPE)
-    {
-        this->pHistory->add(bestMove, depth);
-        this->pKiller->add(board, bestMove);
-        this->pTransportation->add(board, bestMove, vlBest, type, depth);
-    }
     else
     {
         this->pHistory->add(bestMove, depth);
         this->pTransportation->add(board, bestMove, vlBest, type, depth);
+        if(type != ALPHA_TYPE)
+        {
+            this->pKiller->add(board, bestMove);
+        }
     }
 
     return vlBest;

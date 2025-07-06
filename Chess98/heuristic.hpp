@@ -193,6 +193,7 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
         {
             t.alphaDepth = depth;
             t.vlAlpha = vl;
+            t.alphaMove = goodMove;
         }
     }
 }
@@ -232,6 +233,10 @@ Move TransportationTable::getMove(Board &board)
         else if (isValidMoveInSituation(board, t.betaMove))
         {
             return t.betaMove;
+        }
+        else if (isValidMoveInSituation(board, t.alphaMove))
+        {
+            return t.alphaMove;
         }
     }
     return Move{};

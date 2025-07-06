@@ -196,6 +196,7 @@ struct TransItem
     int32 alphaDepth = 0;
     Move exactMove{};
     Move betaMove{};
+    Move alphaMove{};
 };
 
 void printPieceidMap(PIECEID_MAP pieceidMap)
