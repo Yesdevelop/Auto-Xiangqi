@@ -20,7 +20,7 @@ WEIGHT_MAP OPEN_ATTACK_KING_PAWN_WEIGHT = {
         {0, 0, 0, 21, 39, 123, 162, 192, 207, 27},
         {0, 0, 0, 0, 0, 111, 138, 147, 147, 27},
         {0, 0, 0, 21, 21, 87, 117, 117, 117, 27},
-    } };
+    }};
 
 WEIGHT_MAP OPEN_DEFEND_KING_PAWN_WEIGHT = {
     {
@@ -33,7 +33,7 @@ WEIGHT_MAP OPEN_DEFEND_KING_PAWN_WEIGHT = {
         {0, 0, 0, 21, 39, 123, 162, 192, 207, 27},
         {0, 0, 0, 0, 0, 111, 138, 147, 147, 27},
         {0, 0, 0, 21, 21, 87, 117, 117, 117, 27},
-    } };
+    }};
 
 WEIGHT_MAP END_ATTACK_KING_PAWN_WEIGHT = {
     {
@@ -46,7 +46,7 @@ WEIGHT_MAP END_ATTACK_KING_PAWN_WEIGHT = {
         {0, 0, 0, 105, 120, 195, 240, 210, 180, 30},
         {0, 0, 0, 0, 0, 210, 240, 210, 165, 30},
         {0, 0, 0, 120, 135, 210, 225, 195, 150, 30},
-    } };
+    }};
 
 WEIGHT_MAP END_DEFEND_KING_PAWN_WEIGHT = {
     {
@@ -59,7 +59,7 @@ WEIGHT_MAP END_DEFEND_KING_PAWN_WEIGHT = {
         {0, 0, 0, 60, 75, 90, 120, 90, 60, 30},
         {0, 0, 0, 0, 0, 90, 120, 90, 45, 30},
         {0, 0, 0, 60, 75, 75, 105, 75, 30, 30},
-    } };
+    }};
 
 WEIGHT_MAP SAFE_GUARD_BISHOP_WEIGHT = {
     {
@@ -72,7 +72,7 @@ WEIGHT_MAP SAFE_GUARD_BISHOP_WEIGHT = {
         {60, 0, 0, 0, 60, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 50, 0, 0, 0, 0, 0, 0, 0},
-    } };
+    }};
 
 WEIGHT_MAP DANGER_GUARD_BISHOP_WEIGHT = {
     {
@@ -85,7 +85,7 @@ WEIGHT_MAP DANGER_GUARD_BISHOP_WEIGHT = {
         {120, 0, 0, 0, 116, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 108, 0, 0, 0, 0, 0, 0, 0},
-    } };
+    }};
 
 WEIGHT_MAP OPEN_KNIGHT_WEIGHT = {
     {
@@ -98,7 +98,7 @@ WEIGHT_MAP OPEN_KNIGHT_WEIGHT = {
         {270, 276, 282, 294, 303, 297, 300, 297, 309, 270},
         {255, 270, 276, 282, 294, 300, 324, 294, 288, 270},
         {264, 255, 270, 276, 270, 270, 279, 276, 270, 270},
-    } };
+    }};
 
 WEIGHT_MAP END_KNIGHT_WEIGHT = {
     {
@@ -111,7 +111,7 @@ WEIGHT_MAP END_KNIGHT_WEIGHT = {
         {276, 282, 288, 294, 294, 300, 300, 300, 294, 288},
         {270, 276, 282, 288, 288, 294, 294, 294, 288, 282},
         {264, 270, 276, 282, 282, 288, 288, 288, 282, 276},
-    } };
+    }};
 
 WEIGHT_MAP OPEN_ROOK_WEIGHT = {
     {
@@ -124,7 +124,7 @@ WEIGHT_MAP OPEN_ROOK_WEIGHT = {
         {612, 618, 612, 612, 636, 633, 639, 621, 627, 621},
         {618, 624, 624, 627, 636, 633, 639, 624, 636, 624},
         {582, 600, 594, 612, 624, 624, 618, 618, 618, 618},
-    } };
+    }};
 
 WEIGHT_MAP END_ROOK_WEIGHT = {
     {
@@ -137,7 +137,7 @@ WEIGHT_MAP END_ROOK_WEIGHT = {
         {540, 540, 540, 540, 540, 540, 540, 546, 552, 546},
         {540, 540, 540, 540, 540, 540, 540, 546, 552, 546},
         {540, 540, 540, 540, 540, 540, 540, 546, 552, 546},
-    } };
+    }};
 
 WEIGHT_MAP OPEN_CANNON_WEIGHT = {
     {
@@ -150,7 +150,7 @@ WEIGHT_MAP OPEN_CANNON_WEIGHT = {
         {291, 294, 300, 288, 297, 288, 297, 288, 288, 288},
         {288, 291, 288, 288, 288, 288, 297, 291, 294, 300},
         {288, 288, 291, 288, 285, 288, 288, 291, 294, 300},
-    } };
+    }};
 
 WEIGHT_MAP END_CANNON_WEIGHT = {
     {
@@ -163,7 +163,7 @@ WEIGHT_MAP END_CANNON_WEIGHT = {
         {300, 300, 300, 300, 300, 300, 300, 300, 300, 300},
         {300, 300, 300, 300, 300, 300, 300, 300, 300, 300},
         {300, 300, 300, 300, 300, 300, 300, 300, 300, 300},
-    } };
+    }};
 
 // 越接近残局，子力会越来越少，因此可以按照给车马炮等棋子的加权分判断对局进程
 
@@ -191,8 +191,8 @@ const int END_PAWN_VAL = 120;
 std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack)
 {
     // 兵，帅
-    WEIGHT_MAP RED_KING_PAWN_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_KING_PAWN_WEIGHT = { 0 };
+    WEIGHT_MAP RED_KING_PAWN_WEIGHT = {0};
+    WEIGHT_MAP BLACK_KING_PAWN_WEIGHT = {0};
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -220,8 +220,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 车
-    WEIGHT_MAP RED_ROOK_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_ROOK_WEIGHT = { 0 };
+    WEIGHT_MAP RED_ROOK_WEIGHT = {0};
+    WEIGHT_MAP BLACK_ROOK_WEIGHT = {0};
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -236,8 +236,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 马
-    WEIGHT_MAP RED_KNIGHT_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_KNIGHT_WEIGHT = { 0 };
+    WEIGHT_MAP RED_KNIGHT_WEIGHT = {0};
+    WEIGHT_MAP BLACK_KNIGHT_WEIGHT = {0};
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -252,8 +252,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 炮
-    WEIGHT_MAP RED_CANNON_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_CANNON_WEIGHT = { 0 };
+    WEIGHT_MAP RED_CANNON_WEIGHT = {0};
+    WEIGHT_MAP BLACK_CANNON_WEIGHT = {0};
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -268,8 +268,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 士，象
-    WEIGHT_MAP RED_GUARD_BISHOP_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_GUARD_BISHOP_WEIGHT = { 0 };
+    WEIGHT_MAP RED_GUARD_BISHOP_WEIGHT = {0};
+    WEIGHT_MAP BLACK_GUARD_BISHOP_WEIGHT = {0};
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -302,7 +302,7 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
         {B_KNIGHT, BLACK_KNIGHT_WEIGHT},
         {B_ROOK, BLACK_ROOK_WEIGHT},
         {B_CANNON, BLACK_CANNON_WEIGHT},
-        {B_PAWN, BLACK_KING_PAWN_WEIGHT} };
+        {B_PAWN, BLACK_KING_PAWN_WEIGHT}};
 
     return pieceWeights;
 }

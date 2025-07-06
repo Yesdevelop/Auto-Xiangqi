@@ -13,7 +13,7 @@ const int LAZY_MARGIN_2 = KNIGHT_EXTEND_MARGIN;
 
 class Board
 {
-  public:
+public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
@@ -95,9 +95,7 @@ class Board
     int32 hashKey = 0;
     int32 hashLock = 0;
     std::map<PIECEID, std::vector<Piece>> pieceRegistry{
-        {R_KING, {}}, {R_GUARD, {}}, {R_BISHOP, {}}, {R_ROOK, {}}, {R_KNIGHT, {}}, {R_CANNON, {}}, {R_PAWN, {}},
-        {B_KING, {}}, {B_GUARD, {}}, {B_BISHOP, {}}, {B_ROOK, {}}, {B_KNIGHT, {}}, {B_CANNON, {}}, {B_PAWN, {}}
-    };
+        {R_KING, {}}, {R_GUARD, {}}, {R_BISHOP, {}}, {R_ROOK, {}}, {R_KNIGHT, {}}, {R_CANNON, {}}, {R_PAWN, {}}, {B_KING, {}}, {B_GUARD, {}}, {B_BISHOP, {}}, {B_ROOK, {}}, {B_KNIGHT, {}}, {B_CANNON, {}}, {B_PAWN, {}}};
 
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
@@ -594,12 +592,11 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
     }
 }
 
-
 // 车的机动性
 int Board::rookMobility() const
 {
     int result = 0;
-    for (const Piece& rook : this->pieceRegistry.at(this->team * R_ROOK))
+    for (const Piece &rook : this->pieceRegistry.at(this->team * R_ROOK))
     {
         const int x = rook.x;
         const int y = rook.y;
@@ -628,24 +625,21 @@ int Board::rookMobility() const
     return result;
 }
 
-
-const std::array<std::array<int, 10>, 9> badKnightPosMap = { {
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-    } };
-
 // 马的灵活性
 int Board::knightMobility() const
 {
+    const std::array<std::array<int, 10>, 9> badKnightPosMap = {{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                                                                 {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
+                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+                                                                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
     int result = 0;
-    for (const Piece& knight : this->pieceRegistry.at(this->team * R_KNIGHT))
+
+    for (const Piece &knight : this->pieceRegistry.at(this->team * R_KNIGHT))
     {
         const int x = knight.x;
         const int y = knight.y;
@@ -722,7 +716,7 @@ int Board::knightMobility() const
     return result;
 }
 
-int Board::evaluate(int vlAlpha,int vlBeta) const
+int Board::evaluate(int vlAlpha, int vlBeta) const
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);

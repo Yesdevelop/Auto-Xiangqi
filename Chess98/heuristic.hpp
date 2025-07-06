@@ -7,7 +7,7 @@
 // 历史启发
 class HistoryHeuristic
 {
-  public:
+public:
     HistoryHeuristic() = default;
     void sort(MOVES &moves) const;
     void add(Move move, int depth);
@@ -36,13 +36,13 @@ void HistoryHeuristic::sort(MOVES &moves) const
         }
     }
     // vl history compare
-    std::sort(moves.begin(), moves.end(), [](Move &first, Move &second) -> bool {
+    std::sort(moves.begin(), moves.end(), [](Move &first, Move &second) -> bool
+              {
         if (first.moveType != second.moveType)
         {
             return first.moveType > second.moveType;
         }
-        return first.val > second.val;
-    });
+        return first.val > second.val; });
 }
 
 void HistoryHeuristic::add(Move move, int depth)
@@ -63,7 +63,7 @@ void HistoryHeuristic::reset()
 // 杀手启发
 class KillerTable
 {
-  public:
+public:
     KillerTable() = default;
     void reset();
     void add(Board &board, Move move);
@@ -100,19 +100,19 @@ void KillerTable::add(Board &board, Move move)
 // 吃子启发
 void captureSort(Board &board, MOVES &moves)
 {
-    std::sort(moves.begin(), moves.end(), [](Move& first, Move& second) -> bool {
+    std::sort(moves.begin(), moves.end(), [](Move &first, Move &second) -> bool
+              {
         if (first.moveType != second.moveType)
         {
             return first.moveType > second.moveType;
         }
-        return first.val > second.val;
-        });
+        return first.val > second.val; });
 }
 
 // 置换表启发
 class TransportationTable
 {
-  public:
+public:
     TransportationTable(int hashLevel = 23)
     {
         this->hashSize = (1 << hashLevel);
@@ -169,7 +169,7 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
             t.vlBeta = vl;
             t.betaMove = goodMove;
         }
-        else if(type == ALPHA_TYPE)
+        else if (type == ALPHA_TYPE)
         {
             t.alphaDepth = depth;
             t.vlAlpha = vl;
@@ -189,7 +189,7 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
             t.vlBeta = vl;
             t.betaMove = goodMove;
         }
-        else if(type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha)))
+        else if (type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha)))
         {
             t.alphaDepth = depth;
             t.vlAlpha = vl;
@@ -211,7 +211,7 @@ int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int dept
         {
             return t.vlBeta;
         }
-        else if(t.alphaDepth >= depth && t.vlAlpha <= vlApha)
+        else if (t.alphaDepth >= depth && t.vlAlpha <= vlApha)
         {
             return t.vlAlpha;
         }
