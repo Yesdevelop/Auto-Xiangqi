@@ -144,8 +144,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 	Result openbookResult = Search::searchOpenBook();
 	if (openbookResult.val != -1)
 	{
-		std::cout << "Find a great move from OpenBook!" << std::endl;
-		return openbookResult;
+        std::cout << "Find a great move from OpenBook!" << std::endl;
+        return openbookResult;
 	}
 
 	this->reset();
@@ -302,7 +302,10 @@ Result Search::searchOpenBook()
 
 	delete pBookFileStruct;
 
-	return Result{ bookMove, 1 };
+    bookMove.attacker = board.piecePosition(bookMove.x1,bookMove.y1);
+    bookMove.captured = board.piecePosition(bookMove.x2,bookMove.y2);
+
+    return isValidMoveInSituation(board,bookMove) ? Result{ bookMove, 1 } : Result{ Move{}, -1 };
 }
 
 Result Search::searchRoot(int depth)
@@ -466,6 +469,10 @@ int Search::searchPV(int depth, int alpha, int beta)
 			searchPV(depth / 2, -INF, beta);
 		}
 		goodMove = this->pTransportation->getMove(board);
+        if(!mChecking && depth >= 6)
+        {
+            depth -= (depth / 3);
+        }
 	}
 	if (goodMove.id != -1)
 	{
