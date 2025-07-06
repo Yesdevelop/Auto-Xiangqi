@@ -657,71 +657,74 @@ int Board::knightMobility() const
     {
         const int x = knight.x;
         const int y = knight.y;
-        if (this->pieceidOn(x - 1, y) == EMPTY_PIECEID)
+        if(badKnightPosMap[x][y] != 1)
         {
-            if (this->teamOn(x - 2, y - 1) != this->team && this->teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
+            if (this->pieceidOn(x - 1, y) == EMPTY_PIECEID)
             {
-                if (badKnightPosMap[size_t(x - 2)][size_t(y - 1)] != 1)
+                if (this->teamOn(x - 2, y - 1) != this->team && this->teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
                 {
-                    result += KNIGHT_EXTEND;
+                    if (badKnightPosMap[size_t(x - 2)][size_t(y - 1)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
+                }
+                if (this->teamOn(x - 2, y + 1) != this->team && this->teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
+                {
+                    if (badKnightPosMap[size_t(x - 2)][size_t(y + 1)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
                 }
             }
-            if (this->teamOn(x - 2, y + 1) != this->team && this->teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
+            if (this->pieceidOn(x + 1, y) == EMPTY_PIECEID)
             {
-                if (badKnightPosMap[size_t(x - 2)][size_t(y + 1)] != 1)
+                if (this->teamOn(x + 2, y - 1) != this->team && this->teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
                 {
-                    result += KNIGHT_EXTEND;
+                    if (badKnightPosMap[size_t(x + 2)][size_t(y - 1)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
+                }
+                if (this->teamOn(x + 2, y + 1) != this->team && this->teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
+                {
+                    if (badKnightPosMap[size_t(x + 2)][size_t(y + 1)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
                 }
             }
-        }
-        if (this->pieceidOn(x + 1, y) == EMPTY_PIECEID)
-        {
-            if (this->teamOn(x + 2, y - 1) != this->team && this->teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
+            if (this->pieceidOn(x, y - 1) == EMPTY_PIECEID)
             {
-                if (badKnightPosMap[size_t(x + 2)][size_t(y - 1)] != 1)
+                if (this->teamOn(x - 1, y - 2) != this->team && this->teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
                 {
-                    result += KNIGHT_EXTEND;
+                    if (badKnightPosMap[size_t(x - 1)][size_t(y - 2)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
+                }
+                if (this->teamOn(x + 1, y - 2) != this->team && this->teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
+                {
+                    if (badKnightPosMap[size_t(x + 1)][size_t(y - 2)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
                 }
             }
-            if (this->teamOn(x + 2, y + 1) != this->team && this->teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
+            if (this->pieceidOn(x, y + 1) == EMPTY_PIECEID)
             {
-                if (badKnightPosMap[size_t(x + 2)][size_t(y + 1)] != 1)
+                if (this->teamOn(x - 1, y + 2) != this->team && this->teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
                 {
-                    result += KNIGHT_EXTEND;
+                    if (badKnightPosMap[size_t(x - 1)][size_t(y + 2)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
                 }
-            }
-        }
-        if (this->pieceidOn(x, y - 1) == EMPTY_PIECEID)
-        {
-            if (this->teamOn(x - 1, y - 2) != this->team && this->teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
-            {
-                if (badKnightPosMap[size_t(x - 1)][size_t(y - 2)] != 1)
+                if (this->teamOn(x + 1, y + 2) != this->team && this->teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
                 {
-                    result += KNIGHT_EXTEND;
-                }
-            }
-            if (this->teamOn(x + 1, y - 2) != this->team && this->teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
-            {
-                if (badKnightPosMap[size_t(x + 1)][size_t(y - 2)] != 1)
-                {
-                    result += KNIGHT_EXTEND;
-                }
-            }
-        }
-        if (this->pieceidOn(x, y + 1) == EMPTY_PIECEID)
-        {
-            if (this->teamOn(x - 1, y + 2) != this->team && this->teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
-            {
-                if (badKnightPosMap[size_t(x - 1)][size_t(y + 2)] != 1)
-                {
-                    result += KNIGHT_EXTEND;
-                }
-            }
-            if (this->teamOn(x + 1, y + 2) != this->team && this->teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
-            {
-                if (badKnightPosMap[size_t(x + 1)][size_t(y + 2)] != 1)
-                {
-                    result += KNIGHT_EXTEND;
+                    if (badKnightPosMap[size_t(x + 1)][size_t(y + 2)] != 1)
+                    {
+                        result += KNIGHT_EXTEND;
+                    }
                 }
             }
         }
