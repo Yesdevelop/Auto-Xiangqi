@@ -14,14 +14,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # 只收集当前目录下的 .cpp 和 .hpp 文件（不递归子目录）
-file(GLOB SOURCE_CPP_FILES "*.cpp")
-file(GLOB SOURCE_HPP_FILES "*.hpp")
+file(GLOB SOURCE_CPP_FILES "Chess98/*.cpp")
+file(GLOB SOURCE_HPP_FILES "Chess98/*.hpp")
 
 # 添加可执行文件
 add_executable(Chess98 ${SOURCE_CPP_FILES} ${SOURCE_HPP_FILES})
 
 # 添加当前目录为头文件搜索路径
-target_include_directories(Chess98 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(Chess98 PRIVATE Chess98)
 
 # 要求如果有动态链接库，用static方式编译
 # 使用静态链接库
