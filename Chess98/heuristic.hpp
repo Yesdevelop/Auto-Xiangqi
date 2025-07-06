@@ -169,6 +169,11 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
             t.vlBeta = vl;
             t.betaMove = goodMove;
         }
+        else if(type == ALPHA_TYPE)
+        {
+            t.alphaDepth = depth;
+            t.vlAlpha = vl;
+        }
     }
     else if (t.hashLock == board.hashLock)
     {
@@ -183,6 +188,11 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
             t.betaDepth = depth;
             t.vlBeta = vl;
             t.betaMove = goodMove;
+        }
+        else if(type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha)))
+        {
+            t.alphaDepth = depth;
+            t.vlAlpha = vl;
         }
     }
 }
@@ -200,6 +210,10 @@ int TransportationTable::getValue(Board &board, int vlApha, int vlBeta, int dept
         else if (t.betaDepth >= depth && t.vlBeta >= vlBeta)
         {
             return t.vlBeta;
+        }
+        else if(t.alphaDepth >= depth && t.vlAlpha <= vlApha)
+        {
+            return t.vlAlpha;
         }
     }
     return -INF;

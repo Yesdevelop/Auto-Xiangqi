@@ -415,10 +415,13 @@ int Search::searchPV(int depth, int alpha, int beta)
 		else
 		{
 			const int vl1 = Search::searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
-			const int vl2 = Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-			if (vl1 > alpha && vl2 < beta)
+			if (vl1 > alpha)
 			{
-				return vlHash;
+                const int vl2 = Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+                if(vl2 < beta)
+                {
+                    return vlHash;
+                }
 			}
 		}
 	}
@@ -571,6 +574,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     else
     {
         this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
     }
 
 	return vlBest;
@@ -764,6 +768,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     else
     {
         this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
     }
 
 	return vlBest;

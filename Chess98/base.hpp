@@ -195,8 +195,10 @@ struct TransItem
     int32 hashLock = 0;
     int32 vlExact = -INF;
     int32 vlBeta = -INF;
+    int32 vlAlpha = -INF;
     int32 exactDepth = 0;
     int32 betaDepth = 0;
+    int32 alphaDepth = 0;
     Move exactMove{};
     Move betaMove{};
 };
