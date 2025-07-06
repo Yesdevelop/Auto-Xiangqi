@@ -372,3 +372,5 @@ FodyWeavers.xsd
 .idea
 cmake-build-debug
 cmake-build-release
+**/package.json
+**/package-lock.json
