@@ -15,9 +15,11 @@
 
 ## 自动测试
 
-先运行一个 chess98 的 exe 实例
-cd 到Tools/Auto/，**开启代理（因为selenium会自动从cdn拉取webdriver依赖，cdn似乎是google的）**，运行 `npm test` 指令
-之后会自动运行对弈，可以在Tools/Auto/webdriver.js的开头那部分调整对弈人机级别
+环境要求：**windows，node.js，并开启一个稳定的代理**
+
+1. 先运行一个 chess98 的 exe 实例
+2. cd 到Tools/Auto/，若第一次使用则先运行 `npm i selenium webdriver`
+3. 运行 `npm test` 指令
 
 ## 注意事项
 
