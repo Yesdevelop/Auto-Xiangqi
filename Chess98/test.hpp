@@ -24,5 +24,7 @@ void testByUI()
     // fenCode = "2c1kab2/4aR3/4b4/2P1R1C1p/p5p2/8P/Pr2P1P2/4B1N2/1r7/c2AKAB2 w - - 0 1";
     // fenCode = "1rbakabnr/9/1cn4c1/p3p1p1p/2p6/9/P1P1P1P1P/4C1NC1/8R/RNBAKAB2 w - - 0 1";
 
+    fenCode = "3k1abr1/4a4/1c2b1nc1/4pNP1p/p1p6/9/n1P1P3P/NC2C4/R8/2BrKABR1 w - - 0 1";
+
     ui(serverDir, team, maxDepth, maxTime, fenCode);
 }
