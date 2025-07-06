@@ -19,7 +19,7 @@
 
 1. 先运行一个 chess98 的 exe 实例
 2. cd 到Tools/Auto/，若第一次使用则先运行 `npm i selenium webdriver`
-3. 运行 `npm test` 指令
+3. 运行 `node webdriver.js` 指令
 
 ## 注意事项
 
