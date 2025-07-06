@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.14)
 project(Chess98 LANGUAGES CXX)
 
 # 启用 C++17 标准
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 仅在 Release 构建时启用 O3 优化
