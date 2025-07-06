@@ -692,7 +692,7 @@ int Board::knightMobility(TEAM teamNow)
          {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
          {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
          {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-         {{1, 1, 0, 0, 0, 0, 0, 0, 1, 1}},
+         {{1, 2, 0, 0, 0, 0, 0, 0, 2, 1}},
          {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
          {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
          {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
@@ -706,29 +706,32 @@ int Board::knightMobility(TEAM teamNow)
     {
         const int x = knight.x;
         const int y = knight.y;
-        for (const std::array<int, 2> &move : KnightMoves)
+        if(badKnightPosMap[x][y] != 2)
         {
-            const int midX = x + move[0] / 2;
-            const int midY = y + move[1] / 2;
-            const int targetX = x + move[0];
-            const int targetY = y + move[1];
-            if (this->pieceidOn(midX, midY) != EMPTY_PIECEID)
+            for (const std::array<int, 2> &move : KnightMoves)
             {
-                continue;
-            }
-            const int teamOnTarget = this->teamOn(targetX, targetY);
-            if (teamOnTarget == teamNow || teamOnTarget == OVERFLOW_TEAM)
-            {
-                continue;
-            }
-            if (badKnightPosMap[size_t(targetX)][size_t(targetY)] == 1)
-            {
-                continue;
-            }
-            goodTargetCnt++;
-            if (goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
-            {
-                break;
+                const int midX = x + move[0] / 2;
+                const int midY = y + move[1] / 2;
+                const int targetX = x + move[0];
+                const int targetY = y + move[1];
+                if (this->pieceidOn(midX, midY) != EMPTY_PIECEID)
+                {
+                    continue;
+                }
+                const int teamOnTarget = this->teamOn(targetX, targetY);
+                if (teamOnTarget == teamNow || teamOnTarget == OVERFLOW_TEAM)
+                {
+                    continue;
+                }
+                if (badKnightPosMap[size_t(targetX)][size_t(targetY)] != 0)
+                {
+                    continue;
+                }
+                goodTargetCnt++;
+                if (goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
+                {
+                    break;
+                }
             }
         }
         if (goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
@@ -787,6 +790,7 @@ int Board::centerCannon(TEAM teamNow)
              {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}};
     int result = 0;
     const Piece selfKing = this->getPieceFromRegistry(teamNow * R_KING, 0);
+    const Piece anotherKing = this->getPieceFromRegistry(-teamNow * R_KING,0);
     const PIECES enemyCannons = this->getPiecesFromRegistry(-teamNow * R_CANNON);
     const int SUPER_CENTER_CANNON_PENALTY = teamNow == RED ? RED_SUPER_CENTER_CANNON_PENALTY : BLACK_SUPER_CENTER_CANNON_PENALTY;
     const int CENTER_CANNON_PENALTY = teamNow == RED ? RED_CENTER_CANNON_PENALTY : BLACK_CENTER_CANNON_PENALTY;
@@ -799,12 +803,12 @@ int Board::centerCannon(TEAM teamNow)
         if(centerCannonPosMap[cannon.x][cannon.y] == 1)
         {
             // Normal Cannon
-            result -= CENTER_CANNON_PENALTY;
+            result -= CENTER_CANNON_PENALTY * std::abs(cannon.y - anotherKing.y) / 7;
             // Super Cannon
             int num = barrierNumber(this->pieceidMap, selfKing.x, selfKing.y, cannon.x, cannon.y);
             if(num == 0)
             {
-                result -= SUPER_CENTER_CANNON_PENALTY;
+                result -= SUPER_CENTER_CANNON_PENALTY * std::abs(cannon.y - anotherKing.y) / 7;
             }
         }
     }
