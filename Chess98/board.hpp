@@ -720,13 +720,13 @@ int Board::bottomCannon()
         // 是否沉底
         if (piece.y == threatPosSelf)
         {
-            result -= 30;
+            result -= BOTTOM_CANNON_PENALTY;
             // 看相的位置
             for (const Piece &bishop : this->getLivePiecesById(this->team * R_BISHOP))
             {
                 if ((piece.x < 4 && bishop.x < 4) || (piece.y > 4 && bishop.y > 4))
                 {
-                    result += 15;
+                    result += BOTTOM_CANNON_PROTECTION_REWARD;
                 }
             }
         }
@@ -748,11 +748,11 @@ int Board::centerCannon()
             int num = barrierNumber(this->pieceidMap, selfKing.x, selfKing.y, cannon.x, cannon.y);
             if (num == 0)
             {
-                result = -20 * abs(selfKing.y - cannon.y);
+                result = -SUPER_CENTER_CANNON_PENALTY * abs(selfKing.y - cannon.y);
             }
             else if (num == 2)
             {
-                result = -30;
+                result = -CENTER_CANNON_PENALTY;
             }
         }
     }
@@ -772,7 +772,8 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_1;
     }
     // Level 2
-    vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
+    vlEvaluate += this->team == RED ? bottomCannon() : -bottomCannon();
+    vlEvaluate += this->team == RED ? centerCannon() : -centerCannon();
     if (vlEvaluate <= vlAlpha - LAZY_MARGIN_2)
     {
         return vlAlpha - LAZY_MARGIN_2;
@@ -782,8 +783,17 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_2;
     }
     // Level 3
+    vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
+    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_3)
+    {
+        return vlAlpha - LAZY_MARGIN_3;
+    }
+    else if (vlEvaluate >= vlBeta + LAZY_MARGIN_3)
+    {
+        return vlBeta + LAZY_MARGIN_3;
+    }
+    // Level 4
     vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
-    vlEvaluate += this->team == RED ? bottomCannon() : -bottomCannon();
-    vlEvaluate += this->team == RED ? centerCannon() : -centerCannon();
+
     return vlEvaluate;
 }
