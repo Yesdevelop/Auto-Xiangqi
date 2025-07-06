@@ -367,3 +367,5 @@ FodyWeavers.xsd
 **/BOOK.DAT
 **/*.vcxproj.user
 /.VSCodeCounter/**/*
+.vscode
+**/build
