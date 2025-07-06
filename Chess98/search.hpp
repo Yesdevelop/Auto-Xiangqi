@@ -469,10 +469,6 @@ int Search::searchPV(int depth, int alpha, int beta)
 			searchPV(depth / 2, -INF, beta);
 		}
 		goodMove = this->pTransportation->getMove(board);
-        if(!mChecking && depth >= 6)
-        {
-            depth -= (depth / 3);
-        }
 	}
 	if (goodMove.id != -1)
 	{
