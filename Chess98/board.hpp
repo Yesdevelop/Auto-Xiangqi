@@ -95,7 +95,20 @@ public:
     int32 hashKey = 0;
     int32 hashLock = 0;
     std::map<PIECEID, std::vector<Piece>> pieceRegistry{
-        {R_KING, {}}, {R_GUARD, {}}, {R_BISHOP, {}}, {R_ROOK, {}}, {R_KNIGHT, {}}, {R_CANNON, {}}, {R_PAWN, {}}, {B_KING, {}}, {B_GUARD, {}}, {B_BISHOP, {}}, {B_ROOK, {}}, {B_KNIGHT, {}}, {B_CANNON, {}}, {B_PAWN, {}}};
+        {R_KING, {}},
+        {R_GUARD, {}},
+        {R_BISHOP, {}},
+        {R_ROOK, {}},
+        {R_KNIGHT, {}},
+        {R_CANNON, {}},
+        {R_PAWN, {}},
+        {B_KING, {}},
+        {B_GUARD, {}},
+        {B_BISHOP, {}},
+        {B_ROOK, {}},
+        {B_KNIGHT, {}},
+        {B_CANNON, {}},
+        {B_PAWN, {}}};
 
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
@@ -628,15 +641,16 @@ int Board::rookMobility() const
 // 马的灵活性
 int Board::knightMobility() const
 {
-    const std::array<std::array<int, 10>, 9> badKnightPosMap = {{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                                                                 {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
-                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                                                                 {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-                                                                 {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
+    const std::array<std::array<int, 10>, 9> badKnightPosMap = {
+        {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+         {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
+         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
     int result = 0;
 
     for (const Piece &knight : this->pieceRegistry.at(this->team * R_KNIGHT))
