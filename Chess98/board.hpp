@@ -3,14 +3,6 @@
 #include "evaluate.hpp"
 #include "hash.hpp"
 
-const int ROOK_EXTEND = 1;
-const int ROOK_EXTEND_MARGIN = ROOK_EXTEND * 18 * 2;
-const int KNIGHT_EXTEND = 1;
-const int KNIGHT_EXTEND_MARGIN = KNIGHT_EXTEND * 8 * 2;
-
-const int LAZY_MARGIN_1 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
-const int LAZY_MARGIN_2 = KNIGHT_EXTEND_MARGIN;
-
 class Board
 {
 public:
@@ -86,10 +78,8 @@ public:
 
     MOVES historyMoves{};
     TEAM team = -1;
-    Piece *pieceRedKing = nullptr;
-    Piece *pieceBlackKing = nullptr;
     BitBoard *bitboard = nullptr;
-    int distance = 0; // 和根节点的距离
+    int distance = 0;
     int vlRed = 0;
     int vlBlack = 0;
     int32 hashKey = 0;
@@ -119,7 +109,6 @@ public:
     PIECEID_MAP pieceidMap{};
     std::vector<int32> hashKeyList{};
     std::vector<int32> hashLockList{};
-    int isRepeat = 0;
 };
 
 Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
@@ -158,18 +147,6 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
     initEvaluate();
     // 初始化局面哈希
     initHashInfo();
-    // 双方各个棋子的位置
-    for (const Piece &piece : this->getAllLivePieces())
-    {
-        if (piece.pieceid == R_KING)
-        {
-            this->pieceRedKing = &(this->pieces[piece.pieceIndex]);
-        }
-        else if (piece.pieceid == B_KING)
-        {
-            this->pieceBlackKing = &(this->pieces[piece.pieceIndex]);
-        }
-    }
 
     this->bitboard = new BitBoard{this->pieceidMap};
 }

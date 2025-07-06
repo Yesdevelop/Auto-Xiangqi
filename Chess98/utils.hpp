@@ -6,15 +6,15 @@
 /// @return
 bool inCheck(Board &board)
 {
-    Piece *king = board.team == RED ? board.pieceRedKing : board.pieceBlackKing;
-    int x = king->x;
-    int y = king->y;
-    int team = king->team();
+    Piece king = board.team == RED ? board.pieceRegistry[R_KING][0] : board.pieceRegistry[B_KING][0];
+    int x = king.x;
+    int y = king.y;
+    int team = king.team();
 
     // 判断敌方的兵是否在附近
-    bool c1 = abs(board.pieceidOn(king->x + 1, king->y)) == R_PAWN;
-    bool c2 = abs(board.pieceidOn(king->x - 1, king->y)) == R_PAWN;
-    bool c3 = abs(board.pieceidOn(king->x, (king->team() == RED ? king->y - 1 : king->y + 1))) == R_PAWN;
+    bool c1 = abs(board.pieceidOn(x + 1, y)) == R_PAWN;
+    bool c2 = abs(board.pieceidOn(x - 1, y)) == R_PAWN;
+    bool c3 = abs(board.pieceidOn(x, (team == RED ? y - 1 : y + 1))) == R_PAWN;
     if (c1 || c2 || c3)
     {
         return true;
@@ -29,25 +29,25 @@ bool inCheck(Board &board)
     PIECEID piece6 = 0;
     PIECEID piece7 = 0;
     PIECEID piece8 = 0;
-    if (board.pieceidOn(king->x + 1, king->y) != 0)
+    if (board.pieceidOn(x + 1, y) != 0)
     {
-        piece1 = board.pieceidOn(king->x + 2, king->y + 1);
-        piece2 = board.pieceidOn(king->x + 2, king->y - 1);
+        piece1 = board.pieceidOn(x + 2, y + 1);
+        piece2 = board.pieceidOn(x + 2, y - 1);
     }
-    if (board.pieceidOn(king->x - 1, king->y) != 0)
+    if (board.pieceidOn(x - 1, y) != 0)
     {
-        piece3 = board.pieceidOn(king->x - 2, king->y + 1);
-        piece4 = board.pieceidOn(king->x - 2, king->y - 1);
+        piece3 = board.pieceidOn(x - 2, y + 1);
+        piece4 = board.pieceidOn(x - 2, y - 1);
     }
-    if (board.pieceidOn(king->x, king->y + 1) != 0)
+    if (board.pieceidOn(x, y + 1) != 0)
     {
-        piece5 = board.pieceidOn(king->x + 1, king->y + 2);
-        piece6 = board.pieceidOn(king->x - 1, king->y + 2);
+        piece5 = board.pieceidOn(x + 1, y + 2);
+        piece6 = board.pieceidOn(x - 1, y + 2);
     }
-    if (board.pieceidOn(king->x, king->y - 1) != 0)
+    if (board.pieceidOn(x, y - 1) != 0)
     {
-        piece7 = board.pieceidOn(king->x + 1, king->y - 2);
-        piece8 = board.pieceidOn(king->x - 1, king->y - 2);
+        piece7 = board.pieceidOn(x + 1, y - 2);
+        piece8 = board.pieceidOn(x - 1, y - 2);
     }
     bool c4 = abs(piece1) == R_KNIGHT && (board.team > 0 ? (piece1 < 0) : (piece1 > 0));
     bool c5 = abs(piece2) == R_KNIGHT && (board.team > 0 ? (piece2 < 0) : (piece2 > 0));
@@ -66,17 +66,17 @@ bool inCheck(Board &board)
 
     // 白脸将、车、炮
     // 横向着法
-    BITLINE bitlineY = board.getBitLineY(king->y);
-    REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, king->x, 8);
+    BITLINE bitlineY = board.getBitLineY(y);
+    REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     if ((abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[1] - 1, y)) == R_KING) &&
-        board.teamOn(regionY[1] - 1, y) != king->team())
+        board.teamOn(regionY[1] - 1, y) != team)
         return true;
     if ((abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[2] + 1, y)) == R_KING) &&
-        board.teamOn(regionY[2] + 1, y) != king->team())
+        board.teamOn(regionY[2] + 1, y) != team)
         return true;
-    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != king->team())
+    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != team)
         return true;
-    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != king->team())
+    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != team)
         return true;
 
     // 纵向着法
