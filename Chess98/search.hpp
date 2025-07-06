@@ -726,7 +726,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         // 历史启发
         this->pHistory->sort(availableMoves);
 
-        for (Move &move : availableMoves)
+        for (const Move &move : availableMoves)
         {
             board.doMove(move);
             int vl = -INF;

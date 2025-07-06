@@ -27,9 +27,12 @@ public:
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
-    int evaluate(int vlAlpha, int vlBeta) const;
+    int evaluate(int vlAlpha, int vlBeta);
     int rookMobility() const;
     int knightMobility() const;
+    int concentration();
+    int bottomCannon() const;
+    int centerCannon();
 
     void doNullMove()
     {
@@ -582,7 +585,8 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
     }
 }
 
-// 车的机动性
+/// @brief 车的机动性
+/// @return 
 int Board::rookMobility() const
 {
     int result = 0;
@@ -615,7 +619,8 @@ int Board::rookMobility() const
     return result;
 }
 
-// 马的灵活性
+/// @brief 马的灵活性
+/// @return 
 int Board::knightMobility() const
 {
     const std::array<std::array<int, 10>, 9> badKnightPosMap = {
@@ -707,7 +712,48 @@ int Board::knightMobility() const
     return result;
 }
 
-int Board::evaluate(int vlAlpha, int vlBeta) const
+/// @brief 子力集中威胁
+/// @return 
+int Board::concentration()
+{
+    // TODO
+}
+
+/// @brief 沉底炮威胁
+/// @return 
+int Board::bottomCannon() const
+{
+    int result = 0;
+    PIECES enemyCannons = this->getLivePiecesById(-this->team * R_CANNON);
+    const int threatPosSelf = this->team == RED ? 0 : 9;
+    // 对面的炮
+    for (const Piece& piece : enemyCannons)
+    {
+        // 是否沉底
+        if (piece.y == threatPosSelf)
+        {
+            result -= 30;
+            // 看相的位置
+            for (const Piece& bishop : this->getLivePiecesById(this->team* R_BISHOP))
+            {
+                if ((piece.x < 4 && bishop.x < 4) || (piece.y > 4 && bishop.y > 4))
+                {
+                    result += 15;
+                }
+            }
+        }
+    }
+    return result;
+}
+
+/// @brief 当头炮威胁
+/// @return 
+int Board::centerCannon()
+{
+    // TODO
+}
+
+int Board::evaluate(int vlAlpha, int vlBeta)
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
@@ -731,5 +777,6 @@ int Board::evaluate(int vlAlpha, int vlBeta) const
     }
     // Level 3
     vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
+    vlEvaluate += this->team == RED ? bottomCannon() : -bottomCannon();
     return vlEvaluate;
 }
