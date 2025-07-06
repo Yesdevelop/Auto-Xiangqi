@@ -1,78 +1,85 @@
 #pragma once
+
 #include "bitboard.hpp"
 #include "evaluate.hpp"
 #include "hash.hpp"
 
-class Board
-{
+class Board {
 public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
+
     Piece piecePosition(int x, int y);
+
     PIECEID pieceidOn(int x, int y) const;
+
     TEAM teamOn(int x, int y) const;
+
     PIECES getAllLivePieces();
+
     PIECES getPiecesByTeam(TEAM team);
+
     void doMove(Move move);
+
     void undoMove();
+
     void initEvaluate();
+
     void vlOpenCalculator(int &vlOpen);
+
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
+
     void initHashInfo();
+
     void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 
-    bool isKingLive(TEAM team) const
-    {
+    bool isKingLive(TEAM team) const {
         return team == RED ? this->isRedKingLive : this->isBlackKingLive;
     }
 
     int evaluate(int vlAlpha, int vlBeta);
+
     int rookMobility() const;
+
     int knightMobility() const;
+
     int concentration();
+
     int bottomCannon() const;
+
     int centerCannon();
 
-    void doNullMove()
-    {
+    void doNullMove() {
         this->team = -this->team;
     }
 
-    void undoNullMove()
-    {
+    void undoNullMove() {
         this->team = -this->team;
     }
 
-    bool nullOkay() const
-    {
+    bool nullOkay() const {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 600);
     }
 
-    bool nullSafe() const
-    {
+    bool nullSafe() const {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 1200);
     }
 
-    BITLINE getBitLineX(int x) const
-    {
+    BITLINE getBitLineX(int x) const {
         return this->bitboard->xBitBoard[x];
     }
 
-    BITLINE getBitLineY(int y) const
-    {
+    BITLINE getBitLineY(int y) const {
         return this->bitboard->yBitBoard[y];
     }
 
-    PIECES getLivePiecesById(PIECEID pieceid) const
-    {
+    PIECES getLivePiecesById(PIECEID pieceid) const {
         PIECES result{};
-        for (const Piece &piece : this->pieceRegistry.at(pieceid))
-        {
-            if (piece.isLive)
-            {
+        for (const Piece &piece: this->pieceRegistry.at(pieceid)) {
+            if (piece.isLive) {
                 result.emplace_back(piece);
             }
         }
@@ -88,20 +95,20 @@ public:
     int32 hashKey = 0;
     int32 hashLock = 0;
     std::map<PIECEID, std::vector<Piece>> pieceRegistry{
-        {R_KING, {}},
-        {R_GUARD, {}},
-        {R_BISHOP, {}},
-        {R_ROOK, {}},
-        {R_KNIGHT, {}},
-        {R_CANNON, {}},
-        {R_PAWN, {}},
-        {B_KING, {}},
-        {B_GUARD, {}},
-        {B_BISHOP, {}},
-        {B_ROOK, {}},
-        {B_KNIGHT, {}},
-        {B_CANNON, {}},
-        {B_PAWN, {}}};
+            {R_KING,   {}},
+            {R_GUARD,  {}},
+            {R_BISHOP, {}},
+            {R_ROOK,   {}},
+            {R_KNIGHT, {}},
+            {R_CANNON, {}},
+            {R_PAWN,   {}},
+            {B_KING,   {}},
+            {B_GUARD,  {}},
+            {B_BISHOP, {}},
+            {B_ROOK,   {}},
+            {B_KNIGHT, {}},
+            {B_CANNON, {}},
+            {B_PAWN,   {}}};
 
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
     PIECES pieces{};
@@ -114,19 +121,15 @@ public:
     std::vector<int32> hashLockList{};
 };
 
-Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
-{
+Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam) {
     this->distance = 0;
     this->team = initTeam;
     this->pieceidMap = pieceidMap;
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             PIECEID pieceid = this->pieceidMap[x][y];
-            if (pieceid != 0)
-            {
-                Piece piece{this->pieceidMap[x][y], x, y, (int)this->pieces.size()};
+            if (pieceid != 0) {
+                Piece piece{this->pieceidMap[x][y], x, y, (int) this->pieces.size()};
                 this->pieces.emplace_back(piece);
                 PIECE_INDEX index = int(this->pieces.size()) - 1;
                 this->pieceIndexMap[x][y] = index;
@@ -139,9 +142,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
                 if (pieceid == B_KING)
                     this->isBlackKingLive = true;
                 this->pieceRegistry[pieceid].emplace_back(this->pieces.back());
-            }
-            else
-            {
+            } else {
                 this->pieceIndexMap[x][y] = -1;
             }
         }
@@ -154,89 +155,62 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
     this->bitboard = new BitBoard{this->pieceidMap};
 }
 
-Piece Board::pieceIndex(PIECE_INDEX pieceIndex)
-{
+Piece Board::pieceIndex(PIECE_INDEX pieceIndex) {
     return this->pieces[pieceIndex];
 }
 
-Piece Board::piecePosition(int x, int y)
-{
-    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
-    {
+Piece Board::piecePosition(int x, int y) {
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
         PIECEID pieceid = this->pieceidMap[x][y];
-        if (pieceid != 0)
-        {
+        if (pieceid != 0) {
             PIECE_INDEX pieceIndex = this->pieceIndexMap[x][y];
             return this->pieceIndex(pieceIndex);
-        }
-        else
-        {
+        } else {
             return Piece{EMPTY_PIECEID, -1, -1, EMPTY_INDEX};
         }
-    }
-    else
-    {
+    } else {
         return Piece{OVERFLOW_PIECEID, -1, -1, EMPTY_INDEX};
     }
 }
 
-PIECEID Board::pieceidOn(int x, int y) const
-{
-    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
-    {
+PIECEID Board::pieceidOn(int x, int y) const {
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
         return this->pieceidMap[x][y];
-    }
-    else
-    {
+    } else {
         return OVERFLOW_PIECEID;
     }
 }
 
-TEAM Board::teamOn(int x, int y) const
-{
-    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
-    {
+TEAM Board::teamOn(int x, int y) const {
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
         PIECEID pieceid = this->pieceidMap[x][y];
-        if (pieceid > 0)
-        {
+        if (pieceid > 0) {
             return RED;
-        }
-        else if (pieceid < 0)
-        {
+        } else if (pieceid < 0) {
             return BLACK;
-        }
-        else
-        {
+        } else {
             return EMPTY_TEAM;
         }
-    }
-    else
-    {
+    } else {
         return OVERFLOW_TEAM;
     }
 }
 
-PIECES Board::getAllLivePieces()
-{
+PIECES Board::getAllLivePieces() {
     PIECES result{};
-    for (Piece piece : this->pieces)
-    {
-        if (piece.isLive == true)
-        {
+    for (Piece piece: this->pieces) {
+        if (piece.isLive == true) {
             result.emplace_back(piece);
         }
     }
     return result;
 }
 
-PIECES Board::getPiecesByTeam(TEAM team)
-{
+PIECES Board::getPiecesByTeam(TEAM team) {
     PIECES result{};
     PIECES allPieces = this->getAllLivePieces();
-    for (Piece piece : allPieces)
-    {
-        if (piece.team() == team)
-        {
+    for (Piece piece: allPieces) {
+        if (piece.team() == team) {
             result.emplace_back(piece);
         }
     }
@@ -246,8 +220,7 @@ PIECES Board::getPiecesByTeam(TEAM team)
 
 /// @brief 步进
 /// @param move
-void Board::doMove(Move move)
-{
+void Board::doMove(Move move) {
     const int x1 = move.x1;
     const int x2 = move.x2;
     const int y1 = move.y1;
@@ -262,37 +235,29 @@ void Board::doMove(Move move)
     this->pieceIndexMap[x1][y1] = -1;
     this->pieces[attackStarter.pieceIndex].x = x2;
     this->pieces[attackStarter.pieceIndex].y = y2;
-    if (eaten.pieceIndex != -1)
-    {
+    if (eaten.pieceIndex != -1) {
         this->pieces[eaten.pieceIndex].isLive = false;
     }
-    if (eaten.pieceid == R_KING)
-    {
+    if (eaten.pieceid == R_KING) {
         this->isRedKingLive = false;
     }
-    if (eaten.pieceid == B_KING)
-    {
+    if (eaten.pieceid == B_KING) {
         this->isBlackKingLive = false;
     }
     this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
-    if (attackStarter.team() == RED)
-    {
+    if (attackStarter.team() == RED) {
         int valNewPos = pieceWeights[attackStarter.pieceid][x2][y2];
         int valOldPos = pieceWeights[attackStarter.pieceid][x1][y1];
         this->vlRed += (valNewPos - valOldPos);
-        if (eaten.pieceid != EMPTY_PIECEID)
-        {
+        if (eaten.pieceid != EMPTY_PIECEID) {
             this->vlBlack -= pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
         }
-    }
-    else
-    {
+    } else {
         int valNewPos = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
         int valOldPos = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
         this->vlBlack += (valNewPos - valOldPos);
-        if (eaten.pieceid != EMPTY_PIECEID)
-        {
+        if (eaten.pieceid != EMPTY_PIECEID) {
             this->vlRed -= pieceWeights[eaten.pieceid][x2][y2];
         }
     }
@@ -304,8 +269,7 @@ void Board::doMove(Move move)
     this->hashKey ^= hashKeys[attackStarter.pieceid][x2][y2];
     this->hashLock ^= hashLocks[attackStarter.pieceid][x1][y1];
     this->hashLock ^= hashLocks[attackStarter.pieceid][x2][y2];
-    if (eaten.pieceid != EMPTY_PIECEID)
-    {
+    if (eaten.pieceid != EMPTY_PIECEID) {
         this->hashKey ^= hashKeys[eaten.pieceid][x1][y1];
         this->hashLock ^= hashLocks[eaten.pieceid][x2][y2];
     }
@@ -320,8 +284,7 @@ void Board::doMove(Move move)
 }
 
 /// @brief 撤销上一次步进
-void Board::undoMove()
-{
+void Board::undoMove() {
     const int x1 = this->historyMoves.back().x1;
     const int x2 = this->historyMoves.back().x2;
     const int y1 = this->historyMoves.back().y1;
@@ -341,36 +304,28 @@ void Board::undoMove()
     this->pieceIndexMap[x2][y2] = eaten.pieceIndex;
     this->pieces[attackStarter.pieceIndex].x = x1;
     this->pieces[attackStarter.pieceIndex].y = y1;
-    if (eaten.pieceIndex != -1)
-    {
+    if (eaten.pieceIndex != -1) {
         this->pieces[eaten.pieceIndex].isLive = true;
     }
-    if (eaten.pieceid == R_KING)
-    {
+    if (eaten.pieceid == R_KING) {
         this->isRedKingLive = true;
     }
-    if (eaten.pieceid == B_KING)
-    {
+    if (eaten.pieceid == B_KING) {
         this->isBlackKingLive = true;
     }
     // 更新评估分
-    if (attackStarter.team() == RED)
-    {
+    if (attackStarter.team() == RED) {
         int valPos1 = pieceWeights[attackStarter.pieceid][x1][y1];
         int valPos2 = pieceWeights[attackStarter.pieceid][x2][y2];
         this->vlRed -= (valPos2 - valPos1);
-        if (eaten.pieceid != EMPTY_PIECEID)
-        {
+        if (eaten.pieceid != EMPTY_PIECEID) {
             this->vlBlack += pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
         }
-    }
-    else
-    {
+    } else {
         int valPos1 = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
         int valPos2 = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
         this->vlBlack -= (valPos2 - valPos1);
-        if (eaten.pieceid != EMPTY_PIECEID)
-        {
+        if (eaten.pieceid != EMPTY_PIECEID) {
             this->vlRed += pieceWeights[eaten.pieceid][x2][y2];
         }
     }
@@ -381,8 +336,7 @@ void Board::undoMove()
     this->hashLockList.pop_back();
 }
 
-void Board::initEvaluate()
-{
+void Board::initEvaluate() {
     // 更新权重数组
     int vlOpen = 0;
     int vlRedAttack = 0;
@@ -399,42 +353,30 @@ void Board::initEvaluate()
     this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
 
     // 进一步重新计算分数
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             PIECEID pid = this->pieceidMap[x][y];
-            if (pid > 0)
-            {
+            if (pid > 0) {
                 this->vlRed += pieceWeights[pid][x][y];
-            }
-            else if (pid < 0)
-            {
+            } else if (pid < 0) {
                 this->vlBlack += pieceWeights[pid][x][size_t(9) - y];
             }
         }
     }
 }
 
-void Board::vlOpenCalculator(int &vlOpen)
-{
+void Board::vlOpenCalculator(int &vlOpen) {
     // 首先判断局势处于开中局还是残局阶段，方法是计算各种棋子的数量，按照车=6、马炮=3、其它=1相加
     int rookLiveSum = 0;
     int knightCannonLiveSum = 0;
     int otherLiveSum = 0;
-    for (const Piece &piece : this->getAllLivePieces())
-    {
+    for (const Piece &piece: this->getAllLivePieces()) {
         PIECEID pid = std::abs(piece.pieceid);
-        if (pid == R_ROOK)
-        {
+        if (pid == R_ROOK) {
             rookLiveSum++;
-        }
-        else if (pid == R_KNIGHT || pid == R_CANNON)
-        {
+        } else if (pid == R_KNIGHT || pid == R_CANNON) {
             knightCannonLiveSum++;
-        }
-        else if (pid != R_KING)
-        {
+        } else if (pid != R_KING) {
             otherLiveSum++;
         }
     }
@@ -444,8 +386,7 @@ void Board::vlOpenCalculator(int &vlOpen)
     vlOpen /= TOTAL_MIDGAME_VALUE;
 }
 
-void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
-{
+void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) {
     // 然后判断各方是否处于进攻状态，方法是计算各种过河棋子的数量，按照车马2炮兵1相加
     int redAttackLiveRookSum = 0;
     int blackAttackLiveRookSum = 0;
@@ -455,49 +396,29 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
     int blackAttackLiveCannonSum = 0;
     int redAttackLivePawnSum = 0;
     int blackAttackLivePawnSum = 0;
-    for (const Piece &piece : this->getAllLivePieces())
-    {
+    for (const Piece &piece: this->getAllLivePieces()) {
         PIECEID pid = std::abs(piece.pieceid);
-        if (piece.team() == RED)
-        {
-            if (piece.y >= 5)
-            {
-                if (pid == R_ROOK)
-                {
+        if (piece.team() == RED) {
+            if (piece.y >= 5) {
+                if (pid == R_ROOK) {
                     redAttackLiveRookSum++;
-                }
-                else if (pid == R_CANNON)
-                {
+                } else if (pid == R_CANNON) {
                     redAttackLiveCannonSum++;
-                }
-                else if (pid == R_KNIGHT)
-                {
+                } else if (pid == R_KNIGHT) {
                     redAttackLiveKnightSum++;
-                }
-                else if (pid == R_PAWN)
-                {
+                } else if (pid == R_PAWN) {
                     redAttackLivePawnSum++;
                 }
             }
-        }
-        else if (piece.team() == BLACK)
-        {
-            if (piece.y <= 4)
-            {
-                if (pid == R_ROOK)
-                {
+        } else if (piece.team() == BLACK) {
+            if (piece.y <= 4) {
+                if (pid == R_ROOK) {
                     blackAttackLiveRookSum++;
-                }
-                else if (pid == R_CANNON)
-                {
+                } else if (pid == R_CANNON) {
                     blackAttackLiveCannonSum++;
-                }
-                else if (pid == R_KNIGHT)
-                {
+                } else if (pid == R_KNIGHT) {
                     blackAttackLiveKnightSum++;
-                }
-                else if (pid == R_PAWN)
-                {
+                } else if (pid == R_PAWN) {
                     blackAttackLivePawnSum++;
                 }
             }
@@ -527,59 +448,46 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
     blackSimpleValues += blackAttackLiveCannonSum;
     blackSimpleValues += blackAttackLivePawnSum;
     // 设置
-    if (redSimpleValues > blackSimpleValues)
-    {
+    if (redSimpleValues > blackSimpleValues) {
         vlRedAttack += (redSimpleValues - blackSimpleValues) * 2;
-    }
-    else if (redSimpleValues < blackSimpleValues)
-    {
+    } else if (redSimpleValues < blackSimpleValues) {
         vlBlackAttack += (blackSimpleValues - redSimpleValues) * 2;
     }
     vlRedAttack = std::min<int>(vlRedAttack, TOTAL_ATTACK_VALUE);
     vlBlackAttack = std::min<int>(vlBlackAttack, TOTAL_ATTACK_VALUE);
 }
 
-void Board::initHashInfo()
-{
+void Board::initHashInfo() {
     this->hashKey = 0;
     this->hashLock = 0;
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             PIECEID pid = this->pieceidMap[x][y];
-            if (pid != EMPTY_PIECEID)
-            {
+            if (pid != EMPTY_PIECEID) {
                 this->hashKey ^= hashKeys[pid][x][y];
                 this->hashLock ^= hashLocks[pid][x][y];
             }
         }
     }
-    if (this->team == BLACK)
-    {
+    if (this->team == BLACK) {
         this->hashKey ^= PLAYER_KEY;
         this->hashLock ^= PLAYER_LOCK;
     }
 }
 
-void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
-{
+void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock) {
     mirrorHashKey = 0;
     mirrorHashLock = 0;
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             PIECEID pid = this->pieceidMap[x][y];
-            if (pid != EMPTY_PIECEID)
-            {
+            if (pid != EMPTY_PIECEID) {
                 mirrorHashKey ^= hashKeys[pid][size_t(8) - x][y];
                 mirrorHashLock ^= hashLocks[pid][size_t(8) - x][y];
             }
         }
     }
-    if (this->team == BLACK)
-    {
+    if (this->team == BLACK) {
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
@@ -587,11 +495,9 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
 
 /// @brief 车的机动性
 /// @return 
-int Board::rookMobility() const
-{
+int Board::rookMobility() const {
     int result = 0;
-    for (const Piece &rook : this->pieceRegistry.at(this->team * R_ROOK))
-    {
+    for (const Piece &rook: this->pieceRegistry.at(this->team * R_ROOK)) {
         const int x = rook.x;
         const int y = rook.y;
         BITLINE bitlineX = this->getBitLineX(x);
@@ -599,20 +505,16 @@ int Board::rookMobility() const
         BITLINE bitlineY = this->getBitLineY(y);
         REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, x, 8);
         result += ROOK_EXTEND * (regionY[1] - regionY[0] + regionX[1] - regionX[0] - 2);
-        if (this->teamOn(x, regionX[1]) != this->team)
-        {
+        if (this->teamOn(x, regionX[1]) != this->team) {
             result += ROOK_EXTEND;
         }
-        if (this->teamOn(x, regionX[0]) != this->team)
-        {
+        if (this->teamOn(x, regionX[0]) != this->team) {
             result += ROOK_EXTEND;
         }
-        if (this->teamOn(regionY[1], y) != this->team)
-        {
+        if (this->teamOn(regionY[1], y) != this->team) {
             result += ROOK_EXTEND;
         }
-        if (this->teamOn(regionY[1], y) != this->team)
-        {
+        if (this->teamOn(regionY[1], y) != this->team) {
             result += ROOK_EXTEND;
         }
     }
@@ -621,126 +523,83 @@ int Board::rookMobility() const
 
 /// @brief 马的灵活性
 /// @return 
-int Board::knightMobility() const
-{
-    const std::array<std::array<int, 10>, 9> badKnightPosMap = {
-        {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 1, 0, 0, 0, 0, 0, 0, 1, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}};
-    int result = 0;
+int Board::knightMobility() const {
+    const std::array<std::array<int, 10>, 9> badKnightPosMap = {{
+                                                                        {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+                                                                        {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+                                                                        {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+                                                                        {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+                                                                        {{1, 1, 0, 0, 0, 0, 0, 0, 1, 1}},
+                                                                        {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+                                                                        {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+                                                                        {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+                                                                        {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}
+                                                                }};
 
-    for (const Piece &knight : this->pieceRegistry.at(this->team * R_KNIGHT))
-    {
+    static constexpr std::array<std::pair<int, int>, 8> KnightMoves = {{
+                                                                               {-1, -2}, {1, -2},
+                                                                               {-2, -1}, {2, -1},
+                                                                               {-2, 1}, {2, 1},
+                                                                               {-1, 2}, {1, 2}
+                                                                       }};
+
+    int goodTargetCnt = 0;
+
+    for (const Piece &knight: this->pieceRegistry.at(this->team * R_KNIGHT)) {
         const int x = knight.x;
         const int y = knight.y;
-        if(badKnightPosMap[size_t(x)][size_t(y)] != 1)
-        {
-            if (this->pieceidOn(x - 1, y) == EMPTY_PIECEID)
+        for (const auto &[dx, dy]: KnightMoves) {
+            const int midX = x + dx / 2;
+            const int midY = y + dy / 2;
+            const int targetX = x + dx;
+            const int targetY = y + dy;
+            if (this->pieceidOn(midX, midY) != EMPTY_PIECEID)
             {
-                if (this->teamOn(x - 2, y - 1) != this->team && this->teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x - 2)][size_t(y - 1)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
-                if (this->teamOn(x - 2, y + 1) != this->team && this->teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x - 2)][size_t(y + 1)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
+                continue;
             }
-            if (this->pieceidOn(x + 1, y) == EMPTY_PIECEID)
+            const int teamOnTarget = this->teamOn(targetX, targetY);
+            if (teamOnTarget == this->team || teamOnTarget == OVERFLOW_TEAM)
             {
-                if (this->teamOn(x + 2, y - 1) != this->team && this->teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x + 2)][size_t(y - 1)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
-                if (this->teamOn(x + 2, y + 1) != this->team && this->teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x + 2)][size_t(y + 1)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
+                continue;
             }
-            if (this->pieceidOn(x, y - 1) == EMPTY_PIECEID)
+            if (badKnightPosMap[size_t(targetX)][size_t(targetY)] == 1)
             {
-                if (this->teamOn(x - 1, y - 2) != this->team && this->teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x - 1)][size_t(y - 2)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
-                if (this->teamOn(x + 1, y - 2) != this->team && this->teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x + 1)][size_t(y - 2)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
+                continue;
             }
-            if (this->pieceidOn(x, y + 1) == EMPTY_PIECEID)
+            goodTargetCnt++;
+            if(goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
             {
-                if (this->teamOn(x - 1, y + 2) != this->team && this->teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x - 1)][size_t(y + 2)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
-                if (this->teamOn(x + 1, y + 2) != this->team && this->teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
-                {
-                    if (badKnightPosMap[size_t(x + 1)][size_t(y + 2)] != 1)
-                    {
-                        result += KNIGHT_EXTEND;
-                    }
-                }
+                break;
             }
         }
+        if(goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
+        {
+            break;
+        }
     }
-
-    return result;
+    return goodTargetCnt * KNIGHT_EXTEND;
 }
 
 /// @brief 子力集中威胁
 /// @return 
-int Board::concentration()
-{
+int Board::concentration() {
     // TODO
 }
 
 /// @brief 沉底炮威胁
 /// @return 
-int Board::bottomCannon() const
-{
+int Board::bottomCannon() const {
     int result = 0;
     PIECES enemyCannons = this->getLivePiecesById(-this->team * R_CANNON);
     const int threatPosSelf = this->team == RED ? 0 : 9;
     // 对面的炮
-    for (const Piece& piece : enemyCannons)
-    {
+    for (const Piece &piece: enemyCannons) {
         // 是否沉底
-        if (piece.y == threatPosSelf)
-        {
+        if (piece.y == threatPosSelf) {
             result -= 30;
             // 看相的位置
-            for (const Piece& bishop : this->getLivePiecesById(this->team* R_BISHOP))
-            {
-                if ((piece.x < 4 && bishop.x < 4) || (piece.y > 4 && bishop.y > 4))
-                {
+            for (const Piece &bishop: this->getLivePiecesById(this->team * R_BISHOP)) {
+                if ((piece.x < 4 && bishop.x < 4) || (piece.y > 4 && bishop.y > 4)) {
                     result += 15;
                 }
             }
@@ -751,31 +610,23 @@ int Board::bottomCannon() const
 
 /// @brief 当头炮威胁
 /// @return 
-int Board::centerCannon()
-{
+int Board::centerCannon() {
     // TODO
 }
 
-int Board::evaluate(int vlAlpha, int vlBeta)
-{
+int Board::evaluate(int vlAlpha, int vlBeta) {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
-    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_1)
-    {
+    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_1) {
         return vlAlpha - LAZY_MARGIN_1;
-    }
-    else if (vlEvaluate >= vlBeta + LAZY_MARGIN_1)
-    {
+    } else if (vlEvaluate >= vlBeta + LAZY_MARGIN_1) {
         return vlBeta + LAZY_MARGIN_1;
     }
     // Level 2
     vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
-    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_2)
-    {
+    if (vlEvaluate <= vlAlpha - LAZY_MARGIN_2) {
         return vlAlpha - LAZY_MARGIN_2;
-    }
-    else if (vlEvaluate >= vlBeta + LAZY_MARGIN_2)
-    {
+    } else if (vlEvaluate >= vlBeta + LAZY_MARGIN_2) {
         return vlBeta + LAZY_MARGIN_2;
     }
     // Level 3
