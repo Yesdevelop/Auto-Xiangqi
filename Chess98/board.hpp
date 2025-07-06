@@ -860,7 +860,7 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_1;
     }
     // Level 2
-    vlEvaluate += weakStatus(this->team);
+    vlEvaluate += weakStatus(this->team) - weakStatus(-this->team);
     if (vlEvaluate <= vlAlpha - LAZY_MARGIN_2)
     {
         return vlAlpha - LAZY_MARGIN_2;
@@ -870,8 +870,8 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_2;
     }
     // Level 3
-    vlEvaluate += bottomCannon(this->team);
-    vlEvaluate += centerCannon(this->team);
+    vlEvaluate += bottomCannon(this->team) - bottomCannon(-this->team);
+    vlEvaluate += centerCannon(this->team) - bottomCannon(-this->team);
     if (vlEvaluate <= vlAlpha - LAZY_MARGIN_3)
     {
         return vlAlpha - LAZY_MARGIN_3;
@@ -881,7 +881,7 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_3;
     }
     // Level 4
-    vlEvaluate += rookMobility(this->team);
+    vlEvaluate += rookMobility(this->team) - rookMobility(-this->team);
     if (vlEvaluate <= vlAlpha - LAZY_MARGIN_4)
     {
         return vlAlpha - LAZY_MARGIN_4;
@@ -891,7 +891,7 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_4;
     }
     // Level 4
-    vlEvaluate += this->team ==  knightMobility(this->team);
+    vlEvaluate += this->team ==  knightMobility(this->team) - knightMobility(-this->team);
 
     return vlEvaluate;
 }
