@@ -706,32 +706,29 @@ int Board::knightMobility(TEAM teamNow)
     {
         const int x = knight.x;
         const int y = knight.y;
-        if(badKnightPosMap[x][y] != 2)
+        for (const std::array<int, 2> &move : KnightMoves)
         {
-            for (const std::array<int, 2> &move : KnightMoves)
+            const int midX = x + move[0] / 2;
+            const int midY = y + move[1] / 2;
+            const int targetX = x + move[0];
+            const int targetY = y + move[1];
+            if (this->pieceidOn(midX, midY) != EMPTY_PIECEID)
             {
-                const int midX = x + move[0] / 2;
-                const int midY = y + move[1] / 2;
-                const int targetX = x + move[0];
-                const int targetY = y + move[1];
-                if (this->pieceidOn(midX, midY) != EMPTY_PIECEID)
-                {
-                    continue;
-                }
-                const int teamOnTarget = this->teamOn(targetX, targetY);
-                if (teamOnTarget == teamNow || teamOnTarget == OVERFLOW_TEAM)
-                {
-                    continue;
-                }
-                if (badKnightPosMap[size_t(targetX)][size_t(targetY)] != 0)
-                {
-                    continue;
-                }
-                goodTargetCnt++;
-                if (goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
-                {
-                    break;
-                }
+                continue;
+            }
+            const int teamOnTarget = this->teamOn(targetX, targetY);
+            if (teamOnTarget == teamNow || teamOnTarget == OVERFLOW_TEAM)
+            {
+                continue;
+            }
+            if (badKnightPosMap[size_t(targetX)][size_t(targetY)] != 0)
+            {
+                continue;
+            }
+            goodTargetCnt++;
+            if (goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
+            {
+                break;
             }
         }
         if (goodTargetCnt >= KNIGHT_GOOD_TARGET_SUM)
