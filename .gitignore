@@ -369,3 +369,4 @@ FodyWeavers.xsd
 /.VSCodeCounter/**/*
 .vscode
 **/build
+.idea
