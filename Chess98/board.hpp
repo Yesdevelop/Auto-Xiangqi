@@ -518,7 +518,7 @@ int Board::rookMobility() const {
             result += ROOK_EXTEND;
         }
     }
-    return result;
+    return (result / ROOK_EXTEND_FACTOR);
 }
 
 /// @brief 马的灵活性
