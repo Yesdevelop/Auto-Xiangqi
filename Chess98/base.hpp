@@ -233,4 +233,37 @@ void printPieceidMap(PIECEID_MAP pieceidMap)
     std::cout << std::endl;
 };
 
+/// @brief 获取两点间有多少个障碍物
+/// @param board
+/// @param x1
+/// @param y1
+/// @param x2
+/// @param y2
+/// @return
+bool barrierNumber(PIECEID_MAP pieceidMap, int x1, int y1, int x2, int y2)
+{
+    int count = 0;
+    if (x1 == x2)
+    {
+        for (int i = (y1 < y2 ? y1 : y2) + 1; i < (y1 < y2 ? y2 : y1); i++)
+        {
+            if (pieceidMap[x1][i] != 0)
+            {
+                count++;
+            }
+        }
+    }
+    else
+    {
+        for (int i = (x1 < x2 ? x1 : x2) + 1; i < (x1 < x2 ? x2 : x1); i++)
+        {
+            if (pieceidMap[i][y1] != 0)
+            {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
 const int QUIESCENCE_EXTEND_DEPTH = 2;

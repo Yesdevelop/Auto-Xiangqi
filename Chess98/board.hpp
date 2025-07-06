@@ -45,9 +45,7 @@ public:
     int rookMobility();
 
     int knightMobility();
-
-    int concentration();
-
+    
     int bottomCannon();
 
     int centerCannon();
@@ -125,6 +123,16 @@ public:
     Piece getPieceFromRegistry(PIECEID pieceid, int index)
     {
         return this->pieceIndex(this->pieceRegistry.at(pieceid)[index]);
+    }
+
+    PIECES getPiecesFromRegistry(PIECEID pieceid)
+    {
+        PIECES result{};
+        for (PIECE_INDEX pieceindex : this->pieceRegistry[pieceid])
+        {
+            result.emplace_back(this->pieceIndex(pieceindex));
+        }
+        return result;
     }
 
     std::array<std::array<int, 10>, 9> pieceIndexMap{};
@@ -647,17 +655,18 @@ int Board::rookMobility()
 /// @return
 int Board::knightMobility()
 {
-    const std::array<std::array<int, 10>, 9> badKnightPosMap = {{{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
-                                                                 {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-                                                                 {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-                                                                 {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-                                                                 {{1, 1, 0, 0, 0, 0, 0, 0, 1, 1}},
-                                                                 {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-                                                                 {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-                                                                 {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
-                                                                 {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}}};
-
-    static constexpr std::array<std::array<int, 2>, 8> KnightMoves = {{{-1, -2}, {1, -2}, {-2, -1}, {2, -1}, {-2, 1}, {2, 1}, {-1, 2}, {1, 2}}};
+    const std::array<std::array<int, 10>, 9> badKnightPosMap{
+        {{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+         {{1, 1, 0, 0, 0, 0, 0, 0, 1, 1}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}},
+         {{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}}}};
+    const std::array<std::array<int, 2>, 8> KnightMoves{
+        {{-1, -2}, {1, -2}, {-2, -1}, {2, -1}, {-2, 1}, {2, 1}, {-1, 2}, {1, 2}}};
 
     int goodTargetCnt = 0;
 
@@ -698,13 +707,6 @@ int Board::knightMobility()
     return goodTargetCnt * KNIGHT_EXTEND;
 }
 
-/// @brief 子力集中威胁
-/// @return
-int Board::concentration()
-{
-    // TODO
-}
-
 /// @brief 沉底炮威胁
 /// @return
 int Board::bottomCannon()
@@ -736,7 +738,25 @@ int Board::bottomCannon()
 /// @return
 int Board::centerCannon()
 {
-    // TODO
+    int result = 0;
+    const Piece selfKing = this->getPieceFromRegistry(this->team * R_KING, 0);
+    const PIECES enemyCannons = this->getPiecesFromRegistry(-this->team * R_KING);
+    for (const Piece &cannon : enemyCannons)
+    {
+        if (cannon.x == 4)
+        {
+            int num = barrierNumber(this->pieceidMap, selfKing.x, selfKing.y, cannon.x, cannon.y);
+            if (num == 0)
+            {
+                result = -20 * abs(selfKing.y - cannon.y);
+            }
+            else if (num == 2)
+            {
+                result = -30;
+            }
+        }
+    }
+    return result;
 }
 
 int Board::evaluate(int vlAlpha, int vlBeta)
@@ -764,5 +784,6 @@ int Board::evaluate(int vlAlpha, int vlBeta)
     // Level 3
     vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
     vlEvaluate += this->team == RED ? bottomCannon() : -bottomCannon();
+    vlEvaluate += this->team == RED ? centerCannon() : -centerCannon();
     return vlEvaluate;
 }
