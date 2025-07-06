@@ -788,7 +788,6 @@ int Board::centerCannon(TEAM teamNow)
              {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}};
     int result = 0;
     const Piece selfKing = this->getPieceFromRegistry(teamNow * R_KING, 0);
-    const Piece anotherKing = this->getPieceFromRegistry(-teamNow * R_KING,0);
     const PIECES enemyCannons = this->getPiecesFromRegistry(-teamNow * R_CANNON);
     const int SUPER_CENTER_CANNON_PENALTY = teamNow == RED ? RED_SUPER_CENTER_CANNON_PENALTY : BLACK_SUPER_CENTER_CANNON_PENALTY;
     const int CENTER_CANNON_PENALTY = teamNow == RED ? RED_CENTER_CANNON_PENALTY : BLACK_CENTER_CANNON_PENALTY;
@@ -801,12 +800,12 @@ int Board::centerCannon(TEAM teamNow)
         if(centerCannonPosMap[cannon.x][cannon.y] == 1)
         {
             // Normal Cannon
-            result -= CENTER_CANNON_PENALTY * std::abs(cannon.y - anotherKing.y) / 7;
+            result -= CENTER_CANNON_PENALTY * std::abs(cannon.y - selfKing.y) / 7;
             // Super Cannon
             int num = barrierNumber(this->pieceidMap, selfKing.x, selfKing.y, cannon.x, cannon.y);
             if(num == 0)
             {
-                result -= SUPER_CENTER_CANNON_PENALTY * std::abs(cannon.y - anotherKing.y) / 7;
+                result -= SUPER_CENTER_CANNON_PENALTY * std::abs(cannon.y - selfKing.y) / 7;
             }
         }
     }
