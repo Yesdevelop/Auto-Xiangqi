@@ -45,7 +45,7 @@ public:
     int rookMobility();
 
     int knightMobility();
-    
+
     int bottomCannon();
 
     int centerCannon();
