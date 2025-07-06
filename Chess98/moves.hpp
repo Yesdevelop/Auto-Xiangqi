@@ -591,18 +591,18 @@ MOVES Moves::generateCaptureMoves(Board &board, int x, int y)
 MOVES Moves::getCaptureMovesUnordered(Board &board)
 {
     // 对面笑
-    for (int y = board.pieceRegistry[R_KING][0].y + 1; y <= 9; y++)
+    for (int y = board.getPieceFromRegistry(R_KING, 0).y + 1; y <= 9; y++)
     {
-        if (board.pieceidOn(board.pieceRegistry[R_KING][0].x, y) == B_KING)
+        if (board.pieceidOn(board.getPieceFromRegistry(R_KING, 0).x, y) == B_KING)
         {
             if (board.team == RED)
-                return MOVES{Move{board.pieceRegistry[R_KING][0].x, board.pieceRegistry[R_KING][0].y, board.pieceRegistry[B_KING][0].x,
-                                  board.pieceRegistry[B_KING][0].y}};
+                return MOVES{Move{board.getPieceFromRegistry(R_KING, 0).x, board.getPieceFromRegistry(R_KING, 0).y, board.getPieceFromRegistry(B_KING, 0).x,
+                                  board.getPieceFromRegistry(B_KING, 0).y}};
             else
-                return MOVES{Move{board.pieceRegistry[B_KING][0].x, board.pieceRegistry[B_KING][0].y, board.pieceRegistry[R_KING][0].x,
-                                  board.pieceRegistry[R_KING][0].y}};
+                return MOVES{Move{board.getPieceFromRegistry(B_KING, 0).x, board.getPieceFromRegistry(B_KING, 0).y, board.getPieceFromRegistry(R_KING, 0).x,
+                                  board.getPieceFromRegistry(R_KING, 0).y}};
         }
-        if (board.teamOn(board.pieceRegistry[R_KING][0].x, y) != EMPTY_TEAM)
+        if (board.teamOn(board.getPieceFromRegistry(R_KING, 0).x, y) != EMPTY_TEAM)
             break;
     }
 
@@ -623,22 +623,22 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
 MOVES Moves::getMoves(Board &board)
 {
     // 对面笑
-    for (int y = board.pieceRegistry[R_KING][0].y + 1; y <= 9; y++)
+    for (int y = board.getPieceFromRegistry(R_KING, 0).y + 1; y <= 9; y++)
     {
-        if (board.pieceidOn(board.pieceRegistry[R_KING][0].x, y) == B_KING)
+        if (board.pieceidOn(board.getPieceFromRegistry(R_KING, 0).x, y) == B_KING)
         {
             if (board.team == RED)
             {
-                return MOVES{Move{board.pieceRegistry[R_KING][0].x, board.pieceRegistry[R_KING][0].y, board.pieceRegistry[B_KING][0].x,
-                                  board.pieceRegistry[B_KING][0].y}};
+                return MOVES{Move{board.getPieceFromRegistry(R_KING, 0).x, board.getPieceFromRegistry(R_KING, 0).y, board.getPieceFromRegistry(B_KING, 0).x,
+                                  board.getPieceFromRegistry(B_KING, 0).y}};
             }
             else
             {
-                return MOVES{Move{board.pieceRegistry[B_KING][0].x, board.pieceRegistry[B_KING][0].y, board.pieceRegistry[R_KING][0].x,
-                                  board.pieceRegistry[R_KING][0].y}};
+                return MOVES{Move{board.getPieceFromRegistry(B_KING, 0).x, board.getPieceFromRegistry(B_KING, 0).y, board.getPieceFromRegistry(R_KING, 0).x,
+                                  board.getPieceFromRegistry(R_KING, 0).y}};
             }
         }
-        if (board.teamOn(board.pieceRegistry[R_KING][0].x, y) != EMPTY_TEAM)
+        if (board.teamOn(board.getPieceFromRegistry(R_KING, 0).x, y) != EMPTY_TEAM)
         {
             break;
         }

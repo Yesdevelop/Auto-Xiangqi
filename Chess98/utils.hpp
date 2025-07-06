@@ -6,7 +6,7 @@
 /// @return
 bool inCheck(Board &board)
 {
-    Piece king = board.team == RED ? board.pieceRegistry[R_KING][0] : board.pieceRegistry[B_KING][0];
+    Piece king = board.team == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
     int x = king.x;
     int y = king.y;
     int team = king.team();

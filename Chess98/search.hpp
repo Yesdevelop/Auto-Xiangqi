@@ -573,7 +573,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     {
         this->pHistory->add(bestMove, depth);
         this->pTransportation->add(board, bestMove, vlBest, type, depth);
-        if(type != ALPHA_TYPE)
+        if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
         }
@@ -762,7 +762,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     {
         this->pHistory->add(bestMove, depth);
         this->pTransportation->add(board, bestMove, vlBest, type, depth);
-        if(type != ALPHA_TYPE)
+        if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
         }
