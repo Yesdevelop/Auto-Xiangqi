@@ -744,7 +744,7 @@ int Board::knightMobility(TEAM teamNow)
 int Board::bottomCannon(TEAM teamNow)
 {
     const std::array<std::array<int, 10>, 9> bottomCannonPosMap{
-            {{{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
+            {{{2, 0, 0, 0, 0, 0, 0, 0, 0, -2}},
              {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
              {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
              {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
@@ -752,7 +752,7 @@ int Board::bottomCannon(TEAM teamNow)
              {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
              {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
              {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
-             {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}}}};
+             {{2, 0, 0, 0, 0, 0, 0, 0, 0, -2}}}};
     int result = 0;
     PIECES enemyCannons = this->getLivePiecesById(-teamNow * R_CANNON);
     const int BOTTOM_CANNON_PENALTY = teamNow  == RED ? RED_BOTTOM_CANNON_PENALTY : BLACK_BOTTOM_CANNON_PENALTY;
@@ -763,9 +763,10 @@ int Board::bottomCannon(TEAM teamNow)
     // 对面的炮
     for (const Piece &piece : enemyCannons)
     {
-        if(piece.team() * bottomCannonPosMap[piece.x][piece.y] < 0)
+        const int bottomCannonStatus = bottomCannonPosMap[piece.x][piece.y];
+        if(piece.team() * bottomCannonStatus < 0)
         {
-            result -= BOTTOM_CANNON_PENALTY;
+            result -= std::abs(bottomCannonStatus) == 1 ? BOTTOM_CANNON_PENALTY / 2 : BOTTOM_CANNON_PENALTY;
         }
     }
     return result;
