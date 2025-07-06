@@ -657,7 +657,7 @@ int Board::knightMobility() const
     {
         const int x = knight.x;
         const int y = knight.y;
-        if(badKnightPosMap[x][y] != 1)
+        if(badKnightPosMap[size_t(x)][size_t(y)] != 1)
         {
             if (this->pieceidOn(x - 1, y) == EMPTY_PIECEID)
             {
