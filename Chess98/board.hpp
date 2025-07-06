@@ -429,19 +429,19 @@ void Board::initEvaluate()
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
 
     // 根据受威胁的程度，计算底炮威胁分
-    RED_BOTTOM_CANNON_PENALTY = INITIAL_BOTTOM_CANNON_PENALTY * vlBlackAttack / TOTAL_ATTACK_VALUE;
+    RED_BOTTOM_CANNON_PENALTY = (vlOpen * INITIAL_BOTTOM_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
     RED_BOTTOM_CANNOM_MARGIN = RED_BOTTOM_CANNON_PENALTY;
 
-    BLACK_BOTTOM_CANNON_PENALTY = INITIAL_BOTTOM_CANNON_PENALTY * vlRedAttack / TOTAL_ATTACK_VALUE;
+    BLACK_BOTTOM_CANNON_PENALTY = (vlOpen * INITIAL_BOTTOM_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
     BLACK_BOTTOM_CANNOM_MARGIN = BLACK_BOTTOM_CANNON_PENALTY;
 
     // 根据受威胁的程度，计算中炮威胁分
-    RED_CENTER_CANNON_PENALTY = INITIAL_CENTER_CANNON_PENALTY * vlBlackAttack / TOTAL_ATTACK_VALUE;
-    RED_SUPER_CENTER_CANNON_PENALTY = INITIAL_SUPER_CENTER_CANNON_PENALTY * vlBlackAttack / TOTAL_ATTACK_VALUE;
+    RED_CENTER_CANNON_PENALTY = (vlOpen * INITIAL_CENTER_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
+    RED_SUPER_CENTER_CANNON_PENALTY = (vlOpen * INITIAL_SUPER_CENTER_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
     RED_CENTER_CANNON_MARGIN = RED_CENTER_CANNON_PENALTY + RED_SUPER_CENTER_CANNON_PENALTY;
 
-    BLACK_CENTER_CANNON_PENALTY = INITIAL_CENTER_CANNON_PENALTY * vlRedAttack / TOTAL_ATTACK_VALUE;
-    BLACK_SUPER_CENTER_CANNON_PENALTY = INITIAL_SUPER_CENTER_CANNON_PENALTY * vlRedAttack / TOTAL_ATTACK_VALUE;
+    BLACK_CENTER_CANNON_PENALTY = (vlOpen * INITIAL_CENTER_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
+    BLACK_SUPER_CENTER_CANNON_PENALTY = (vlOpen * INITIAL_SUPER_CENTER_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
     BLACK_CENTER_CANNON_MARGIN = BLACK_CENTER_CANNON_PENALTY + BLACK_SUPER_CENTER_CANNON_PENALTY;
 
     const int RED_CANNON_COMBINATION_MARGIN = RED_BOTTOM_CANNOM_MARGIN + RED_CENTER_CANNON_MARGIN;
@@ -819,16 +819,25 @@ int Board::weakStatus(TEAM teamNow)
     const PIECES enemyRooks = this->getPiecesFromRegistry(-teamNow * R_ROOK);
     const PIECES myAdvisors = this->getPiecesFromRegistry(teamNow * R_GUARD);
     const PIECES myBishops = this->getPiecesFromRegistry(teamNow * R_BISHOP);
+    const PIECES myRooks = this->getPiecesFromRegistry(teamNow * R_ROOK);
     if(!enemyCannons.empty() && myBishops.size() < 2)
     {
-        result -= WEAK_STATUS_PENALTY;
+        result -= ((int)enemyCannons.size() + (2 - (int)myBishops.size())) * WEAK_STATUS_PENALTY / 4;
     }
     if(myAdvisors.size() < 2)
     {
-        if(enemyRooks.size() + enemyKnights.size() >= 2)
+        if(enemyRooks.size() == 2)
         {
-            result -= WEAK_STATUS_PENALTY;
+            result -= WEAK_STATUS_PENALTY / 2;
         }
+        if(!enemyKnights.empty())
+        {
+            result -= WEAK_STATUS_PENALTY / 2;
+        }
+    }
+    if(myRooks.empty() && !enemyRooks.empty())
+    {
+        result -= (int)enemyRooks.size() * WEAK_STATUS_PENALTY / 2;
     }
     return result;
 }
