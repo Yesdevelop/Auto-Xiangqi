@@ -650,14 +650,14 @@ int Board::knightMobility() const
         {
             if (this->teamOn(x - 2, y - 1) != this->team && this->teamOn(x - 2, y - 1) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x - 2][y - 1] != 1)
+                if (badKnightPosMap[size_t(x - 2)][size_t(y - 1)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
             if (this->teamOn(x - 2, y + 1) != this->team && this->teamOn(x - 2, y + 1) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x - 2][y + 1] != 1)
+                if (badKnightPosMap[size_t(x - 2)][size_t(y + 1)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
@@ -667,14 +667,14 @@ int Board::knightMobility() const
         {
             if (this->teamOn(x + 2, y - 1) != this->team && this->teamOn(x + 2, y - 1) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x + 2][y - 1] != 1)
+                if (badKnightPosMap[size_t(x + 2)][size_t(y - 1)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
             if (this->teamOn(x + 2, y + 1) != this->team && this->teamOn(x + 2, y + 1) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x + 2][y + 1] != 1)
+                if (badKnightPosMap[size_t(x + 2)][size_t(y + 1)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
@@ -684,14 +684,14 @@ int Board::knightMobility() const
         {
             if (this->teamOn(x - 1, y - 2) != this->team && this->teamOn(x - 1, y - 2) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x - 1][y - 2] != 1)
+                if (badKnightPosMap[size_t(x - 1)][size_t(y - 2)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
             if (this->teamOn(x + 1, y - 2) != this->team && this->teamOn(x + 1, y - 2) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x + 1][y - 2] != 1)
+                if (badKnightPosMap[size_t(x + 1)][size_t(y - 2)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
@@ -701,14 +701,14 @@ int Board::knightMobility() const
         {
             if (this->teamOn(x - 1, y + 2) != this->team && this->teamOn(x - 1, y + 2) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x - 1][y + 2] != 1)
+                if (badKnightPosMap[size_t(x - 1)][size_t(y + 2)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
             }
             if (this->teamOn(x + 1, y + 2) != this->team && this->teamOn(x + 1, y + 2) != OVERFLOW_TEAM)
             {
-                if (badKnightPosMap[x + 1][y + 2] != 1)
+                if (badKnightPosMap[size_t(x + 1)][size_t(y + 2)] != 1)
                 {
                     result += KNIGHT_EXTEND;
                 }
