@@ -42,13 +42,13 @@ public:
 
     int evaluate(int vlAlpha, int vlBeta);
 
-    int rookMobility();
+    int rookMobility(TEAM team);
 
-    int knightMobility();
+    int knightMobility(TEAM team);
 
-    int bottomCannon();
+    int bottomCannon(TEAM team);
 
-    int centerCannon();
+    int centerCannon(TEAM team);
 
     void doNullMove()
     {
@@ -426,6 +426,40 @@ void Board::initEvaluate()
     vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
 
+    // 根据受威胁的程度，计算底炮威胁分
+    RED_BOTTOM_CANNON_PENALTY = INITIAL_BOTTOM_CANNON_PENALTY * vlBlackAttack / TOTAL_ATTACK_VALUE;
+    RED_BOTTOM_CANNON_PROTECTION_REWARD = INITIAL_BOTTOM_CANNON_PROTECTION_REWARD * vlBlackAttack / TOTAL_ATTACK_VALUE;
+    RED_BOTTOM_CANNOM_MARGIN = std::max<int>(RED_BOTTOM_CANNON_PENALTY,RED_BOTTOM_CANNON_PROTECTION_REWARD * 2);
+
+    BLACK_BOTTOM_CANNON_PENALTY = INITIAL_BOTTOM_CANNON_PENALTY * vlRedAttack / TOTAL_ATTACK_VALUE;
+    BLACK_BOTTOM_CANNON_PROTECTION_REWARD = INITIAL_BOTTOM_CANNON_PROTECTION_REWARD * vlRedAttack / TOTAL_ATTACK_VALUE;
+    BLACK_BOTTOM_CANNOM_MARGIN = std::max<int>(BLACK_BOTTOM_CANNON_PENALTY,BLACK_BOTTOM_CANNON_PROTECTION_REWARD * 2);
+
+    // 根据受威胁的程度，计算中炮威胁分
+    RED_CENTER_CANNON_PENALTY = INITIAL_CENTER_CANNON_PENALTY * vlBlackAttack / TOTAL_ATTACK_VALUE;
+    RED_SUPER_CENTER_CANNON_PENALTY = INITIAL_CENTER_CANNON_PROTECTION_REWARD * vlBlackAttack / TOTAL_ATTACK_VALUE;
+    RED_CENTER_CANNON_MARGIN = std::max<int>(RED_CENTER_CANNON_PENALTY * 2,RED_SUPER_CENTER_CANNON_PENALTY * 8);
+
+    BLACK_CENTER_CANNON_PENALTY = INITIAL_CENTER_CANNON_PENALTY * vlRedAttack / TOTAL_ATTACK_VALUE;
+    BLACK_SUPER_CENTER_CANNON_PENALTY = INITIAL_CENTER_CANNON_PROTECTION_REWARD * vlRedAttack / TOTAL_ATTACK_VALUE;
+    BLACK_CENTER_CANNON_MARGIN = std::max<int>(BLACK_CENTER_CANNON_PENALTY * 2,BLACK_SUPER_CENTER_CANNON_PENALTY * 8);
+
+    const int RED_CANNON_COMBINATION_MARGIN = RED_BOTTOM_CANNOM_MARGIN + RED_CENTER_CANNON_MARGIN;
+    const int BLACK_CANNON_COMBINATION_MARGIN = BLACK_BOTTOM_CANNOM_MARGIN + BLACK_CENTER_CANNON_MARGIN;
+
+    // 计算懒惰评价边界
+    RED_LAZY_MARGIN_1 = RED_CANNON_COMBINATION_MARGIN + ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+    RED_LAZY_MARGIN_2 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+    RED_LAZY_MARGIN_3 = KNIGHT_EXTEND_MARGIN;
+
+    BLACK_LAZY_MARGIN_1 = BLACK_CANNON_COMBINATION_MARGIN + ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+    BLACK_LAZY_MARGIN_2 = ROOK_EXTEND_MARGIN + KNIGHT_EXTEND_MARGIN;
+    BLACK_LAZY_MARGIN_3 = KNIGHT_EXTEND_MARGIN;
+
+    LAZY_MARGIN_3 = std::max<int>(RED_LAZY_MARGIN_3,BLACK_LAZY_MARGIN_3);
+    LAZY_MARGIN_2 = LAZY_MARGIN_3 + std::max<int>(RED_LAZY_MARGIN_2,BLACK_LAZY_MARGIN_2);
+    LAZY_MARGIN_1 = LAZY_MARGIN_2 + std::max<int>(RED_LAZY_MARGIN_1,BLACK_LAZY_MARGIN_1);
+
     // 调整不受威胁方少掉的士象分
     this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
     this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
@@ -619,10 +653,10 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
 
 /// @brief 车的机动性
 /// @return
-int Board::rookMobility()
+int Board::rookMobility(TEAM teamNow)
 {
     int result = 0;
-    for (const Piece &rook : this->getLivePiecesById(this->team * R_ROOK))
+    for (const Piece &rook : this->getLivePiecesById(teamNow * R_ROOK))
     {
         const int x = rook.x;
         const int y = rook.y;
@@ -631,19 +665,19 @@ int Board::rookMobility()
         BITLINE bitlineY = this->getBitLineY(y);
         REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, x, 8);
         result += ROOK_EXTEND * (regionY[1] - regionY[0] + regionX[1] - regionX[0] - 2);
-        if (this->teamOn(x, regionX[1]) != this->team)
+        if (this->teamOn(x, regionX[1]) != teamNow)
         {
             result += ROOK_EXTEND;
         }
-        if (this->teamOn(x, regionX[0]) != this->team)
+        if (this->teamOn(x, regionX[0]) != teamNow)
         {
             result += ROOK_EXTEND;
         }
-        if (this->teamOn(regionY[1], y) != this->team)
+        if (this->teamOn(regionY[1], y) != teamNow)
         {
             result += ROOK_EXTEND;
         }
-        if (this->teamOn(regionY[1], y) != this->team)
+        if (this->teamOn(regionY[1], y) != teamNow)
         {
             result += ROOK_EXTEND;
         }
@@ -653,7 +687,7 @@ int Board::rookMobility()
 
 /// @brief 马的灵活性
 /// @return
-int Board::knightMobility()
+int Board::knightMobility(TEAM teamNow)
 {
     const std::array<std::array<int, 10>, 9> badKnightPosMap{
         {{{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
@@ -670,7 +704,7 @@ int Board::knightMobility()
 
     int goodTargetCnt = 0;
 
-    for (const Piece &knight : this->getLivePiecesById(this->team * R_KNIGHT))
+    for (const Piece &knight : this->getLivePiecesById(teamNow * R_KNIGHT))
     {
         const int x = knight.x;
         const int y = knight.y;
@@ -685,7 +719,7 @@ int Board::knightMobility()
                 continue;
             }
             const int teamOnTarget = this->teamOn(targetX, targetY);
-            if (teamOnTarget == this->team || teamOnTarget == OVERFLOW_TEAM)
+            if (teamOnTarget == teamNow || teamOnTarget == OVERFLOW_TEAM)
             {
                 continue;
             }
@@ -709,11 +743,17 @@ int Board::knightMobility()
 
 /// @brief 沉底炮威胁
 /// @return
-int Board::bottomCannon()
+int Board::bottomCannon(TEAM teamNow)
 {
     int result = 0;
-    PIECES enemyCannons = this->getLivePiecesById(-this->team * R_CANNON);
-    const int threatPosSelf = this->team == RED ? 0 : 9;
+    PIECES enemyCannons = this->getLivePiecesById(-teamNow * R_CANNON);
+    const int threatPosSelf = teamNow == RED ? 0 : 9;
+    const int BOTTOM_CANNON_PENALTY = teamNow  == RED ? RED_BOTTOM_CANNON_PENALTY : BLACK_BOTTOM_CANNON_PENALTY;
+    const int BOTTOM_CANNON_PROTECTION_REWARD = teamNow  == RED ? RED_BOTTOM_CANNON_PROTECTION_REWARD : BLACK_BOTTOM_CANNON_PROTECTION_REWARD;
+    if(BOTTOM_CANNON_PENALTY == 0 || BOTTOM_CANNON_PROTECTION_REWARD == 0)
+    {
+        return 0;
+    }
     // 对面的炮
     for (const Piece &piece : enemyCannons)
     {
@@ -722,7 +762,7 @@ int Board::bottomCannon()
         {
             result -= BOTTOM_CANNON_PENALTY;
             // 看相的位置
-            for (const Piece &bishop : this->getLivePiecesById(this->team * R_BISHOP))
+            for (const Piece &bishop : this->getLivePiecesById(teamNow * R_BISHOP))
             {
                 if ((piece.x < 4 && bishop.x < 4) || (piece.y > 4 && bishop.y > 4))
                 {
@@ -736,11 +776,17 @@ int Board::bottomCannon()
 
 /// @brief 当头炮威胁
 /// @return
-int Board::centerCannon()
+int Board::centerCannon(TEAM teamNow)
 {
     int result = 0;
-    const Piece selfKing = this->getPieceFromRegistry(this->team * R_KING, 0);
-    const PIECES enemyCannons = this->getPiecesFromRegistry(-this->team * R_KING);
+    const Piece selfKing = this->getPieceFromRegistry(teamNow * R_KING, 0);
+    const PIECES enemyCannons = this->getPiecesFromRegistry(-teamNow * R_KING);
+    const int SUPER_CENTER_CANNON_PENALTY = teamNow == RED ? RED_SUPER_CENTER_CANNON_PENALTY : BLACK_SUPER_CENTER_CANNON_PENALTY;
+    const int CENTER_CANNON_PENALTY = teamNow == RED ? RED_CENTER_CANNON_PENALTY : BLACK_CENTER_CANNON_PENALTY;
+    if(SUPER_CENTER_CANNON_PENALTY == 0 || CENTER_CANNON_PENALTY == 0)
+    {
+        return 0;
+    }
     for (const Piece &cannon : enemyCannons)
     {
         if (cannon.x == 4)
@@ -772,8 +818,8 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_1;
     }
     // Level 2
-    vlEvaluate += this->team == RED ? bottomCannon() : -bottomCannon();
-    vlEvaluate += this->team == RED ? centerCannon() : -centerCannon();
+    vlEvaluate += this->team == RED ? bottomCannon(RED) - bottomCannon(BLACK) : bottomCannon(BLACK) - bottomCannon(RED);
+    vlEvaluate += this->team == RED ? centerCannon(RED) - centerCannon(BLACK) : centerCannon(BLACK) - centerCannon(RED);
     if (vlEvaluate <= vlAlpha - LAZY_MARGIN_2)
     {
         return vlAlpha - LAZY_MARGIN_2;
@@ -783,7 +829,7 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_2;
     }
     // Level 3
-    vlEvaluate += this->team == RED ? rookMobility() : -rookMobility();
+    vlEvaluate += this->team == RED ? rookMobility(RED) - rookMobility(BLACK) : rookMobility(BLACK) - rookMobility(RED);
     if (vlEvaluate <= vlAlpha - LAZY_MARGIN_3)
     {
         return vlAlpha - LAZY_MARGIN_3;
@@ -793,7 +839,7 @@ int Board::evaluate(int vlAlpha, int vlBeta)
         return vlBeta + LAZY_MARGIN_3;
     }
     // Level 4
-    vlEvaluate += this->team == RED ? knightMobility() : -knightMobility();
+    vlEvaluate += this->team == RED ? knightMobility(RED) - knightMobility(BLACK) : knightMobility(BLACK) - knightMobility(RED);
 
     return vlEvaluate;
 }
