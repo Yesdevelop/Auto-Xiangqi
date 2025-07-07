@@ -44,6 +44,7 @@ protected:
 private:
     friend void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string fenCode);
     friend void setBoardCode(const Board &board);
+    friend class SearchTricks;
 };
 
 // tricks
@@ -57,6 +58,49 @@ public:
         {
             board.historyMoves.back().isCheckingMove = true;
         }
+    }
+
+    static TrickResult<int> transportationScorePV(Search& search, Board& board, int alpha, int beta, int depth)
+    {
+        const int vlHash = search.pTransportation->getValue(board, alpha, beta, depth);
+        if (vlHash != -INF)
+        {
+            if (vlHash >= beta)
+            {
+                if (search.searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
+                {
+                    return TrickResult<int>{true, { vlHash }};
+                }
+                else if (depth <= 0)
+                {
+                    return TrickResult<int>{true, { beta }};
+                }
+            }
+            else if (vlHash <= alpha)
+            {
+                if (search.searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
+                {
+                    return TrickResult<int>{true, { vlHash }};
+                }
+                else if (depth <= 0)
+                {
+                    return TrickResult<int>{true, { alpha }};
+                }
+            }
+            else
+            {
+                const int vl1 = search.searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
+                if (vl1 > alpha)
+                {
+                    const int vl2 = search.searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+                    if (vl2 < beta)
+                    {
+                        return TrickResult<int>{true, { vlHash }};
+                    }
+                }
+            }
+        }
+        return TrickResult<int>{false, {}};
     }
 
     static TrickResult<int> nullAndDeltaPruning(Board &board, bool mChecking, int &alpha, int &beta, int &vlBest)
@@ -138,6 +182,8 @@ public:
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
+    nodecount++;
+
     if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
     {
         exit(0);
@@ -447,43 +493,10 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // 置换表分数
-    const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
-    if (vlHash != -INF)
+    TrickResult<int> ttscoreResult = SearchTricks::transportationScorePV(*this, board, alpha, beta, depth);
+    if (ttscoreResult.isSuccess == true)
     {
-        if (vlHash >= beta)
-        {
-            if (Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
-            {
-                return vlHash;
-            }
-            else if (depth <= 0)
-            {
-                return beta;
-            }
-        }
-        else if (vlHash <= alpha)
-        {
-            if (Search::searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
-            {
-                return vlHash;
-            }
-            else if (depth <= 0)
-            {
-                return alpha;
-            }
-        }
-        else
-        {
-            const int vl1 = Search::searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
-            if (vl1 > alpha)
-            {
-                const int vl2 = Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-                if (vl2 < beta)
-                {
-                    return vlHash;
-                }
-            }
-        }
+        return ttscoreResult.data[0];
     }
 
     // 静态搜索
