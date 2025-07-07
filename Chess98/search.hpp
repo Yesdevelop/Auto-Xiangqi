@@ -107,7 +107,7 @@ public:
     {
         if (!mChecking)
         {
-            int vl = board.evaluate(alpha, beta);
+            int vl = board.evaluate();
             if (vl >= beta)
             {
                 return TrickResult<int>{true, {vl}};
@@ -144,7 +144,7 @@ public:
     {
         if (depth == 1)
         {
-            int vl = board.evaluate(alpha, beta);
+            int vl = board.evaluate();
             if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
             {
                 return TrickResult<int>{true, {vl}};
@@ -201,7 +201,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
     // situation info
     std::cout << "situation: " << boardToFen(board) << std::endl;
-    std::cout << "evaluate: " << board.evaluate(-INF, INF) << std::endl;
+    std::cout << "evaluate: " << board.evaluate() << std::endl;
 
     this->rootMoves = Moves::getMoves(board);
 
@@ -756,10 +756,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             }
         }
     }
-    else if(!mChecking && depth >= 6)
-    {
-        depth -= 2;
-    }
 
     // 杀手启发
     if (type != BETA_TYPE)
@@ -851,7 +847,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     // 返回评估结果
     if (board.distance > maxDistance)
     {
-        return board.evaluate(alpha, beta);
+        return board.evaluate();
     }
 
     // mate distance pruning
