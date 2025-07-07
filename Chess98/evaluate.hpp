@@ -179,7 +179,7 @@ const int TOTAL_ADVANCED_VALUE = 6;
 // 对方越偏向进攻，过河进入我方地界的棋子就越多，因此可以按照敌方过河子数量调整攻防策略
 
 const int TOTAL_ATTACK_VALUE = 8;
-const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 240;
+const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 300;
 
 // 开局和残局时兵的基础分数
 const int OPEN_PAWN_VAL = 30;
