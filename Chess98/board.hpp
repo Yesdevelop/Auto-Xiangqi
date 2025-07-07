@@ -744,19 +744,19 @@ int Board::knightMobility(TEAM teamNow)
 int Board::bottomCannon(TEAM teamNow)
 {
     const std::array<std::array<int, 10>, 9> bottomCannonPosMap{
-            {{{2, 0, 0, 0, 0, 0, 0, 0, 0, -2}},
-             {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
-             {{2, 0, 0, 0, 0, 0, 0, 0, 0, -2}}}};
+        {{{2, 0, 0, 0, 0, 0, 0, 0, 0, -2}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{1, 0, 0, 0, 0, 0, 0, 0, 0, -1}},
+         {{2, 0, 0, 0, 0, 0, 0, 0, 0, -2}}}};
     int result = 0;
     PIECES enemyCannons = this->getLivePiecesById(-teamNow * R_CANNON);
-    const int BOTTOM_CANNON_PENALTY = teamNow  == RED ? RED_BOTTOM_CANNON_PENALTY : BLACK_BOTTOM_CANNON_PENALTY;
-    if(BOTTOM_CANNON_PENALTY == 0)
+    const int BOTTOM_CANNON_PENALTY = teamNow == RED ? RED_BOTTOM_CANNON_PENALTY : BLACK_BOTTOM_CANNON_PENALTY;
+    if (BOTTOM_CANNON_PENALTY == 0)
     {
         return 0;
     }
@@ -764,7 +764,7 @@ int Board::bottomCannon(TEAM teamNow)
     for (const Piece &piece : enemyCannons)
     {
         const int bottomCannonStatus = bottomCannonPosMap[piece.x][piece.y];
-        if(piece.team() * bottomCannonStatus < 0)
+        if (piece.team() * bottomCannonStatus < 0)
         {
             result -= std::abs(bottomCannonStatus) == 1 ? BOTTOM_CANNON_PENALTY / 2 : BOTTOM_CANNON_PENALTY;
         }
@@ -777,33 +777,33 @@ int Board::bottomCannon(TEAM teamNow)
 int Board::centerCannon(TEAM teamNow)
 {
     const std::array<std::array<int, 10>, 9> centerCannonPosMap{
-            {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 1, 1, 1, 1, 1, 1, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}};
+        {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 1, 1, 1, 1, 1, 1, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}};
     int result = 0;
     const Piece selfKing = this->getPieceFromRegistry(teamNow * R_KING, 0);
     const PIECES enemyCannons = this->getPiecesFromRegistry(-teamNow * R_CANNON);
     const int SUPER_CENTER_CANNON_PENALTY = teamNow == RED ? RED_SUPER_CENTER_CANNON_PENALTY : BLACK_SUPER_CENTER_CANNON_PENALTY;
     const int CENTER_CANNON_PENALTY = teamNow == RED ? RED_CENTER_CANNON_PENALTY : BLACK_CENTER_CANNON_PENALTY;
-    if(SUPER_CENTER_CANNON_PENALTY == 0 || CENTER_CANNON_PENALTY == 0)
+    if (SUPER_CENTER_CANNON_PENALTY == 0 || CENTER_CANNON_PENALTY == 0)
     {
         return 0;
     }
     for (const Piece &cannon : enemyCannons)
     {
-        if(centerCannonPosMap[cannon.x][cannon.y] == 1)
+        if (centerCannonPosMap[cannon.x][cannon.y] == 1)
         {
             // Normal Cannon
             result -= CENTER_CANNON_PENALTY * std::abs(cannon.y - selfKing.y) / 7;
             // Super Cannon
             int num = barrierNumber(this->pieceidMap, selfKing.x, selfKing.y, cannon.x, cannon.y);
-            if(num == 0)
+            if (num == 0)
             {
                 result -= SUPER_CENTER_CANNON_PENALTY * std::abs(cannon.y - selfKing.y) / 7;
             }
@@ -821,22 +821,22 @@ int Board::weakStatus(TEAM teamNow)
     const PIECES myAdvisors = this->getPiecesFromRegistry(teamNow * R_GUARD);
     const PIECES myBishops = this->getPiecesFromRegistry(teamNow * R_BISHOP);
     const PIECES myRooks = this->getPiecesFromRegistry(teamNow * R_ROOK);
-    if(!enemyCannons.empty() && myBishops.size() < 2)
+    if (!enemyCannons.empty() && myBishops.size() < 2)
     {
         result -= ((int)enemyCannons.size() + (2 - (int)myBishops.size())) * WEAK_STATUS_PENALTY / 4;
     }
-    if(myAdvisors.size() < 2)
+    if (myAdvisors.size() < 2)
     {
-        if(enemyRooks.size() == 2)
+        if (enemyRooks.size() == 2)
         {
             result -= WEAK_STATUS_PENALTY / 2;
         }
-        if(!enemyKnights.empty())
+        if (!enemyKnights.empty())
         {
             result -= WEAK_STATUS_PENALTY / 2;
         }
     }
-    if(myRooks.empty() && !enemyRooks.empty())
+    if (myRooks.empty() && !enemyRooks.empty())
     {
         result -= (int)enemyRooks.size() * WEAK_STATUS_PENALTY / 2;
     }
@@ -890,8 +890,8 @@ int Board::evaluate(int vlAlpha, int vlBeta)
     {
         return vlBeta + LAZY_MARGIN_4;
     }
-    // Level 4
-    vlEvaluate += this->team ==  knightMobility(this->team) - knightMobility(-this->team);
+    // Level 5
+    vlEvaluate += this->team == knightMobility(this->team) - knightMobility(-this->team);
 
     return vlEvaluate;
 }
