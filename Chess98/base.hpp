@@ -266,4 +266,4 @@ bool barrierNumber(PIECEID_MAP pieceidMap, int x1, int y1, int x2, int y2)
     return count;
 }
 
-const int QUIESCENCE_EXTEND_DEPTH = 2;
+const int QUIESCENCE_EXTEND_DEPTH = 1;
