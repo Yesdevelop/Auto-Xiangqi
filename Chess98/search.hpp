@@ -494,7 +494,7 @@ int Search::searchPV(int depth, int alpha, int beta)
 
     // 置换表分数
     TrickResult<int> ttscoreResult = SearchTricks::transportationScorePV(*this, board, alpha, beta, depth);
-    if (ttscoreResult.isSuccess == true)
+    if (ttscoreResult.isSuccess)
     {
         return ttscoreResult.data[0];
     }
