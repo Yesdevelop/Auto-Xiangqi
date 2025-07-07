@@ -294,4 +294,54 @@ bool barrierNumber(PIECEID_MAP pieceidMap, int x1, int y1, int x2, int y2)
     return count;
 }
 
+
+FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0)
+{
+    FILE *file = nullptr;
+    errno_t result = fopen_s(&file, filename.c_str(), mode);
+    if (retryCount >= 5)
+    {
+        std::cerr << "Failed to open file: " << filename << std::endl;
+        std::cerr << "UI cannot run, please check the file path and permissions." << std::endl;
+        system("pause");
+        throw std::runtime_error("Failed to open file after multiple attempts.");
+    }
+    if (result != 0)
+    {
+        wait(50);
+        return openFile(filename, mode, retryCount + 1);
+    }
+    return file;
+}
+
+std::string readFile(const std::string &filename)
+{
+    FILE *file = openFile(filename, "r");
+    if (!file)
+    {
+        return "";
+    }
+
+    fseek(file, 0, SEEK_END);
+    long length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    std::string content(length, '\0');
+    fread(&content[0], 1, length, file);
+    fclose(file);
+    return content;
+}
+
+void writeFile(const std::string &filename, const std::string &content)
+{
+    FILE *file = openFile(filename, "w+");
+    if (!file)
+    {
+        return;
+    }
+
+    fwrite(content.c_str(), 1, content.size(), file);
+    fclose(file);
+}
+
 const int QUIESCENCE_EXTEND_DEPTH = 1;

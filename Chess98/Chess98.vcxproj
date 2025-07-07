@@ -188,7 +188,6 @@
     <ClInclude Include="base.hpp" />
     <ClInclude Include="bitboard.hpp" />
     <ClInclude Include="board.hpp" />
-    <ClInclude Include="book.hpp" />
     <ClInclude Include="evaluate.hpp" />
     <ClInclude Include="hash.hpp" />
     <ClInclude Include="heuristic.hpp" />

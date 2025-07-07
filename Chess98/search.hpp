@@ -1,5 +1,5 @@
 #pragma once
-#include "book.hpp"
+#include "hash.hpp"
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"
@@ -186,6 +186,62 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
 Result Search::searchOpenBook()
 {
+    struct BookStruct
+    {
+        union
+        {
+            uint32_t dwZobristLock;
+            int nPtr;
+        };
+        uint16_t wmv, wvl;
+    };
+
+    struct BookFileStruct
+    {
+        FILE *fp = nullptr;
+        int nLen = 0;
+
+        bool open(const char *szFileName, bool bEdit = false)
+        {
+            errno_t result = fopen_s(&fp, szFileName, bEdit ? "r+b" : "rb");
+            if (result == 0)
+            {
+                fseek(fp, 0, SEEK_END);
+                nLen = ftell(fp) / sizeof(BookStruct);
+                return true;
+            }
+            return false;
+        }
+
+        void close(void) const
+        {
+            fclose(fp);
+        }
+
+        void read(BookStruct &bk, int nMid) const
+        {
+            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
+            fread(&bk, sizeof(BookStruct), 1, fp);
+        }
+
+        void write(const BookStruct &bk, int nMid) const
+        {
+            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
+            fwrite(&bk, sizeof(BookStruct), 1, fp);
+        }
+    };
+
+    std::function<int(BookStruct&, int32)> bookPosCmp = [](BookStruct &bk, int32 hashLock) -> int
+    {
+        uint32_t bookLock = bk.dwZobristLock;
+        uint32_t boardLock = (uint32_t)hashLock;
+        if (bookLock < boardLock)
+            return -1;
+        else if (bookLock > boardLock)
+            return 1;
+        return 0;
+    };
+
     BookStruct bk{};
     auto *pBookFileStruct = new BookFileStruct{};
 
@@ -213,11 +269,11 @@ Result Search::searchOpenBook()
         {
             nMid = (nHigh + nLow) / 2;
             pBookFileStruct->read(bk, nMid);
-            if (BOOK_POS_CMP(bk, nowHashLock) < 0)
+            if (bookPosCmp(bk, nowHashLock) < 0)
             {
                 nLow = nMid + 1;
             }
-            else if (BOOK_POS_CMP(bk, nowHashLock) > 0)
+            else if (bookPosCmp(bk, nowHashLock) > 0)
             {
                 nHigh = nMid - 1;
             }
@@ -242,7 +298,7 @@ Result Search::searchOpenBook()
     for (nMid--; nMid >= 0; nMid--)
     {
         pBookFileStruct->read(bk, nMid);
-        if (BOOK_POS_CMP(bk, nowHashLock) < 0)
+        if (bookPosCmp(bk, nowHashLock) < 0)
         {
             break;
         }
@@ -254,7 +310,7 @@ Result Search::searchOpenBook()
     for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
     {
         pBookFileStruct->read(bk, nMid);
-        if (BOOK_POS_CMP(bk, nowHashLock) > 0)
+        if (bookPosCmp(bk, nowHashLock) > 0)
         {
             break;
         }
