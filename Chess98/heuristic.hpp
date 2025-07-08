@@ -173,6 +173,7 @@ void TransportationTable::add(Board &board, Move goodMove, int vl, int type, int
         {
             t.alphaDepth = depth;
             t.vlAlpha = vl;
+            t.alphaMove = goodMove;
         }
     }
     else if (t.hashLock == board.hashLock)
