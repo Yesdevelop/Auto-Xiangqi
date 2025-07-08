@@ -489,7 +489,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
-        return -INF;
+        return -INF + board.distance;
     }
 
     // 置换表分数
@@ -658,7 +658,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
-        return -INF;
+        return -INF + board.distance;
     }
 
     // 置换表分数
