@@ -345,4 +345,4 @@ void writeFile(const std::string &filename, const std::string &content)
 }
 
 const int QUIESCENCE_EXTEND_DEPTH = 64;
-const int QUIESCENCE_EXTEND_DEPTH_WHEN_CHECKING = 4;
+const int QUIESCENCE_EXTEND_DEPTH_WHEN_CHECKING = 2;
