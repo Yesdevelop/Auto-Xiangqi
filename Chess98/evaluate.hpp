@@ -76,15 +76,15 @@ WEIGHT_MAP SAFE_GUARD_BISHOP_WEIGHT = {
 
 WEIGHT_MAP DANGER_GUARD_BISHOP_WEIGHT = {
     {
-        {0, 0, 108, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {120, 0, 0, 0, 116, 0, 0, 0, 0, 0},
-        {120, 0, 120, 0, 0, 0, 0, 0, 0, 0},
-        {0, 129, 129, 0, 0, 0, 0, 0, 0, 0},
-        {120, 0, 120, 0, 0, 0, 0, 0, 0, 0},
-        {120, 0, 0, 0, 116, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 108, 0, 0, 0, 0, 0, 0, 0},
+            {0,   0,   128, 0,   0,   0,   0,   0,   0,   0},
+            {0,   0,   0,   0,   0,   0,   0,   0,   0,   0},
+            {140, 0,   0,   0,   136, 0,   0,   0,   0,   0},
+            {140, 0,   140, 0,   0,   0,   0,   0,   0,   0},
+            {0,   149, 149, 0,   0,   0,   0,   0,   0,   0},
+            {140, 0,   140, 0,   0,   0,   0,   0,   0,   0},
+            {140, 0,   0,   0,   136, 0,   0,   0,   0,   0},
+            {0,   0,   0,   0,   0,   0,   0,   0,   0,   0},
+            {0,   0,   128, 0,   0,   0,   0,   0,   0,   0}
     }};
 
 WEIGHT_MAP OPEN_KNIGHT_WEIGHT = {
@@ -179,7 +179,7 @@ const int TOTAL_ADVANCED_VALUE = 6;
 // 对方越偏向进攻，过河进入我方地界的棋子就越多，因此可以按照敌方过河子数量调整攻防策略
 
 const int TOTAL_ATTACK_VALUE = 8;
-const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 240;
+const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 80 * 4;
 
 // 开局和残局时兵的基础分数
 const int OPEN_PAWN_VAL = 30;
@@ -316,8 +316,10 @@ const int MAX_SEARCH_DISTANCE = 64;
 const int DELTA_PRUNING_MARGIN = 300;
 const int FUTILITY_PRUNING_MARGIN = 400;
 
-const int INITIAL_BOTTOM_CANNON_PENALTY = 15;
-const int TERMINAL_BOTTOM_CANNON_PENALTY = 5;
+const int INITIAL_BOTTOM_CANNON_REWARD = 15;
+const int TERMINAL_BOTTOM_CANNON_REWARD = 5;
 
-const int INITIAL_CENTER_CANNON_PENALTY = 15;
-const int TERMINAL_CENTER_CANNON_PENALTY = 5;
+const int INITIAL_CENTER_CANNON_REWARD = 15;
+const int TERMINAL_CENTER_CANNON_REWARD = 5;
+
+const int KNIGHT_ROAD_REWARD = 11;

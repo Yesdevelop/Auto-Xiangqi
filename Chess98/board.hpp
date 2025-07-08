@@ -418,23 +418,23 @@ void Board::initEvaluate()
     vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
 
-    const int BOTTOM_CANNON_PENALTY = (vlOpen * INITIAL_BOTTOM_CANNON_PENALTY + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_BOTTOM_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
-    const int CENTER_CANNON_PENALTY = (vlOpen * INITIAL_CENTER_CANNON_PENALTY + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_CENTER_CANNON_PENALTY) / TOTAL_MIDGAME_VALUE;
+    const int BOTTOM_CANNON_REWARD = (vlOpen * INITIAL_BOTTOM_CANNON_REWARD + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_BOTTOM_CANNON_REWARD) / TOTAL_MIDGAME_VALUE;
+    const int CENTER_CANNON_REWARD = (vlOpen * INITIAL_CENTER_CANNON_REWARD + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_CENTER_CANNON_REWARD) / TOTAL_MIDGAME_VALUE;
 
     //底炮
     const std::vector<int> bottomCannonXList = {0,1,7,8};
     for(auto x : bottomCannonXList)
     {
-        pieceWeights[R_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_PENALTY : BOTTOM_CANNON_PENALTY / 2;
-        pieceWeights[B_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_PENALTY : BOTTOM_CANNON_PENALTY / 2;
+        pieceWeights[R_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_REWARD : BOTTOM_CANNON_REWARD / 2;
+        pieceWeights[B_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_REWARD : BOTTOM_CANNON_REWARD / 2;
     }
 
     //中炮
-    const std::vector<int> centerCannonYList = {2,3,4,5,6,7};
+    const std::vector<int> centerCannonYList = {2,4,5,6};
     for(auto y : centerCannonYList)
     {
-        pieceWeights[R_CANNON][4][y] += CENTER_CANNON_PENALTY / (y - 1);
-        pieceWeights[B_CANNON][4][y] += CENTER_CANNON_PENALTY / (y - 1);
+        pieceWeights[R_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
+        pieceWeights[B_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
     }
 
     //马前卒
@@ -455,13 +455,13 @@ void Board::initEvaluate()
         {
             if(this->pieceidOn(knight.x,knight.y + 1) == R_PAWN)
             {
-                pieceWeights[R_PAWN][knight.x][knight.y + 2] += 15;
+                pieceWeights[R_PAWN][knight.x][knight.y + 2] += KNIGHT_ROAD_REWARD;
             }
         }
         else if(searchPosMap[knight.x][knight.y] * knight.team() == 3)
         {
-            pieceWeights[R_PAWN][knight.x - 1][knight.y + 4] += 15;
-            pieceWeights[R_PAWN][knight.x + 1][knight.y + 4] += 15;
+            pieceWeights[R_PAWN][knight.x - 1][knight.y + 4] += KNIGHT_ROAD_REWARD;
+            pieceWeights[R_PAWN][knight.x + 1][knight.y + 4] += KNIGHT_ROAD_REWARD;
         }
     }
 
@@ -472,13 +472,13 @@ void Board::initEvaluate()
         {
             if(this->pieceidOn(knight.x,knight.y - 1) == B_PAWN)
             {
-                pieceWeights[B_PAWN][knight.x][size_t(9) - knight.y + 2] += 15;
+                pieceWeights[B_PAWN][knight.x][size_t(9) - knight.y + 2] += KNIGHT_ROAD_REWARD;
             }
         }
         else if(searchPosMap[knight.x][knight.y] * knight.team() == 3)
         {
-            pieceWeights[B_PAWN][knight.x - 1][size_t(9) - knight.y + 4] += 15;
-            pieceWeights[B_PAWN][knight.x + 1][size_t(9) - knight.y + 4] += 15;
+            pieceWeights[B_PAWN][knight.x - 1][size_t(9) - knight.y + 4] += KNIGHT_ROAD_REWARD;
+            pieceWeights[B_PAWN][knight.x + 1][size_t(9) - knight.y + 4] += KNIGHT_ROAD_REWARD;
         }
     }
 
