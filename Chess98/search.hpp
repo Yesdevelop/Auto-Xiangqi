@@ -886,6 +886,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     if (mChecking)
     {
         captureSort(board, availableMoves);
+        maxDistance = std::min<int>(QUIESCENCE_EXTEND_DEPTH_WHEN_CHECKING,maxDistance);
     }
 
     // 搜索
