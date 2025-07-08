@@ -799,7 +799,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
             // lmr pruning
             if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 3 &&
-                searchedCnt >= 4)
+                searchedCnt >= 6)
             {
                 vl = -searchCut(depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
             }
