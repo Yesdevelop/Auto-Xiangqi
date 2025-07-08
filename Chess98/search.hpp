@@ -847,6 +847,12 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
 {
     nodecount++;
 
+    // 检查将帅是否在棋盘上
+    if (!board.isKingLive(board.team))
+    {
+        return -INF + board.distance;
+    }
+
     // 返回评估结果
     if (board.distance > maxDistance)
     {
