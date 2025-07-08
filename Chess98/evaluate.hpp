@@ -63,15 +63,15 @@ WEIGHT_MAP END_DEFEND_KING_PAWN_WEIGHT = {
 
 WEIGHT_MAP SAFE_GUARD_BISHOP_WEIGHT = {
     {
-        {0, 0, 50, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 70, 0, 0, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {60, 0, 0, 0, 60, 0, 0, 0, 0, 0},
-        {60, 0, 60, 0, 0, 0, 0, 0, 0, 0},
-        {0, 69, 69, 0, 0, 0, 0, 0, 0, 0},
-        {60, 0, 60, 0, 0, 0, 0, 0, 0, 0},
-        {60, 0, 0, 0, 60, 0, 0, 0, 0, 0},
+        {80, 0, 0, 0, 80, 0, 0, 0, 0, 0},
+        {80, 0, 80, 0, 0, 0, 0, 0, 0, 0},
+        {0, 89, 89, 0, 0, 0, 0, 0, 0, 0},
+        {80, 0, 80, 0, 0, 0, 0, 0, 0, 0},
+        {80, 0, 0, 0, 80, 0, 0, 0, 0, 0},
         {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 50, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 70, 0, 0, 0, 0, 0, 0, 0},
     }};
 
 WEIGHT_MAP DANGER_GUARD_BISHOP_WEIGHT = {
@@ -179,7 +179,7 @@ const int TOTAL_ADVANCED_VALUE = 6;
 // 对方越偏向进攻，过河进入我方地界的棋子就越多，因此可以按照敌方过河子数量调整攻防策略
 
 const int TOTAL_ATTACK_VALUE = 8;
-const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 80 * 4;
+const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 60 * 4;
 
 // 开局和残局时兵的基础分数
 const int OPEN_PAWN_VAL = 30;
