@@ -755,6 +755,9 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                 type = BETA_TYPE;
             }
         }
+    }else if(!mChecking && depth >= 8 && this->board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
+    {
+        depth -= 2;
     }
 
     // 杀手启发
