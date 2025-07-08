@@ -886,7 +886,28 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     if (mChecking)
     {
         captureSort(board, availableMoves);
-        maxDistance = std::min<int>(QUIESCENCE_EXTEND_DEPTH_WHEN_CHECKING,maxDistance);
+        if(board.distance >= 4)
+        {
+            const int i = (int)board.historyMoves.size() - 1;
+            const Move& myFirstMove = board.historyMoves[i - 3];
+            const Move& mySecondMove = board.historyMoves[i - 1];
+            const Move& enemyFirstMove = board.historyMoves[i - 2];
+            const Move& enemySecondMove = board.historyMoves[i];
+            const int myCheckLevel = (int)myFirstMove.isCheckingMove + (int)mySecondMove.isCheckingMove;
+            const int enemyCheckLevel = (int)enemyFirstMove.isCheckingMove + (int)enemySecondMove.isCheckingMove;
+            if(myCheckLevel == 2 && enemyCheckLevel == 2)
+            {
+                return board.evaluate();
+            }
+            else if(myCheckLevel == 2 && enemyCheckLevel == 0)
+            {
+                return -INF + board.distance;
+            }
+            else if(myCheckLevel == 0 && enemyCheckLevel == 2)
+            {
+                return INF - board.distance;
+            }
+        }
     }
 
     // 搜索

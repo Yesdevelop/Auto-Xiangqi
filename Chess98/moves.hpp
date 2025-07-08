@@ -42,6 +42,7 @@ public:
     static MOVES getMoves(Board &board);
 
     static MOVES getCaptureMoves(Board &board);
+
 };
 
 MOVES Moves::king(TEAM team, Board &board, int x, int y)
