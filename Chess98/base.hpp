@@ -344,4 +344,4 @@ void writeFile(const std::string &filename, const std::string &content)
     fclose(file);
 }
 
-const int QUIESCENCE_EXTEND_DEPTH = 2;
+const int QUIESCENCE_EXTEND_DEPTH = 1;
