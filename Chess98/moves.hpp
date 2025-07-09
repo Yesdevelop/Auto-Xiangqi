@@ -615,7 +615,15 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
     {
         std::vector<Move> moves = Moves::generateCaptureMoves(board, piece.x, piece.y);
         for (Move move : moves)
-            result.emplace_back(move);
+        {
+            board.doMove(move);
+            const bool skip = inCheck(board,-board.team);
+            board.undoMove();
+            if(!skip)
+            {
+                result.emplace_back(move);
+            }
+        }
     }
 
     return result;
@@ -664,14 +672,20 @@ MOVES Moves::getMoves(Board &board)
         std::vector<Move> moves = Moves::generateMoves(board, piece.x, piece.y);
         for (Move move : moves)
         {
-            move.attacker = board.piecePosition(move.x1, move.y1);
-            move.captured = board.piecePosition(move.x2, move.y2);
-            if (move.captured.pieceid != EMPTY_PIECEID)
+            board.doMove(move);
+            const bool skip = inCheck(board,-board.team);
+            board.undoMove();
+            if(!skip)
             {
-                move.moveType = CAPTURE;
-                move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.attacker.pieceid));
+                move.attacker = board.piecePosition(move.x1, move.y1);
+                move.captured = board.piecePosition(move.x2, move.y2);
+                if (move.captured.pieceid != EMPTY_PIECEID)
+                {
+                    move.moveType = CAPTURE;
+                    move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.attacker.pieceid));
+                }
+                result.emplace_back(move);
             }
-            result.emplace_back(move);
         }
     }
 

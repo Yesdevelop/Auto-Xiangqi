@@ -89,7 +89,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
             s.board.doMove(node.move);
-            if (inCheck(s.board) == true)
+            if (inCheck(s.board, s.board.team))
                 s.board.historyMoves.back().isCheckingMove = true;
 
             setBoardCode(s.board);

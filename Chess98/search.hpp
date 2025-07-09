@@ -176,6 +176,74 @@ public:
 
         return TrickResult<int>{false, {}};
     }
+
+    static TrickResult<int> repeatCheck(Search *search)
+    {
+        if(search->board.distance >= 32)
+        {
+            std::cout<<std::endl;
+        }
+        if(search->board.distance >= 4 && search->board.historyMoves.back().isCheckingMove)
+        {
+            int repeatCnt = 2;
+            bool mySide = false;
+            bool myFaceChecking = true;
+            bool enemyFaceChecking = true;
+            for(int i = (int)search->board.historyMoves.size() - 1;i >= 0 && repeatCnt >= 0;i--)
+            {
+                const auto& historyMove = search->board.historyMoves[i];
+                if(historyMove.captured.pieceid != EMPTY_PIECEID)
+                {
+                    break;
+                }
+                else if(std::abs(historyMove.attacker.pieceid) == R_PAWN)
+                {
+                    if(historyMove.attacker.team() == RED && historyMove.y1 == 4)
+                    {
+                        break;
+                    }
+                    else if(historyMove.attacker.team() == BLACK && historyMove.y2 == 5)
+                    {
+                        break;
+                    }
+                }
+
+                if(search->board.hashKeyList[i] == search->board.hashKey)
+                {
+                    repeatCnt--;
+                    if(repeatCnt == 0)
+                    {
+                        if(myFaceChecking && enemyFaceChecking)
+                        {
+                            return TrickResult<int>{true, {DrawValue}};
+                        }
+                        else if(myFaceChecking && !enemyFaceChecking)
+                        {
+                            return TrickResult<int>{true, {INF - search->board.distance}};
+                        }
+                        else if(!myFaceChecking && enemyFaceChecking)
+                        {
+                            return TrickResult<int>{true, {-INF + search->board.distance}};
+                        }
+                        else
+                        {
+                            return TrickResult<int>{true, {0}};
+                        }
+                    }
+                }
+                if(mySide)
+                {
+                    myFaceChecking = myFaceChecking && search->board.historyMoves[i].isCheckingMove;
+                }
+                else
+                {
+                    enemyFaceChecking = enemyFaceChecking && search->board.historyMoves[i].isCheckingMove;
+                }
+                mySide = !mySide;
+            }
+        }
+        return TrickResult<int>{false, {}};
+    }
 };
 
 // functions
@@ -423,7 +491,6 @@ Result Search::searchRoot(int depth)
     for (const Move &move : rootMoves)
     {
         board.doMove(move);
-
         if (vlBest == -INF)
         {
             vl = -searchPV(depth - 1, -INF, -vlBest);
@@ -453,7 +520,6 @@ Result Search::searchRoot(int depth)
                 }
             }
         }
-
         board.undoMove();
     }
 
@@ -515,10 +581,17 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // variables
-    const bool mChecking = inCheck(board);
+    const bool mChecking = inCheck(board,board.team);
 
     // 验证上一步是否是将军着法
     SearchTricks::setCheckingMove(board, mChecking);
+
+    // 重复检测
+    TrickResult<int> repeatResult = SearchTricks::repeatCheck(this);
+    if (repeatResult.isSuccess)
+    {
+        return repeatResult.data[0];
+    }
 
     // tricks
     if (!mChecking)
@@ -694,10 +767,17 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // variables
-    const bool mChecking = inCheck(board);
+    const bool mChecking = inCheck(board,board.team);
 
     // 验证上一步是否是将军着法
     SearchTricks::setCheckingMove(board, mChecking);
+
+    // 重复检测
+    TrickResult<int> repeatResult = SearchTricks::repeatCheck(this);
+    if (repeatResult.isSuccess)
+    {
+        return repeatResult.data[0];
+    }
 
     // tricks
     if (!mChecking)
@@ -866,7 +946,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     }
 
     // variables
-    const bool mChecking = inCheck(board);
+    const bool mChecking = inCheck(board,board.team);
     int vlBest = -INF;
 
     // 验证上一步是否是将军着法
@@ -877,6 +957,13 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     if (nullDeltaResult.isSuccess)
     {
         return nullDeltaResult.data[0];
+    }
+
+    // 重复检测
+    TrickResult<int> repeatResult = SearchTricks::repeatCheck(this);
+    if (repeatResult.isSuccess)
+    {
+        return repeatResult.data[0];
     }
 
     // 搜索
