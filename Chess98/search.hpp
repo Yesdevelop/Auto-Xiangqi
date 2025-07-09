@@ -258,6 +258,7 @@ public:
             }
         }
 
+#ifdef debug
         const bool debug = search->board.distance >= 32 && search->board.historyMoves.back().isCheckingMove;
         if(debug)
         {
@@ -268,6 +269,7 @@ public:
             }
             exit(0);
         }
+#endif
         return TrickResult<int>{false, {}};
     }
 };
