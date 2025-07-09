@@ -179,10 +179,6 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
-        if(search->board.distance >= 32)
-        {
-            std::cout<<std::endl;
-        }
         if(search->board.distance >= 4 && search->board.historyMoves.back().isCheckingMove)
         {
             int repeatCnt = 2;
@@ -231,16 +227,46 @@ public:
                         }
                     }
                 }
+                const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
                 if(mySide)
                 {
-                    myFaceChecking = myFaceChecking && search->board.historyMoves[i].isCheckingMove;
+                    myFaceChecking = myFaceChecking && currentMoveIsChecking;
                 }
                 else
                 {
-                    enemyFaceChecking = enemyFaceChecking && search->board.historyMoves[i].isCheckingMove;
+                    enemyFaceChecking = enemyFaceChecking && currentMoveIsChecking;
                 }
                 mySide = !mySide;
             }
+            int continuousCheckCnt = 0;
+            for(int i = (int)search->board.historyMoves.size() - 1;i >= 0;i--)
+            {
+                const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
+                if(currentMoveIsChecking)
+                {
+                    const auto& historyMove = search->board.historyMoves[i];
+                    continuousCheckCnt++;
+                    if(continuousCheckCnt >= 4)
+                    {
+                        return TrickResult<int>{true, {DrawValue}};
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        const bool debug = search->board.distance >= 32 && search->board.historyMoves.back().isCheckingMove;
+        if(debug)
+        {
+            std::cout<<"n -> "<<search->board.hashKey<<std::endl;
+            for(int i = (int)search->board.historyMoves.size() - 1;i >= 0;i--)
+            {
+                std::cout<<search->board.hashKeyList[i]<<" "<<search->board.historyMoves[i].isCheckingMove<<" "<<(search->board.historyMoves[i].captured.pieceid != EMPTY_PIECEID)<<std::endl;
+            }
+            exit(0);
         }
         return TrickResult<int>{false, {}};
     }
