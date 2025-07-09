@@ -979,6 +979,11 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     // 搜索
     MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
 
+    if(mChecking)
+    {
+        maxDistance = std::min<int>(maxDistance,QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECK);
+    }
+
     // 搜索
     for (const Move &move : availableMoves)
     {

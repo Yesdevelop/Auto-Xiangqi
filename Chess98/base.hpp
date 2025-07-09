@@ -344,5 +344,7 @@ void writeFile(const std::string &filename, const std::string &content)
     fclose(file);
 }
 
-const int QUIESCENCE_EXTEND_DEPTH = 2;
+const int QUIESCENCE_EXTEND_DEPTH = 64;
+const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECK = 6;
+
 const int DrawValue = 20;
