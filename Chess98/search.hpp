@@ -202,7 +202,7 @@ public:
                     {
                         break;
                     }
-                    else if(historyMove.attacker.team() == BLACK && historyMove.y2 == 5)
+                    else if(historyMove.attacker.team() == BLACK && historyMove.y1 == 5)
                     {
                         break;
                     }
