@@ -378,7 +378,11 @@ bool isValidMoveInSituation(Board &board, Move move)
             return false;
     }
 
-    return true;
+    board.doMove(move);
+    const bool skip = inCheck(board,-board.team);
+    board.undoMove();
+
+    return !skip;
 }
 
 /// @brief 检查两个在同行或同列的坐标之间是否存在障碍物（要求这两个位置上必须有子）
