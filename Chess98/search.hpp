@@ -238,24 +238,6 @@ public:
                 }
                 mySide = !mySide;
             }
-            int continuousCheckCnt = 0;
-            for(int i = (int)search->board.historyMoves.size() - 1;i >= 0;i--)
-            {
-                const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
-                if(currentMoveIsChecking)
-                {
-                    const auto& historyMove = search->board.historyMoves[i];
-                    continuousCheckCnt++;
-                    if(continuousCheckCnt >= 4)
-                    {
-                        return TrickResult<int>{true, {DrawValue}};
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
         }
 
 #ifdef debug
