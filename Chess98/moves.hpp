@@ -37,17 +37,14 @@ public:
 
     static MOVES generateCaptureMoves(Board &board, int x, int y);
 
-    static MOVES getCaptureMovesUnordered(Board &board);
-
-    static MOVES getMoves(Board &board);
-
     static MOVES getCaptureMoves(Board &board);
 
+    static MOVES getMoves(Board &board);
 };
 
 MOVES Moves::king(TEAM team, Board &board, int x, int y)
 {
-    MOVES result{};
+    MOVES result;
     result.reserve(8);
 
     // 横坐标应当在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
@@ -589,7 +586,7 @@ MOVES Moves::generateCaptureMoves(Board &board, int x, int y)
         return MOVES{};
 }
 
-MOVES Moves::getCaptureMovesUnordered(Board &board)
+MOVES Moves::getCaptureMoves(Board &board)
 {
     // 对面笑
     for (int y = board.getPieceFromRegistry(R_KING, 0).y + 1; y <= 9; y++)
@@ -617,9 +614,9 @@ MOVES Moves::getCaptureMovesUnordered(Board &board)
         for (Move move : moves)
         {
             board.doMove(move);
-            const bool skip = inCheck(board,-board.team);
+            const bool skip = inCheck(board, -board.team);
             board.undoMove();
-            if(!skip)
+            if (!skip)
             {
                 result.emplace_back(move);
             }
@@ -673,9 +670,9 @@ MOVES Moves::getMoves(Board &board)
         for (Move move : moves)
         {
             board.doMove(move);
-            const bool skip = inCheck(board,-board.team);
+            const bool skip = inCheck(board, -board.team);
             board.undoMove();
-            if(!skip)
+            if (!skip)
             {
                 move.attacker = board.piecePosition(move.x1, move.y1);
                 move.captured = board.piecePosition(move.x2, move.y2);
@@ -686,69 +683,6 @@ MOVES Moves::getMoves(Board &board)
                 }
                 result.emplace_back(move);
             }
-        }
-    }
-
-    return result;
-}
-
-MOVES Moves::getCaptureMoves(Board &board)
-{
-    MOVES moves = Moves::getCaptureMovesUnordered(board);
-
-    MOVES result{};
-    result.reserve(64);
-
-    const std::map<PIECEID, int> weightPairs{
-        {R_KING, 4},
-        {R_ROOK, 4},
-        {R_CANNON, 3},
-        {R_KNIGHT, 3},
-        {R_BISHOP, 2},
-        {R_GUARD, 2},
-        {R_PAWN, 1},
-    };
-    std::array<std::vector<Move>, 9> orderMap{};
-
-    for (const Move &move : moves)
-    {
-        int score = 0;
-
-        Piece attacker = board.piecePosition(move.x1, move.y1);
-        Piece captured = board.piecePosition(move.x2, move.y2);
-        int a = weightPairs.at(abs(captured.pieceid));
-        int b = weightPairs.at(abs(attacker.pieceid));
-        if (hasProtector(board, captured.x, captured.y))
-        {
-            score = a - b + 1;
-
-            if (score < 1)
-            {
-                PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
-                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK ||
-                    isRiveredPawn(board, captured.x, captured.y))
-                {
-                    score = 1;
-                }
-            }
-        }
-        else
-        {
-            score = a + 1;
-        }
-        if (score >= 1)
-        {
-            orderMap[score].emplace_back(move);
-        }
-    }
-
-    for (int score = 8; score >= 1; score--)
-    {
-        for (Move &move : orderMap[score])
-        {
-            move.attacker = board.piecePosition(move.x1, move.y1);
-            move.captured = board.piecePosition(move.x2, move.y2);
-            result.emplace_back(move);
         }
     }
 

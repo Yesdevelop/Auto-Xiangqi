@@ -421,44 +421,44 @@ void Board::initEvaluate()
     const int BOTTOM_CANNON_REWARD = (vlOpen * INITIAL_BOTTOM_CANNON_REWARD + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_BOTTOM_CANNON_REWARD) / TOTAL_MIDGAME_VALUE;
     const int CENTER_CANNON_REWARD = (vlOpen * INITIAL_CENTER_CANNON_REWARD + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_CENTER_CANNON_REWARD) / TOTAL_MIDGAME_VALUE;
 
-    //底炮
-    const std::vector<int> bottomCannonXList = {0,1,7,8};
-    for(auto x : bottomCannonXList)
+    // 底炮
+    const std::vector<int> bottomCannonXList = {0, 1, 7, 8};
+    for (auto x : bottomCannonXList)
     {
         pieceWeights[R_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_REWARD : BOTTOM_CANNON_REWARD / 2;
         pieceWeights[B_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_REWARD : BOTTOM_CANNON_REWARD / 2;
     }
 
-    //中炮
-    const std::vector<int> centerCannonYList = {2,4,5,6};
-    for(auto y : centerCannonYList)
+    // 中炮
+    const std::vector<int> centerCannonYList = {2, 4, 5, 6};
+    for (auto y : centerCannonYList)
     {
         pieceWeights[R_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
         pieceWeights[B_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
     }
 
-    //马前卒
+    // 马前卒
     const std::array<std::array<int, 10>, 9> searchPosMap{
-            {{{0, 0, 2, 1, 0, 0,-1,-2, 0, 0}},
-             {{3, 0, 0, 0, 0, 0, 0, 0, 0,-3}},
-             {{0, 0, 2, 1, 0, 0,-1,-2, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 2, 1, 0, 0,-1,-2, 0, 0}},
-             {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-             {{0, 0, 2, 1, 0, 0,-1,-2, 0, 0}},
-             {{3, 0, 0, 0, 0, 0, 0, 0, 0,-3}},
-             {{0, 0, 2, 1, 0, 0,-1,-2, 0, 0}}}};
+        {{{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
+         {{3, 0, 0, 0, 0, 0, 0, 0, 0, -3}},
+         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
+         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
+         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
+         {{3, 0, 0, 0, 0, 0, 0, 0, 0, -3}},
+         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}}}};
     PIECES redKnights = this->getPiecesFromRegistry(R_KNIGHT);
-    for(auto knight : redKnights)
+    for (auto knight : redKnights)
     {
-        if(searchPosMap[knight.x][knight.y] * knight.team() == 2)
+        if (searchPosMap[knight.x][knight.y] * knight.team() == 2)
         {
-            if(this->pieceidOn(knight.x,knight.y + 1) == R_PAWN)
+            if (this->pieceidOn(knight.x, knight.y + 1) == R_PAWN)
             {
                 pieceWeights[R_PAWN][knight.x][knight.y + 2] += KNIGHT_ROAD_REWARD;
             }
         }
-        else if(searchPosMap[knight.x][knight.y] * knight.team() == 3)
+        else if (searchPosMap[knight.x][knight.y] * knight.team() == 3)
         {
             pieceWeights[R_PAWN][knight.x - 1][knight.y + 4] += KNIGHT_ROAD_REWARD;
             pieceWeights[R_PAWN][knight.x + 1][knight.y + 4] += KNIGHT_ROAD_REWARD;
@@ -466,16 +466,16 @@ void Board::initEvaluate()
     }
 
     PIECES blackKnights = this->getPiecesFromRegistry(B_KNIGHT);
-    for(auto knight : blackKnights)
+    for (auto knight : blackKnights)
     {
-        if(searchPosMap[knight.x][knight.y] * knight.team() == 2)
+        if (searchPosMap[knight.x][knight.y] * knight.team() == 2)
         {
-            if(this->pieceidOn(knight.x,knight.y - 1) == B_PAWN)
+            if (this->pieceidOn(knight.x, knight.y - 1) == B_PAWN)
             {
                 pieceWeights[B_PAWN][knight.x][size_t(9) - knight.y + 2] += KNIGHT_ROAD_REWARD;
             }
         }
-        else if(searchPosMap[knight.x][knight.y] * knight.team() == 3)
+        else if (searchPosMap[knight.x][knight.y] * knight.team() == 3)
         {
             pieceWeights[B_PAWN][knight.x - 1][size_t(9) - knight.y + 4] += KNIGHT_ROAD_REWARD;
             pieceWeights[B_PAWN][knight.x + 1][size_t(9) - knight.y + 4] += KNIGHT_ROAD_REWARD;

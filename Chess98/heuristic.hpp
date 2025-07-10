@@ -3,6 +3,7 @@
 #include "board.hpp"
 #include "hash.hpp"
 #include "utils.hpp"
+#include "moves.hpp"
 
 // 历史启发
 class HistoryHeuristic
@@ -241,4 +242,66 @@ Move TransportationTable::getMove(Board &board)
         }
     }
     return Move{};
+}
+
+// SEE
+MOVES SEE(Board &board, MOVES &moves)
+{
+    MOVES result{};
+    result.reserve(64);
+
+    const std::map<PIECEID, int> weightPairs{
+        {R_KING, 4},
+        {R_ROOK, 4},
+        {R_CANNON, 3},
+        {R_KNIGHT, 3},
+        {R_BISHOP, 2},
+        {R_GUARD, 2},
+        {R_PAWN, 1},
+    };
+    std::array<std::vector<Move>, 9> orderMap{};
+
+    for (const Move &move : moves)
+    {
+        int score = 0;
+
+        Piece attacker = board.piecePosition(move.x1, move.y1);
+        Piece captured = board.piecePosition(move.x2, move.y2);
+        int a = weightPairs.at(abs(captured.pieceid));
+        int b = weightPairs.at(abs(attacker.pieceid));
+        if (hasProtector(board, captured.x, captured.y))
+        {
+            score = a - b + 1;
+
+            if (score < 1)
+            {
+                PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
+                if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK ||
+                    isRiveredPawn(board, captured.x, captured.y))
+                {
+                    score = 1;
+                }
+            }
+        }
+        else
+        {
+            score = a + 1;
+        }
+        if (score >= 1)
+        {
+            orderMap[score].emplace_back(move);
+        }
+    }
+
+    for (int score = 8; score >= 1; score--)
+    {
+        for (Move &move : orderMap[score])
+        {
+            move.attacker = board.piecePosition(move.x1, move.y1);
+            move.captured = board.piecePosition(move.x2, move.y2);
+            result.emplace_back(move);
+        }
+    }
+
+    return result;
 }

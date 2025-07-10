@@ -60,7 +60,7 @@ public:
         }
     }
 
-    static TrickResult<int> transportationScorePV(Search& search, Board& board, int alpha, int beta, int depth)
+    static TrickResult<int> transportationScorePV(Search &search, Board &board, int alpha, int beta, int depth)
     {
         const int vlHash = search.pTransportation->getValue(board, alpha, beta, depth);
         if (vlHash != -INF)
@@ -69,22 +69,22 @@ public:
             {
                 if (search.searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
                 {
-                    return TrickResult<int>{true, { vlHash }};
+                    return TrickResult<int>{true, {vlHash}};
                 }
                 else if (depth <= 0)
                 {
-                    return TrickResult<int>{true, { beta }};
+                    return TrickResult<int>{true, {beta}};
                 }
             }
             else if (vlHash <= alpha)
             {
                 if (search.searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
                 {
-                    return TrickResult<int>{true, { vlHash }};
+                    return TrickResult<int>{true, {vlHash}};
                 }
                 else if (depth <= 0)
                 {
-                    return TrickResult<int>{true, { alpha }};
+                    return TrickResult<int>{true, {alpha}};
                 }
             }
             else
@@ -95,7 +95,7 @@ public:
                     const int vl2 = search.searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
                     if (vl2 < beta)
                     {
-                        return TrickResult<int>{true, { vlHash }};
+                        return TrickResult<int>{true, {vlHash}};
                     }
                 }
             }
@@ -179,45 +179,45 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
-        if(search->board.distance >= 4 && search->board.historyMoves.back().isCheckingMove)
+        if (search->board.distance >= 4 && search->board.historyMoves.back().isCheckingMove)
         {
             int repeatCnt = 2;
             bool mySide = false;
             bool myFaceChecking = true;
             bool enemyFaceChecking = true;
-            for(int i = (int)search->board.historyMoves.size() - 1;i >= 0 && repeatCnt >= 0;i--)
+            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0 && repeatCnt >= 0; i--)
             {
-                const auto& historyMove = search->board.historyMoves[i];
-                if(historyMove.captured.pieceid != EMPTY_PIECEID)
+                const auto &historyMove = search->board.historyMoves[i];
+                if (historyMove.captured.pieceid != EMPTY_PIECEID)
                 {
                     break;
                 }
-                else if(std::abs(historyMove.attacker.pieceid) == R_PAWN)
+                else if (std::abs(historyMove.attacker.pieceid) == R_PAWN)
                 {
-                    if(historyMove.attacker.team() == RED && historyMove.y1 == 4)
+                    if (historyMove.attacker.team() == RED && historyMove.y1 == 4)
                     {
                         break;
                     }
-                    else if(historyMove.attacker.team() == BLACK && historyMove.y1 == 5)
+                    else if (historyMove.attacker.team() == BLACK && historyMove.y1 == 5)
                     {
                         break;
                     }
                 }
 
-                if(search->board.hashKeyList[i] == search->board.hashKey)
+                if (search->board.hashKeyList[i] == search->board.hashKey)
                 {
                     repeatCnt--;
-                    if(repeatCnt == 0)
+                    if (repeatCnt == 0)
                     {
-                        if(myFaceChecking && enemyFaceChecking)
+                        if (myFaceChecking && enemyFaceChecking)
                         {
                             return TrickResult<int>{true, {DrawValue}};
                         }
-                        else if(myFaceChecking && !enemyFaceChecking)
+                        else if (myFaceChecking && !enemyFaceChecking)
                         {
                             return TrickResult<int>{true, {INF - search->board.distance}};
                         }
-                        else if(!myFaceChecking && enemyFaceChecking)
+                        else if (!myFaceChecking && enemyFaceChecking)
                         {
                             return TrickResult<int>{true, {-INF + search->board.distance}};
                         }
@@ -228,7 +228,7 @@ public:
                     }
                 }
                 const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
-                if(mySide)
+                if (mySide)
                 {
                     myFaceChecking = myFaceChecking && currentMoveIsChecking;
                 }
@@ -242,12 +242,12 @@ public:
 
 #ifdef debug
         const bool debug = search->board.distance >= 32 && search->board.historyMoves.back().isCheckingMove;
-        if(debug)
+        if (debug)
         {
-            std::cout<<"n -> "<<search->board.hashKey<<std::endl;
-            for(int i = (int)search->board.historyMoves.size() - 1;i >= 0;i--)
+            std::cout << "n -> " << search->board.hashKey << std::endl;
+            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--)
             {
-                std::cout<<search->board.hashKeyList[i]<<" "<<search->board.historyMoves[i].isCheckingMove<<" "<<(search->board.historyMoves[i].captured.pieceid != EMPTY_PIECEID)<<std::endl;
+                std::cout << search->board.hashKeyList[i] << " " << search->board.historyMoves[i].isCheckingMove << " " << (search->board.historyMoves[i].captured.pieceid != EMPTY_PIECEID) << std::endl;
             }
             exit(0);
         }
@@ -355,7 +355,7 @@ Result Search::searchOpenBook()
         }
     };
 
-    std::function<int(BookStruct&, int32)> bookPosCmp = [](BookStruct &bk, int32 hashLock) -> int
+    std::function<int(BookStruct &, int32)> bookPosCmp = [](BookStruct &bk, int32 hashLock) -> int
     {
         uint32_t bookLock = bk.dwZobristLock;
         uint32_t boardLock = (uint32_t)hashLock;
@@ -591,7 +591,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // variables
-    const bool mChecking = inCheck(board,board.team);
+    const bool mChecking = inCheck(board, board.team);
 
     // 验证上一步是否是将军着法
     SearchTricks::setCheckingMove(board, mChecking);
@@ -777,7 +777,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // variables
-    const bool mChecking = inCheck(board,board.team);
+    const bool mChecking = inCheck(board, board.team);
 
     // 验证上一步是否是将军着法
     SearchTricks::setCheckingMove(board, mChecking);
@@ -845,7 +845,8 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                 type = BETA_TYPE;
             }
         }
-    }else if(!mChecking && depth >= 8 && this->board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
+    }
+    else if (!mChecking && depth >= 8 && this->board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
     {
         depth -= 2;
     }
@@ -956,7 +957,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     }
 
     // variables
-    const bool mChecking = inCheck(board,board.team);
+    const bool mChecking = inCheck(board, board.team);
     int vlBest = -INF;
 
     // 验证上一步是否是将军着法
@@ -977,11 +978,20 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     }
 
     // 搜索
-    MOVES availableMoves = mChecking ? Moves::getMoves(board) : Moves::getCaptureMoves(board);
-
-    if(mChecking)
+    MOVES availableMoves;
+    if (mChecking)
     {
-        maxDistance = std::min<int>(maxDistance,QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECK);
+        availableMoves = Moves::getMoves(board);
+    }
+    else
+    {
+        MOVES unordered = Moves::getCaptureMoves(board);
+        availableMoves = SEE(board, availableMoves);
+    }
+
+    if (mChecking)
+    {
+        maxDistance = std::min<int>(maxDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECK);
     }
 
     // 搜索

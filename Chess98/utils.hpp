@@ -4,7 +4,7 @@
 /// @brief 是否被将军
 /// @param board
 /// @return
-bool inCheck(Board &board,TEAM judgeTeam)
+bool inCheck(Board &board, TEAM judgeTeam)
 {
     Piece king = judgeTeam == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
     int x = king.x;
@@ -379,7 +379,7 @@ bool isValidMoveInSituation(Board &board, Move move)
     }
 
     board.doMove(move);
-    const bool skip = inCheck(board,-board.team);
+    const bool skip = inCheck(board, -board.team);
     board.undoMove();
 
     return !skip;
@@ -413,4 +413,13 @@ bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
         }
     }
     return true;
+}
+
+/// @brief 检查是否被捉子
+/// @param board
+/// @param attacker
+/// @param mine
+/// @return
+bool isCaughtBy(Board &board, Piece attacker, Piece mine)
+{
 }

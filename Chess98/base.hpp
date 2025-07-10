@@ -294,7 +294,6 @@ bool barrierNumber(PIECEID_MAP pieceidMap, int x1, int y1, int x2, int y2)
     return count;
 }
 
-
 FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0)
 {
     FILE *file = nullptr;
