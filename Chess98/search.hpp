@@ -223,7 +223,7 @@ public:
                         }
                         else
                         {
-                            return TrickResult<int>{true, {0}};
+                            return TrickResult<int>{true, {search->board.evaluate()}};
                         }
                     }
                 }
