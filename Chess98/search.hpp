@@ -221,10 +221,10 @@ public:
                         {
                             return TrickResult<int>{true, {-INF + search->board.distance}};
                         }
-                        else
-                        {
-                            return TrickResult<int>{true, {search->board.evaluate()}};
-                        }
+//                        else
+//                        {
+//                            return TrickResult<int>{true, {search->board.evaluate()}};
+//                        }
                     }
                 }
                 const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
