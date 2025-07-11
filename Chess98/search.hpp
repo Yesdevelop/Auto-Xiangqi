@@ -181,11 +181,10 @@ public:
     {
         if (search->board.distance >= 4 && search->board.historyMoves.back().isCheckingMove)
         {
-            int repeatCnt = 2;
             bool mySide = false;
             bool myFaceChecking = true;
             bool enemyFaceChecking = true;
-            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0 && repeatCnt >= 0; i--)
+            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--)
             {
                 const auto &historyMove = search->board.historyMoves[i];
                 if (historyMove.captured.pieceid != EMPTY_PIECEID)
@@ -204,29 +203,6 @@ public:
                     }
                 }
 
-                if (search->board.hashKeyList[i] == search->board.hashKey)
-                {
-                    repeatCnt--;
-                    if (repeatCnt == 0)
-                    {
-                        if (myFaceChecking && enemyFaceChecking)
-                        {
-                            return TrickResult<int>{true, {DrawValue}};
-                        }
-                        else if (myFaceChecking && !enemyFaceChecking)
-                        {
-                            return TrickResult<int>{true, {INF - search->board.distance}};
-                        }
-                        else if (!myFaceChecking && enemyFaceChecking)
-                        {
-                            return TrickResult<int>{true, {-INF + search->board.distance}};
-                        }
-//                        else
-//                        {
-//                            return TrickResult<int>{true, {search->board.evaluate()}};
-//                        }
-                    }
-                }
                 const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
                 if (mySide)
                 {
@@ -237,6 +213,14 @@ public:
                     enemyFaceChecking = enemyFaceChecking && currentMoveIsChecking;
                 }
                 mySide = !mySide;
+            }
+            if (myFaceChecking && !enemyFaceChecking)
+            {
+                return TrickResult<int>{true, {INF - search->board.distance}};
+            }
+            else if (!myFaceChecking && enemyFaceChecking)
+            {
+                return TrickResult<int>{true, {-INF + search->board.distance}};
             }
         }
 
