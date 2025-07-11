@@ -179,12 +179,13 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
-        if (search->board.distance >= 4 && search->board.historyMoves.back().isCheckingMove)
+        if (search->board.distance >= 6 && search->board.historyMoves.back().isCheckingMove)
         {
             bool mySide = false;
             bool myFaceChecking = true;
             bool enemyFaceChecking = true;
-            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--)
+            int cnt = 0;
+            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--,cnt++)
             {
                 const auto &historyMove = search->board.historyMoves[i];
                 if (historyMove.captured.pieceid != EMPTY_PIECEID)
@@ -214,13 +215,16 @@ public:
                 }
                 mySide = !mySide;
             }
-            if (myFaceChecking && !enemyFaceChecking)
+            if(cnt >= 6)
             {
-                return TrickResult<int>{true, {INF - search->board.distance}};
-            }
-            else if (!myFaceChecking && enemyFaceChecking)
-            {
-                return TrickResult<int>{true, {-INF + search->board.distance}};
+                if (myFaceChecking && !enemyFaceChecking)
+                {
+                    return TrickResult<int>{true, {INF - search->board.distance}};
+                }
+                else if (!myFaceChecking && enemyFaceChecking)
+                {
+                    return TrickResult<int>{true, {-INF + search->board.distance}};
+                }
             }
         }
 
