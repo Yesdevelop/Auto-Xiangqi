@@ -192,18 +192,6 @@ public:
             const Move& ply3 = history[size_t(size - 3)];
             const Move& ply4 = history[size_t(size - 4)];
             const Move& ply5 = history[size_t(size - 5)];
-            // 重复局面可能性检查
-            const bool impossibleRepeat = (
-                impossibleRepeatMove(ply1) ||
-                impossibleRepeatMove(ply2) ||
-                impossibleRepeatMove(ply3) ||
-                impossibleRepeatMove(ply4) ||
-                impossibleRepeatMove(ply5)
-            );
-            if (impossibleRepeat)
-            {
-                return TrickResult<int>{false, {}};
-            }
             // 判断是否出现重复局面，没有则直接false
             // 试想如下重复局面：（格式：plyX: x1y1x2y2）
             // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
