@@ -422,15 +422,11 @@ bool impossibleRepeatMove(const Move& move)
     {
         return true;
     }
-    else if (move.attacker.team() == RED &&
-        move.attacker.pieceid == R_PAWN &&
-        move.y1 == 4)
+    else if (move.attacker.pieceid == R_PAWN && move.y1 == 4)
     {
         return true;
     }
-    else if (move.attacker.team() == BLACK &&
-        move.attacker.pieceid == B_PAWN &&
-        move.y1 == 5)
+    else if (move.attacker.pieceid == B_PAWN && move.y1 == 5)
     {
         return true;
     }
