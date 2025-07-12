@@ -185,7 +185,7 @@ public:
             bool myFaceChecking = true;
             bool enemyFaceChecking = true;
             int cnt = 0;
-            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--,cnt++)
+            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--, cnt++)
             {
                 const auto &historyMove = search->board.historyMoves[i];
                 if (historyMove.captured.pieceid != EMPTY_PIECEID)
@@ -215,7 +215,7 @@ public:
                 }
                 mySide = !mySide;
             }
-            if(cnt >= 6)
+            if (cnt >= 6)
             {
                 if (myFaceChecking && !enemyFaceChecking)
                 {
@@ -269,7 +269,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     std::cout << "situation: " << boardToFen(board) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
 
-    this->rootMoves = Moves::getMoves(board);
+    this->rootMoves = MovesGenerate::getMoves(board);
 
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
@@ -540,7 +540,7 @@ Result Search::searchRoot(int depth)
     }
     else
     {
-        return Result{Moves::getMoves(board)[0], vlBest};
+        return Result{MovesGenerate::getMoves(board)[0], vlBest};
     }
 }
 
@@ -638,7 +638,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (type != BETA_TYPE)
     {
         MOVES killerAvailableMoves = this->pKiller->get(board);
-        MOVES _moves = Moves::getMoves(board);
+        MOVES _moves = MovesGenerate::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
@@ -661,7 +661,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (type != BETA_TYPE)
     {
         int vl = -INF;
-        MOVES availableMoves = Moves::getMoves(board);
+        MOVES availableMoves = MovesGenerate::getMoves(board);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -843,7 +843,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     if (type != BETA_TYPE)
     {
         MOVES killerAvailableMoves = this->pKiller->get(board);
-        MOVES _moves = Moves::getMoves(board);
+        MOVES _moves = MovesGenerate::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
@@ -866,7 +866,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     if (type != BETA_TYPE)
     {
         // 获取所有可行着法
-        MOVES availableMoves = Moves::getMoves(board);
+        MOVES availableMoves = MovesGenerate::getMoves(board);
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -969,11 +969,11 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     MOVES availableMoves;
     if (mChecking)
     {
-        availableMoves = Moves::getMoves(board);
+        availableMoves = MovesGenerate::getMoves(board);
     }
     else
     {
-        MOVES unordered = Moves::getCaptureMoves(board);
+        MOVES unordered = MovesGenerate::getCaptureMoves(board);
         availableMoves = SEE(board, availableMoves);
     }
 

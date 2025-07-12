@@ -268,8 +268,6 @@ PIECES Board::getPiecesByTeam(TEAM team)
     return result;
 }
 
-/// @brief 步进
-/// @param move
 void Board::doMove(Move move)
 {
     const int x1 = move.x1;
@@ -343,7 +341,6 @@ void Board::doMove(Move move)
     this->historyMoves.back().captured = eaten;
 }
 
-/// @brief 撤销上一次步进
 void Board::undoMove()
 {
     const int x1 = this->historyMoves.back().x1;

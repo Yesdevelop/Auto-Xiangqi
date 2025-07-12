@@ -414,12 +414,3 @@ bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
     }
     return true;
 }
-
-/// @brief 检查是否被捉子
-/// @param board
-/// @param attacker
-/// @param mine
-/// @return
-bool isCaughtBy(Board &board, Piece attacker, Piece mine)
-{
-}
