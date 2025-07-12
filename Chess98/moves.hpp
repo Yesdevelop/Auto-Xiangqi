@@ -24,6 +24,16 @@ public:
     static MOVES pawnCapture(TEAM team, Board &board, int x, int y);
     static MOVES generateCaptureMovesOn(Board &board, int x, int y);
     static MOVES getCaptureMoves(Board &board);
+
+    static PIECE_TARGET_MAP kingTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP guardTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP bishopTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP knightTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP rookTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP cannonTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP pawnTarget(TEAM team, Board& board, int x, int y);
+    static PIECE_TARGET_MAP generateTargetOn(Board& board, int x, int y);
+    static PIECE_TARGET_MAP getTargetMap(Board& board);
 };
 
 MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
@@ -671,4 +681,243 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     }
 
     return result;
+}
+
+PIECE_TARGET_MAP MovesGenerate::kingTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    const int left = x - 1;
+    const int right = x + 1;
+    const int up = y + 1;
+    const int down = y - 1;
+
+    if (left >= 3)
+        targetMap[left][y] = true;
+    if (right <= 5)
+        targetMap[right][y] = true;
+    if (team == RED) {
+        if (up <= 2)
+            targetMap[x][up] = true;
+        if (down >= 0)
+            targetMap[x][down] = true;
+    } else {
+        if (up <= 9)
+            targetMap[x][up] = true;
+        if (down >= 7)
+            targetMap[x][down] = true;
+    }
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::guardTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    const int left = x - 1;
+    const int right = x + 1;
+    const int up = y + 1;
+    const int down = y - 1;
+    if (left >= 3) {
+        if (team == RED) {
+            if (up <= 2)
+                targetMap[left][up] = true;
+            if (down >= 0)
+                targetMap[left][down] = true;
+        } else {
+            if (up <= 9)
+                targetMap[left][up] = true;
+            if (down >= 7)
+                targetMap[left][down] = true;
+        }
+    }
+    if (right <= 5) {
+        if (team == RED) {
+            if (up <= 2)
+                targetMap[right][up] = true;
+            if (down >= 0)
+                targetMap[right][down] = true;
+        } else {
+            if (up <= 9)
+                targetMap[right][up] = true;
+            if (down >= 7)
+                targetMap[right][down] = true;
+        }
+    }
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::bishopTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    if (team == RED) {
+        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && x - 2 >= 0 && y - 2 >= 0)
+            targetMap[x - 2][y - 2] = true;
+        if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && x + 2 <= 8 && y - 2 >= 0)
+            targetMap[x + 2][y - 2] = true;
+        if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && x - 2 >= 0 && y + 2 <= 4 && y + 1 <= 4)
+            targetMap[x - 2][y + 2] = true;
+        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && x + 2 <= 8 && y + 2 <= 4 && y + 1 <= 4)
+            targetMap[x + 2][y + 2] = true;
+    } else {
+        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && x + 2 <= 8 && y + 2 <= 9)
+            targetMap[x + 2][y + 2] = true;
+        if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && x + 2 <= 8 && y - 2 >= 5 && y - 1 >= 5)
+            targetMap[x + 2][y - 2] = true;
+        if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && x - 2 >= 0 && y + 2 <= 9)
+            targetMap[x - 2][y + 2] = true;
+        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && x - 2 >= 0 && y - 2 >= 5 && y - 1 >= 5)
+            targetMap[x - 2][y - 2] = true;
+    }
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::knightTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    if (board.teamOn(x, y - 1) == EMPTY_TEAM) {
+        if (x - 1 >= 0 && y - 2 >= 0)
+            targetMap[x - 1][y - 2] = true;
+        if (x + 1 <= 8 && y - 2 >= 0)
+            targetMap[x + 1][y - 2] = true;
+    }
+    if (board.teamOn(x, y + 1) == EMPTY_TEAM) {
+        if (x - 1 >= 0 && y + 2 <= 9)
+            targetMap[x - 1][y + 2] = true;
+        if (x + 1 <= 8 && y + 2 <= 9)
+            targetMap[x + 1][y + 2] = true;
+    }
+    if (board.teamOn(x - 1, y) == EMPTY_TEAM) {
+        if (x - 2 >= 0 && y + 1 <= 9)
+            targetMap[x - 2][y + 1] = true;
+        if (x - 2 >= 0 && y - 1 >= 0)
+            targetMap[x - 2][y - 1] = true;
+    }
+    if (board.teamOn(x + 1, y) == EMPTY_TEAM) {
+        if (x + 2 <= 8 && y + 1 <= 9)
+            targetMap[x + 2][y + 1] = true;
+        if (x + 2 <= 8 && y - 1 >= 0)
+            targetMap[x + 2][y - 1] = true;
+    }
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::rookTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
+    for (int y2 = y + 1; y2 < regionX[1]; y2++)
+        targetMap[x][y2] = true;
+    targetMap[x][regionX[1]] = true;
+    for (int y2 = y - 1; y2 > regionX[0]; y2--)
+        targetMap[x][y2] = true;
+    targetMap[x][regionX[0]] = true;
+
+    BITLINE bitlineY = board.getBitLineY(y);
+    REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
+    for (int x2 = x + 1; x2 < regionY[1]; x2++)
+        targetMap[x2][y] = true;
+    targetMap[regionY[1]][y] = true;
+    for (int x2 = x - 1; x2 > regionY[0]; x2--)
+        targetMap[x2][y] = true;
+    targetMap[regionY[0]][y] = true;
+
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::cannonTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    BITLINE bitlineY = board.getBitLineY(y);
+    REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
+    for (int x2 = x + 1; x2 <= regionY[2]; x2++)
+        targetMap[x2][y] = true;
+    if (regionY[3] != regionY[2])
+        targetMap[regionY[3]][y] = true;
+    for (int x2 = x - 1; x2 >= regionY[1]; x2--)
+        targetMap[x2][y] = true;
+    if (regionY[0] != regionY[1])
+        targetMap[regionY[0]][y] = true;
+
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
+    for (int y2 = y + 1; y2 <= regionX[2]; y2++)
+        targetMap[x][y2] = true;
+    if (regionX[3] != regionX[2])
+        targetMap[x][regionX[3]] = true;
+    for (int y2 = y - 1; y2 >= regionX[1]; y2--)
+        targetMap[x][y2] = true;
+    if (regionX[0] != regionX[1])
+        targetMap[x][regionX[0]] = true;
+
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::pawnTarget(TEAM team, Board& board, int x, int y)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    if (team == RED) {
+        if (y + 1 <= 9)
+            targetMap[x][y + 1] = true;
+        if (y > 4) {
+            if (x - 1 >= 0)
+                targetMap[x - 1][y] = true;
+            if (x + 1 <= 8)
+                targetMap[x + 1][y] = true;
+        }
+    } else {
+        if (y - 1 >= 0)
+            targetMap[x][y - 1] = true;
+        if (y < 5) {
+            if (x - 1 >= 0)
+                targetMap[x - 1][y] = true;
+            if (x + 1 <= 8)
+                targetMap[x + 1][y] = true;
+        }
+    }
+    return targetMap;
+}
+
+PIECE_TARGET_MAP MovesGenerate::generateTargetOn(Board& board, int x, int y)
+{
+    PIECEID pieceid = board.pieceidOn(x, y);
+    TEAM team = board.teamOn(x, y);
+
+    if (pieceid == R_KING || pieceid == B_KING)
+        return MovesGenerate::kingTarget(team, board, x, y);
+    else if (pieceid == R_GUARD || pieceid == B_GUARD)
+        return MovesGenerate::guardTarget(team, board, x, y);
+    else if (pieceid == R_BISHOP || pieceid == B_BISHOP)
+        return MovesGenerate::bishopTarget(team, board, x, y);
+    else if (pieceid == R_KNIGHT || pieceid == B_KNIGHT)
+        return MovesGenerate::knightTarget(team, board, x, y);
+    else if (pieceid == R_ROOK || pieceid == B_ROOK)
+        return MovesGenerate::rookTarget(team, board, x, y);
+    else if (pieceid == R_CANNON || pieceid == B_CANNON)
+        return MovesGenerate::cannonTarget(team, board, x, y);
+    else if (pieceid == R_PAWN || pieceid == B_PAWN)
+        return MovesGenerate::pawnTarget(team, board, x, y);
+    else
+        return PIECE_TARGET_MAP{};
+}
+
+PIECE_TARGET_MAP MovesGenerate::getTargetMap(Board& board)
+{
+    PIECE_TARGET_MAP targetMap{};
+    targetMap.fill({});
+    PIECES pieces = board.getPiecesByTeam(board.team);
+    for (const Piece& piece : pieces) {
+        PIECE_TARGET_MAP pieceMap = MovesGenerate::generateTargetOn(board, piece.x, piece.y);
+        for (int x = 0; x < 9; ++x)
+            for (int y = 0; y < 10; ++y)
+                if (pieceMap[x][y])
+                    targetMap[x][y] = true;
+    }
+    return targetMap;
 }

@@ -62,6 +62,7 @@ const TEAM BLACK = -1;
 const TEAM OVERFLOW_TEAM = 2;
 
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
+using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
 std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
     {R_KING, "RK"},
     {R_GUARD, "RG"},
@@ -140,10 +141,18 @@ class Move
 public:
     Move() = default;
     Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
-        : x1(x1), y1(y1), x2(x2), y2(y2), id(x1 * 1000 + y1 * 100 + x2 * 10 + y2), val(val), moveType(moveType)
-    {
-    }
+        : x1(x1),
+          y1(y1),
+          x2(x2),
+          y2(y2),
+          id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
+          startpos(x1 * 10 + y1),
+          endpos(x2 * 10 + y2),
+          val(val),
+          moveType(moveType) {};
     int id = -1;
+    int startpos = -1;
+    int endpos = -1;
     int x1 = -1;
     int y1 = -1;
     int x2 = -1;
@@ -170,9 +179,7 @@ using MOVES = std::vector<Move>;
 class Result
 {
 public:
-    Result(Move move, int score) : move(move), val(score)
-    {
-    }
+    Result(Move move, int score) : move(move), val(score) {};
     Move move{};
     int val = 0;
 };
@@ -181,9 +188,7 @@ template <typename T>
 class TrickResult
 {
 public:
-    TrickResult(bool isSuccess, std::vector<T> data) : isSuccess(isSuccess), data(std::move(data))
-    {
-    }
+    TrickResult(bool isSuccess, std::vector<T> data) : isSuccess(isSuccess), data(std::move(data)) {};
     bool isSuccess = false;
     std::vector<T> data;
 };

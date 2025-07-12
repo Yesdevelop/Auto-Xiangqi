@@ -24,8 +24,9 @@ void testByUI()
     // fenCode = "2c1kab2/4aR3/4b4/2P1R1C1p/p5p2/8P/Pr2P1P2/4B1N2/1r7/c2AKAB2 w - - 0 1";
     // fenCode = "1rbakabnr/9/1cn4c1/p3p1p1p/2p6/9/P1P1P1P1P/4C1NC1/8R/RNBAKAB2 w - - 0 1";
     // fenCode = "r1bakabnr/9/1cn4c1/p3p1p1p/2p6/9/P1P1P1P1P/1CN4C1/R8/2BAKABNR w - - 0 1";
-
     // fenCode = "1rbakab1r/9/c1n3nc1/p1p1p3p/6p2/2PN5/P3P1P1P/4C1NC1/9/R1BAKAB1R w - - 0 1";
     // fenCode = "1R3ab2/3ka4/2C1c4/3r3Pp/p1p6/9/P7P/B2A5/2N2c3/3K1AB2 w - - 0 1";
+    // fenCode = "4k4/9/9/9/3R5/9/9/4p4/3p1p3/2p1K1p2 w";
+
     ui(serverDir, team, maxDepth, maxTime, fenCode);
 }

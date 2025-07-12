@@ -179,67 +179,60 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
-        if (search->board.distance >= 6 && search->board.historyMoves.back().isCheckingMove)
+        // 这个函数只判断对方有没有违规，违规返回INF
+        const Board& board = search->board;
+        const MOVES& history = board.historyMoves;
+        const size_t size = history.size();
+        // 前面加一些快速判断的方法
+        const bool quickCheck = (
+            false // TODO
+        );
+        // 总历史着法数5个及以上才可判定是否重复
+        if (quickCheck == false && size >= 5)
         {
-            bool mySide = false;
-            bool myFaceChecking = true;
-            bool enemyFaceChecking = true;
-            int cnt = 0;
-            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--, cnt++)
+            const Move& ply1 = history[size_t(size - 1)];
+            const Move& ply2 = history[size_t(size - 2)];
+            const Move& ply3 = history[size_t(size - 3)];
+            const Move& ply4 = history[size_t(size - 4)];
+            const Move& ply5 = history[size_t(size - 5)];
+            // 判断是否出现重复局面，没有则直接false
+            // 试想如下重复局面：（格式：plyX: x1y1x2y2）
+            // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
+            const bool isRepeat = (
+                ply1 == ply5 &&
+                ply1.startpos == ply3.endpos &&
+                ply1.endpos == ply3.startpos &&
+                ply2.startpos == ply4.endpos &&
+                ply2.endpos == ply4.startpos
+            );
+            if (!isRepeat)
             {
-                const auto &historyMove = search->board.historyMoves[i];
-                if (historyMove.captured.pieceid != EMPTY_PIECEID)
-                {
-                    break;
-                }
-                else if (std::abs(historyMove.attacker.pieceid) == R_PAWN)
-                {
-                    if (historyMove.attacker.team() == RED && historyMove.y1 == 4)
-                    {
-                        break;
-                    }
-                    else if (historyMove.attacker.team() == BLACK && historyMove.y1 == 5)
-                    {
-                        break;
-                    }
-                }
-
-                const bool currentMoveIsChecking = search->board.historyMoves[i].isCheckingMove;
-                if (mySide)
-                {
-                    myFaceChecking = myFaceChecking && currentMoveIsChecking;
-                }
-                else
-                {
-                    enemyFaceChecking = enemyFaceChecking && currentMoveIsChecking;
-                }
-                mySide = !mySide;
+                return TrickResult<int>{false, {}};
             }
-            if (cnt >= 6)
+            // 长将在任何情况下都会判负
+            // 由于性能原因，isCheckingMove是被延迟设置的，ply1可能还没有被设成checkingMove
+            // 但是若判定了循环局面，ply1必然等于ply5
+            // 若ply5和ply3都是将军着法，且出现循环局面，则直接判定违规
+            if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
             {
-                if (myFaceChecking && !enemyFaceChecking)
-                {
-                    return TrickResult<int>{true, {INF - search->board.distance}};
-                }
-                else if (!myFaceChecking && enemyFaceChecking)
-                {
-                    return TrickResult<int>{true, {-INF + search->board.distance}};
-                }
+                return TrickResult<int>{true, {INF}};
+            }
+            // 长捉情况比较特殊
+            // 只有车、马、炮能作为长捉的发起者
+            // 发起者不断捉同一个子，判负
+            const bool condition1 = ( // 是否是车马炮
+                abs(ply1.attacker.pieceid) == R_ROOK ||
+                abs(ply1.attacker.pieceid) == R_KNIGHT ||
+                abs(ply1.attacker.pieceid) == R_CANNON
+            );
+            const bool condition2 = (
+                false // TODO
+            );
+            if (condition1 == true && condition2 == true)
+            {
+                return TrickResult<int>{true, {INF}};
             }
         }
-
-#ifdef debug
-        const bool debug = search->board.distance >= 32 && search->board.historyMoves.back().isCheckingMove;
-        if (debug)
-        {
-            std::cout << "n -> " << search->board.hashKey << std::endl;
-            for (int i = (int)search->board.historyMoves.size() - 1; i >= 0; i--)
-            {
-                std::cout << search->board.hashKeyList[i] << " " << search->board.historyMoves[i].isCheckingMove << " " << (search->board.historyMoves[i].captured.pieceid != EMPTY_PIECEID) << std::endl;
-            }
-            exit(0);
-        }
-#endif
         return TrickResult<int>{false, {}};
     }
 };
