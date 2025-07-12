@@ -194,8 +194,8 @@ public:
                 for (int i = tailIndex;i >= 0;i--)
                 {
                     const auto& key = keys[i];
-                    const auto& currentMove = historyMoves[i];
                     positionCount[key]++;
+                    const auto& currentMove = historyMoves[i];
                     if (currentMove.attacker.team() == currentSide)
                     {
                         mySideCheckCount++;
