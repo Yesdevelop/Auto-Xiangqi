@@ -195,10 +195,6 @@ public:
                 {
                     const auto& key = keys[i];
                     const auto& currentMove = historyMoves[i];
-                    if (impossibleRepeatMove(currentMove))
-                    {
-                        return TrickResult<int>{false, {}};
-                    }
                     positionCount[key]++;
                     if (currentMove.attacker.team() == currentSide)
                     {
@@ -208,15 +204,22 @@ public:
                     {
                         enemySideCheckCount++;
                     }
-                    if (positionCount[key] >= 2)
+                    if (positionCount[key] >= 1)
                     {
-                        if(mySideCheckCount > enemySideCheckCount)
+                        if (mySideCheckCount > 0 || enemySideCheckCount > 0)
                         {
-                            return TrickResult<int>{true, {-INF + search->board.distance}};
-                        }
-                        else if(enemySideCheckCount > mySideCheckCount)
-                        {
-                            return TrickResult<int>{true, { INF - search->board.distance }};
+                            if (mySideCheckCount == enemySideCheckCount)
+                            {
+                                return TrickResult<int>{true, { DrawValue }};
+                            }
+                            else if (mySideCheckCount > enemySideCheckCount)
+                            {
+                                return TrickResult<int>{true, { -INF + search->board.distance }};
+                            }
+                            else if (enemySideCheckCount > mySideCheckCount)
+                            {
+                                return TrickResult<int>{true, { INF - search->board.distance }};
+                            }
                         }
                     }
                 }
