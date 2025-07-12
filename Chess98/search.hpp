@@ -185,7 +185,7 @@ public:
         const size_t size = history.size();
 
         // 总历史着法数5个及以上才可判定是否重复
-        if (history.back().isCheckingMove && size >= 5)
+        if (size >= 5)
         {
             const Move& ply1 = history[size_t(size - 1)];
             const Move& ply2 = history[size_t(size - 2)];
