@@ -29,6 +29,7 @@ private:
         board.distance = 0;
         board.initEvaluate();
         this->pHistory->reset();
+        this->pQuiescHistory->reset();
         this->pKiller->reset();
         this->pTransportation->reset();
         this->nodecount = 0;
@@ -38,6 +39,7 @@ protected:
     Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
+    HistoryHeuristic *pQuiescHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
     TransportationTable *pTransportation = new TransportationTable{};
     int nodecount = 0;
@@ -230,19 +232,6 @@ public:
                         }
                     }
                 }
-            }
-            if (search->board.distance >= 32)
-            {
-                const int tailIndex = (int)historyMoves.size() - 1;
-                for (int i = tailIndex;i >= 0;i--)
-                {
-                    //printPieceidMap(search->board.pieceidMap);
-                    //std::cout << search->board.historyMoves.back().isCheckingMove << std::endl;
-                    std::cout << boardToFen(search->board) << std::endl;
-                    search->board.undoMove();
-                }
-                std::cout << boardToFen(search->board) << std::endl;
-                exit(0);
             }
         }
         return TrickResult<int>{false, {}};
@@ -824,9 +813,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    // 将军延申
-    const int extendDepth = mChecking ? depth : depth - 1;
-
     // variables
     int vlBest = -INF;
     Move bestMove{};
@@ -838,7 +824,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        int vl = -searchCut(extendDepth, -beta + 1);
+        int vl = -searchCut(depth - 1, -beta + 1);
         board.undoMove();
         bestMove = goodMove;
         if (vl > vlBest)
@@ -863,7 +849,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            int vl = -searchCut(extendDepth, -beta + 1);
+            int vl = -searchCut(depth - 1, -beta + 1);
             board.undoMove();
             if (vl > vlBest)
             {
@@ -899,7 +885,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             }
             else
             {
-                vl = -searchCut(extendDepth, -beta + 1);
+                vl = -searchCut(depth - 1, -beta + 1);
             }
 
             board.undoMove();
@@ -926,8 +912,8 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
     else
     {
-        this->pHistory->add(bestMove, extendDepth);
-        this->pTransportation->add(board, bestMove, vlBest, type, extendDepth);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
@@ -986,7 +972,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     if (mChecking)
     {
         availableMoves = MovesGenerate::getMoves(board);
-        pHistory->sort(availableMoves);
+        pQuiescHistory->sort(availableMoves);
     }
     else
     {
@@ -1024,9 +1010,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
     else if (mChecking)
     {
-        pHistory->add(bestMove,board.distance)
+        pQuiescHistory->add(bestMove, leftDistance);
     }
-
-
     return vlBest;
 }
