@@ -189,8 +189,8 @@ public:
             {
                 std::unordered_map<int32, int> positionCount;
                 const int tailIndex = (int)historyMoves.size() - 1;
-                int mySideCheckCount = 0;
-                int enemySideCheckCount = 0;
+                bool mySideChecking = true;
+                bool enemySideChecking = true;
                 for (int i = tailIndex;i >= 0;i--)
                 {
                     const auto& key = keys[i];
@@ -200,30 +200,27 @@ public:
                     {
                         return TrickResult<int>{false, {}};
                     }
-                    if (currentMove.isCheckingMove)
+                    if (currentMove.attacker.team() == currentSide)
                     {
-                        if (currentMove.attacker.team() == currentSide)
-                        {
-                            mySideCheckCount++;
-                        }
-                        else
-                        {
-                            enemySideCheckCount++;
-                        }
+                        mySideChecking = mySideChecking && currentMove.isCheckingMove;
+                    }
+                    else
+                    {
+                        enemySideChecking = enemySideChecking && currentMove.isCheckingMove;
                     }
                     if (positionCount[key] >= 2)
                     {
-                        if (mySideCheckCount > 0 || enemySideCheckCount > 0)
+                        if (mySideChecking || enemySideChecking)
                         {
-                            if (mySideCheckCount == enemySideCheckCount)
+                            if (mySideChecking == enemySideChecking)
                             {
                                 return TrickResult<int>{true, { DrawValue }};
                             }
-                            else if (mySideCheckCount > enemySideCheckCount)
+                            else if (mySideChecking && !enemySideChecking)
                             {
                                 return TrickResult<int>{true, { -INF + search->board.distance }};
                             }
-                            else if (enemySideCheckCount > mySideCheckCount)
+                            else if (enemySideChecking && !mySideChecking)
                             {
                                 return TrickResult<int>{true, { INF - search->board.distance }};
                             }
@@ -474,19 +471,6 @@ Result Search::searchOpenBook()
 
 Result Search::searchRoot(int depth)
 {
-    const bool mChecking = inCheck(board, board.team);
-
-    // 将军延申
-        // 将军延申
-    int extendDepth = depth - 1;
-    if (mChecking)
-    {
-        if (Search::searchQ(-BAN, -BAN + 1) <= -BAN || Search::searchQ(BAN - 1, BAN) >= BAN)
-        {
-            extendDepth = depth;
-        }
-    }
-
     Move bestMove{};
     int vl = -INF;
     int vlBest = -INF;
@@ -496,14 +480,14 @@ Result Search::searchRoot(int depth)
         board.doMove(move);
         if (vlBest == -INF)
         {
-            vl = -searchPV(extendDepth, -INF, -vlBest);
+            vl = -searchPV(depth - 1, -INF, -vlBest);
         }
         else
         {
-            vl = -searchCut(extendDepth, -vlBest);
+            vl = -searchCut(depth - 1, -vlBest);
             if (vl > vlBest)
             {
-                vl = -searchPV(extendDepth, -INF, -vlBest);
+                vl = -searchPV(depth - 1, -INF, -vlBest);
             }
         }
         if (vl > vlBest)
@@ -532,8 +516,8 @@ Result Search::searchRoot(int depth)
     }
     else
     {
-        this->pHistory->add(bestMove, extendDepth);
-        this->pTransportation->add(board, bestMove, vlBest, EXACT_TYPE, extendDepth);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, EXACT_TYPE, depth);
     }
 
     // 历史启发调整根节点似乎更快
@@ -596,46 +580,25 @@ int Search::searchPV(int depth, int alpha, int beta)
         return repeatResult.data[0];
     }
 
-    // tricks
-    if (!mChecking)
-    {
-        // multi probCut
-        TrickResult<int> probCutResult = SearchTricks::multiProbCut(this, PV, alpha, beta, depth);
-        if (probCutResult.isSuccess)
-        {
-            return probCutResult.data[0];
-        }
-    }
-
     // variables
     int vlBest = -INF;
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
 
-    // 将军延申
-    int extendDepth = depth - 1;
-    if (mChecking)
-    {
-        if (Search::searchQ(-BAN, -BAN + 1) <= -BAN || Search::searchQ(BAN - 1, BAN) >= BAN)
-        {
-            extendDepth = depth;
-        }
-    }
-
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
-    if (goodMove.id == -1 && extendDepth >= 2)
+    if (goodMove.id == -1 && depth >= 2)
     {
-        if (searchPV(extendDepth / 2, alpha, beta) <= alpha)
+        if (searchPV(depth / 2, alpha, beta) <= alpha)
         {
-            searchPV(extendDepth / 2, -INF, beta);
+            searchPV(depth / 2, -INF, beta);
         }
         goodMove = this->pTransportation->getMove(board);
     }
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        vlBest = -searchPV(extendDepth, -beta, -alpha);
+        vlBest = -searchPV(depth - 1, -beta, -alpha);
         board.undoMove();
         bestMove = goodMove;
         if (vlBest >= beta)
@@ -657,7 +620,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            vlBest = -searchPV(extendDepth, -beta, -alpha);
+            vlBest = -searchPV(depth - 1, -beta, -alpha);
             board.undoMove();
             bestMove = move;
             if (vlBest >= beta)
@@ -687,14 +650,14 @@ int Search::searchPV(int depth, int alpha, int beta)
 
             if (vlBest == -INF)
             {
-                vl = -searchPV(extendDepth, -beta, -alpha);
+                vl = -searchPV(depth - 1, -beta, -alpha);
             }
             else
             {
-                vl = -searchCut(extendDepth, -alpha);
+                vl = -searchCut(depth - 1, -alpha);
                 if (vl > alpha && vl < beta)
                 {
-                    vl = -searchPV(extendDepth, -beta, -alpha);
+                    vl = -searchPV(depth - 1, -beta, -alpha);
                 }
             }
 
@@ -726,8 +689,8 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
     else
     {
-        this->pHistory->add(bestMove, extendDepth);
-        this->pTransportation->add(board, bestMove, vlBest, type, extendDepth);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
@@ -832,22 +795,12 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     NODE_TYPE type = ALPHA_TYPE;
     int searchedCnt = 0;
 
-    // 将军延申
-    int extendDepth = depth - 1;
-    if (mChecking)
-    {
-        if (Search::searchQ(-BAN, -BAN + 1) <= -BAN || Search::searchQ(BAN - 1, BAN) >= BAN)
-        {
-            extendDepth = depth;
-        }
-    }
-
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        int vl = -searchCut(extendDepth, -beta + 1);
+        int vl = -searchCut(depth - 1, -beta + 1);
         board.undoMove();
         bestMove = goodMove;
         if (vl > vlBest)
@@ -859,10 +812,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             }
         }
     }
-    else if (!mChecking && extendDepth >= 8 && this->board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
-    {
-        extendDepth -= 2;
-    }
 
     // 杀手启发
     if (type != BETA_TYPE)
@@ -872,7 +821,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            int vl = -searchCut(extendDepth, -beta + 1);
+            int vl = -searchCut(depth - 1, -beta + 1);
             board.undoMove();
             if (vl > vlBest)
             {
@@ -904,11 +853,11 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 3 &&
                 searchedCnt >= 4)
             {
-                vl = -searchCut(extendDepth - 2 - static_cast<int>(depth >= 4), -beta + 1);
+                vl = -searchCut(depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
             }
             else
             {
-                vl = -searchCut(extendDepth, -beta + 1);
+                vl = -searchCut(depth - 1, -beta + 1);
             }
 
             board.undoMove();
@@ -935,8 +884,8 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
     else
     {
-        this->pHistory->add(bestMove, extendDepth);
-        this->pTransportation->add(board, bestMove, vlBest, type, extendDepth);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
@@ -995,6 +944,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     if (mChecking)
     {
         availableMoves = MovesGenerate::getMoves(board);
+        captureSort(board, availableMoves);
     }
     else
     {
