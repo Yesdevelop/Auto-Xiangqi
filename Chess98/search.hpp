@@ -605,7 +605,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     NODE_TYPE type = ALPHA_TYPE;
 
     // 将军启发
-    const int extendDepth = (mChecking && depth <= 8) ? depth : depth - 1;
+    const int extendDepth = (mChecking && depth <= 6) ? depth : depth - 1;
 
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
@@ -818,7 +818,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     int searchedCnt = 0;
 
     // 将军启发
-    const int extendDepth = (mChecking && depth <= 8) ? depth : depth - 1;
+    const int extendDepth = (mChecking && depth <= 4) ? depth : depth - 1;
 
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
