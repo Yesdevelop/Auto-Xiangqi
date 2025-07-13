@@ -232,10 +232,6 @@ public:
                 }
             }
         }
-        else if (search->board.distance >= MAX_SEARCH_DISTANCE)
-        {
-            return TrickResult<int>{true, { search->board.evaluate()}};
-        }
         return TrickResult<int>{false, {}};
     }
 };
