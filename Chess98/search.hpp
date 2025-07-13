@@ -611,18 +611,18 @@ int Search::searchPV(int depth, int alpha, int beta)
 
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
-    if (goodMove.id == -1 && extendDepth >= 2)
+    if (goodMove.id == -1 && depth >= 2)
     {
-        if (searchPV(extendDepth / 2, alpha, beta) <= alpha)
+        if (searchPV(depth / 2, alpha, beta) <= alpha)
         {
-            searchPV(extendDepth / 2, -INF, beta);
+            searchPV(depth / 2, -INF, beta);
         }
         goodMove = this->pTransportation->getMove(board);
     }
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        vlBest = -searchPV(extendDepth, -beta, -alpha);
+        vlBest = -searchPV(depth - 1, -beta, -alpha);
         board.undoMove();
         bestMove = goodMove;
         if (vlBest >= beta)
