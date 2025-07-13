@@ -20,7 +20,7 @@ public:
     Result searchRoot(int depth);
     int searchPV(int depth, int alpha, int beta);
     int searchCut(int depth, int beta, bool banNullMove = false);
-    int searchQ(int alpha, int beta, int maxDistance = MAX_SEARCH_DISTANCE);
+    int searchQ(int alpha, int beta, int maxDistance = QUIESCENCE_EXTEND_DEPTH);
 
 private:
     void reset()
@@ -68,7 +68,7 @@ public:
         {
             if (vlHash >= beta)
             {
-                if (search.searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH) >= beta)
+                if (search.searchQ(beta - 1, beta) >= beta)
                 {
                     return TrickResult<int>{true, {vlHash}};
                 }
@@ -79,7 +79,7 @@ public:
             }
             else if (vlHash <= alpha)
             {
-                if (search.searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH) <= alpha)
+                if (search.searchQ(alpha, alpha + 1) <= alpha)
                 {
                     return TrickResult<int>{true, {vlHash}};
                 }
@@ -90,10 +90,10 @@ public:
             }
             else
             {
-                const int vl1 = search.searchQ(alpha, alpha + 1, board.distance + QUIESCENCE_EXTEND_DEPTH);
+                const int vl1 = search.searchQ(alpha, alpha + 1);
                 if (vl1 > alpha)
                 {
-                    const int vl2 = search.searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+                    const int vl2 = search.searchQ(beta - 1, beta);
                     if (vl2 < beta)
                     {
                         return TrickResult<int>{true, {vlHash}};
@@ -230,6 +230,19 @@ public:
                         }
                     }
                 }
+            }
+            if (search->board.distance >= 32)
+            {
+                const int tailIndex = (int)historyMoves.size() - 1;
+                for (int i = tailIndex;i >= 0;i--)
+                {
+                    //printPieceidMap(search->board.pieceidMap);
+                    //std::cout << search->board.historyMoves.back().isCheckingMove << std::endl;
+                    std::cout << boardToFen(search->board) << std::endl;
+                    search->board.undoMove();
+                }
+                std::cout << boardToFen(search->board) << std::endl;
+                exit(0);
             }
         }
         return TrickResult<int>{false, {}};
@@ -563,7 +576,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     // 静态搜索
     if (depth <= 0)
     {
-        int vl = Search::searchQ(alpha, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+        int vl = Search::searchQ(alpha, beta);
         this->pTransportation->add(board, Move{}, vl, EXACT_TYPE, depth);
         return vl;
     }
@@ -736,8 +749,8 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
     if (vlHash != -INF)
     {
-        int statisValue = Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
-        if (vlHash >= beta && statisValue >= beta && board.distance + QUIESCENCE_EXTEND_DEPTH)
+        int statisValue = Search::searchQ(beta - 1, beta);
+        if (vlHash >= beta && statisValue >= beta)
         {
             return vlHash;
         }
@@ -754,7 +767,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     // 静态搜索
     if (depth <= 0)
     {
-        return Search::searchQ(beta - 1, beta, board.distance + QUIESCENCE_EXTEND_DEPTH);
+        return Search::searchQ(beta - 1, beta);
     }
 
     // mate distance pruning
@@ -924,7 +937,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     return vlBest;
 }
 
-int Search::searchQ(int alpha, int beta, int maxDistance)
+int Search::searchQ(int alpha, int beta, int leftDistance)
 {
     nodecount++;
 
@@ -935,7 +948,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     }
 
     // 返回评估结果
-    if (board.distance > maxDistance)
+    if (leftDistance <= 0)
     {
         return board.evaluate();
     }
@@ -973,7 +986,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     if (mChecking)
     {
         availableMoves = MovesGenerate::getMoves(board);
-        captureSort(board, availableMoves);
+        pHistory->sort(availableMoves);
     }
     else
     {
@@ -981,11 +994,13 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
         availableMoves = SEE(board, availableMoves);
     }
 
+    Move bestMove;
+
     // 搜索
     for (const Move &move : availableMoves)
     {
         board.doMove(move);
-        int vl = -Search::searchQ(-beta, -alpha, maxDistance - 1);
+        int vl = -Search::searchQ(-beta, -alpha, leftDistance - 1);
         board.undoMove();
         if (vl > vlBest)
         {
@@ -994,6 +1009,7 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
                 return vl;
             }
             vlBest = vl;
+            bestMove = move;
             if (vl > alpha)
             {
                 alpha = vl;
@@ -1006,6 +1022,11 @@ int Search::searchQ(int alpha, int beta, int maxDistance)
     {
         vlBest += board.distance;
     }
+    else if (mChecking)
+    {
+        pHistory->add(bestMove,board.distance)
+    }
+
 
     return vlBest;
 }
