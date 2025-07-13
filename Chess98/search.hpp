@@ -599,9 +599,6 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
-    // 将军延申
-    const int extendDepth = mChecking ? depth : depth - 1;
-
     // variables
     int vlBest = -INF;
     Move bestMove{};
@@ -642,7 +639,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            vlBest = -searchPV(extendDepth, -beta, -alpha);
+            vlBest = -searchPV(depth - 1, -beta, -alpha);
             board.undoMove();
             bestMove = move;
             if (vlBest >= beta)
@@ -672,14 +669,14 @@ int Search::searchPV(int depth, int alpha, int beta)
 
             if (vlBest == -INF)
             {
-                vl = -searchPV(extendDepth, -beta, -alpha);
+                vl = -searchPV(depth - 1, -beta, -alpha);
             }
             else
             {
-                vl = -searchCut(extendDepth, -alpha);
+                vl = -searchCut(depth - 1, -alpha);
                 if (vl > alpha && vl < beta)
                 {
-                    vl = -searchPV(extendDepth, -beta, -alpha);
+                    vl = -searchPV(depth - 1, -beta, -alpha);
                 }
             }
 
@@ -711,8 +708,8 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
     else
     {
-        this->pHistory->add(bestMove, extendDepth);
-        this->pTransportation->add(board, bestMove, vlBest, type, extendDepth);
+        this->pHistory->add(bestMove, depth);
+        this->pTransportation->add(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
