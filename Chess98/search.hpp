@@ -29,7 +29,6 @@ private:
         board.distance = 0;
         board.initEvaluate();
         this->pHistory->reset();
-        this->pQuiescHistory->reset();
         this->pKiller->reset();
         this->pTransportation->reset();
         this->nodecount = 0;
@@ -39,7 +38,6 @@ protected:
     Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
     HistoryHeuristic *pHistory = new HistoryHeuristic{};
-    HistoryHeuristic *pQuiescHistory = new HistoryHeuristic{};
     KillerTable *pKiller = new KillerTable{};
     TransportationTable *pTransportation = new TransportationTable{};
     int nodecount = 0;
@@ -972,7 +970,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     if (mChecking)
     {
         availableMoves = MovesGenerate::getMoves(board);
-        pQuiescHistory->sort(availableMoves);
     }
     else
     {
@@ -1007,10 +1004,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     if (vlBest == -INF)
     {
         vlBest += board.distance;
-    }
-    else if (mChecking)
-    {
-        pQuiescHistory->add(bestMove, leftDistance);
     }
     return vlBest;
 }
