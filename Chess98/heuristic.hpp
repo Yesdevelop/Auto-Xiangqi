@@ -251,7 +251,7 @@ MOVES SEE(Board &board, MOVES &moves)
     result.reserve(64);
 
     const std::map<PIECEID, int> weightPairs{
-        {R_KING, 4},
+        {R_KING, 5},
         {R_ROOK, 4},
         {R_CANNON, 3},
         {R_KNIGHT, 3},
@@ -287,7 +287,7 @@ MOVES SEE(Board &board, MOVES &moves)
         {
             score = a + 1;
         }
-        if (score >= 2)
+        if (score >= 1)
         {
             orderMap[score].emplace_back(move);
         }
