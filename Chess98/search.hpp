@@ -779,14 +779,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                 }
             }
         }
-        else
-        {
-            TrickResult<int> probCutResult = SearchTricks::multiProbCut(this, CUT, beta - 1, beta, depth);
-            if (probCutResult.isSuccess)
-            {
-                return probCutResult.data[0];
-            }
-        }
     }
 
     // variables
@@ -850,7 +842,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             board.doMove(move);
             int vl = -INF;
             // lmr pruning
-            if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 3 &&
+            if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 4 &&
                 searchedCnt >= 4)
             {
                 vl = -searchCut(depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
@@ -945,6 +937,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     {
         availableMoves = MovesGenerate::getMoves(board);
         captureSort(board, availableMoves);
+        leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
     }
     else
     {
