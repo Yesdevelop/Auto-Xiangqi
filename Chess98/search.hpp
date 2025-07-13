@@ -204,7 +204,7 @@ public:
                     {
                         enemySideCheckCount++;
                     }
-                    if (positionCount[key] >= 1)
+                    if (positionCount[key] >= 2)
                     {
                         if (mySideCheckCount > 0 || enemySideCheckCount > 0)
                         {
