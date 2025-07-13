@@ -196,13 +196,20 @@ public:
                     const auto& key = keys[i];
                     positionCount[key]++;
                     const auto& currentMove = historyMoves[i];
-                    if (currentMove.attacker.team() == currentSide)
+                    if (impossibleRepeatMove(currentMove))
                     {
-                        mySideCheckCount++;
+                        return TrickResult<int>{false, {}};
                     }
-                    else
+                    if (currentMove.isCheckingMove)
                     {
-                        enemySideCheckCount++;
+                        if (currentMove.attacker.team() == currentSide)
+                        {
+                            mySideCheckCount++;
+                        }
+                        else
+                        {
+                            enemySideCheckCount++;
+                        }
                     }
                     if (positionCount[key] >= 2)
                     {

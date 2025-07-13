@@ -414,3 +414,22 @@ bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
     }
     return true;
 }
+
+/// @brief 判断是否发生吃子以及兵过河，导致重复检测中断
+/// @param move
+bool impossibleRepeatMove(const Move& move)
+{
+    if (move.captured.pieceid != EMPTY_PIECEID)
+    {
+        return true;
+    }
+    else if (move.attacker.pieceid == R_PAWN && move.y1 == 4)
+    {
+        return true;
+    }
+    else if (move.attacker.pieceid == B_PAWN && move.y1 == 5)
+    {
+        return true;
+    }
+    return false;
+}
