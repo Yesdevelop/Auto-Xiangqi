@@ -287,7 +287,7 @@ MOVES SEE(Board &board, MOVES &moves)
         {
             score = a + 1;
         }
-        if (score >= 1)
+        if (score >= 2)
         {
             orderMap[score].emplace_back(move);
         }
