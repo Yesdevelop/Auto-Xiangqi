@@ -20,7 +20,7 @@ public:
     Result searchRoot(int depth);
     int searchPV(int depth, int alpha, int beta);
     int searchCut(int depth, int beta, bool banNullMove = false);
-    int searchQ(int alpha, int beta, int maxDistance = QUIESCENCE_EXTEND_DEPTH);
+    int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
 
 private:
     void reset()
