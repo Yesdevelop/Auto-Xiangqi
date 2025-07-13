@@ -232,6 +232,10 @@ public:
                 }
             }
         }
+        else if (search->board.distance >= MAX_SEARCH_DISTANCE)
+        {
+            return TrickResult<int>{true, { search->board.evaluate()}};
+        }
         return TrickResult<int>{false, {}};
     }
 };
@@ -604,6 +608,9 @@ int Search::searchPV(int depth, int alpha, int beta)
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
 
+    // 将军启发
+    const int extendDepth = mChecking ? depth : depth - 1;
+
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id == -1 && depth >= 2)
@@ -617,7 +624,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        vlBest = -searchPV(depth - 1, -beta, -alpha);
+        vlBest = -searchPV(extendDepth, -beta, -alpha);
         board.undoMove();
         bestMove = goodMove;
         if (vlBest >= beta)
@@ -639,7 +646,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            vlBest = -searchPV(depth - 1, -beta, -alpha);
+            vlBest = -searchPV(extendDepth, -beta, -alpha);
             board.undoMove();
             bestMove = move;
             if (vlBest >= beta)
@@ -669,14 +676,14 @@ int Search::searchPV(int depth, int alpha, int beta)
 
             if (vlBest == -INF)
             {
-                vl = -searchPV(depth - 1, -beta, -alpha);
+                vl = -searchPV(extendDepth, -beta, -alpha);
             }
             else
             {
-                vl = -searchCut(depth - 1, -alpha);
+                vl = -searchCut(extendDepth, -alpha);
                 if (vl > alpha && vl < beta)
                 {
-                    vl = -searchPV(depth - 1, -beta, -alpha);
+                    vl = -searchPV(extendDepth, -beta, -alpha);
                 }
             }
 
@@ -814,12 +821,15 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     NODE_TYPE type = ALPHA_TYPE;
     int searchedCnt = 0;
 
+    // 将军启发
+    const int extendDepth = mChecking ? depth : depth - 1;
+
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
-        int vl = -searchCut(depth - 1, -beta + 1);
+        int vl = -searchCut(extendDepth, -beta + 1);
         board.undoMove();
         bestMove = goodMove;
         if (vl > vlBest)
@@ -844,7 +854,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            int vl = -searchCut(depth - 1, -beta + 1);
+            int vl = -searchCut(extendDepth, -beta + 1);
             board.undoMove();
             if (vl > vlBest)
             {
@@ -880,7 +890,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             }
             else
             {
-                vl = -searchCut(depth - 1, -beta + 1);
+                vl = -searchCut(extendDepth, -beta + 1);
             }
 
             board.undoMove();
