@@ -25,15 +25,15 @@ public:
     static MOVES generateCaptureMovesOn(Board &board, int x, int y);
     static MOVES getCaptureMoves(Board &board);
 
-    static PIECE_TARGET_MAP kingTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP guardTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP bishopTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP knightTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP rookTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP cannonTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP pawnTarget(TEAM team, Board& board, int x, int y);
-    static PIECE_TARGET_MAP generateTargetOn(Board& board, int x, int y);
-    static PIECE_TARGET_MAP getTargetMap(Board& board);
+    static PIECE_TARGET_MAP kingTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP guardTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP bishopTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP knightTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP rookTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP cannonTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP pawnTarget(TEAM team, Board &board, int x, int y);
+    static PIECE_TARGET_MAP generateTargetOn(Board &board, int x, int y);
+    static PIECE_TARGET_MAP getTargetMap(Board &board);
 };
 
 MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
@@ -683,7 +683,7 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     return result;
 }
 
-PIECE_TARGET_MAP MovesGenerate::kingTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::kingTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
@@ -696,12 +696,15 @@ PIECE_TARGET_MAP MovesGenerate::kingTarget(TEAM team, Board& board, int x, int y
         targetMap[left][y] = true;
     if (right <= 5)
         targetMap[right][y] = true;
-    if (team == RED) {
+    if (team == RED)
+    {
         if (up <= 2)
             targetMap[x][up] = true;
         if (down >= 0)
             targetMap[x][down] = true;
-    } else {
+    }
+    else
+    {
         if (up <= 9)
             targetMap[x][up] = true;
         if (down >= 7)
@@ -710,7 +713,7 @@ PIECE_TARGET_MAP MovesGenerate::kingTarget(TEAM team, Board& board, int x, int y
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::guardTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::guardTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
@@ -718,26 +721,34 @@ PIECE_TARGET_MAP MovesGenerate::guardTarget(TEAM team, Board& board, int x, int 
     const int right = x + 1;
     const int up = y + 1;
     const int down = y - 1;
-    if (left >= 3) {
-        if (team == RED) {
+    if (left >= 3)
+    {
+        if (team == RED)
+        {
             if (up <= 2)
                 targetMap[left][up] = true;
             if (down >= 0)
                 targetMap[left][down] = true;
-        } else {
+        }
+        else
+        {
             if (up <= 9)
                 targetMap[left][up] = true;
             if (down >= 7)
                 targetMap[left][down] = true;
         }
     }
-    if (right <= 5) {
-        if (team == RED) {
+    if (right <= 5)
+    {
+        if (team == RED)
+        {
             if (up <= 2)
                 targetMap[right][up] = true;
             if (down >= 0)
                 targetMap[right][down] = true;
-        } else {
+        }
+        else
+        {
             if (up <= 9)
                 targetMap[right][up] = true;
             if (down >= 7)
@@ -747,11 +758,12 @@ PIECE_TARGET_MAP MovesGenerate::guardTarget(TEAM team, Board& board, int x, int 
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::bishopTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::bishopTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
-    if (team == RED) {
+    if (team == RED)
+    {
         if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && x - 2 >= 0 && y - 2 >= 0)
             targetMap[x - 2][y - 2] = true;
         if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && x + 2 <= 8 && y - 2 >= 0)
@@ -760,7 +772,9 @@ PIECE_TARGET_MAP MovesGenerate::bishopTarget(TEAM team, Board& board, int x, int
             targetMap[x - 2][y + 2] = true;
         if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && x + 2 <= 8 && y + 2 <= 4 && y + 1 <= 4)
             targetMap[x + 2][y + 2] = true;
-    } else {
+    }
+    else
+    {
         if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && x + 2 <= 8 && y + 2 <= 9)
             targetMap[x + 2][y + 2] = true;
         if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && x + 2 <= 8 && y - 2 >= 5 && y - 1 >= 5)
@@ -773,29 +787,33 @@ PIECE_TARGET_MAP MovesGenerate::bishopTarget(TEAM team, Board& board, int x, int
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::knightTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::knightTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
-    if (board.teamOn(x, y - 1) == EMPTY_TEAM) {
+    if (board.teamOn(x, y - 1) == EMPTY_TEAM)
+    {
         if (x - 1 >= 0 && y - 2 >= 0)
             targetMap[x - 1][y - 2] = true;
         if (x + 1 <= 8 && y - 2 >= 0)
             targetMap[x + 1][y - 2] = true;
     }
-    if (board.teamOn(x, y + 1) == EMPTY_TEAM) {
+    if (board.teamOn(x, y + 1) == EMPTY_TEAM)
+    {
         if (x - 1 >= 0 && y + 2 <= 9)
             targetMap[x - 1][y + 2] = true;
         if (x + 1 <= 8 && y + 2 <= 9)
             targetMap[x + 1][y + 2] = true;
     }
-    if (board.teamOn(x - 1, y) == EMPTY_TEAM) {
+    if (board.teamOn(x - 1, y) == EMPTY_TEAM)
+    {
         if (x - 2 >= 0 && y + 1 <= 9)
             targetMap[x - 2][y + 1] = true;
         if (x - 2 >= 0 && y - 1 >= 0)
             targetMap[x - 2][y - 1] = true;
     }
-    if (board.teamOn(x + 1, y) == EMPTY_TEAM) {
+    if (board.teamOn(x + 1, y) == EMPTY_TEAM)
+    {
         if (x + 2 <= 8 && y + 1 <= 9)
             targetMap[x + 2][y + 1] = true;
         if (x + 2 <= 8 && y - 1 >= 0)
@@ -804,7 +822,7 @@ PIECE_TARGET_MAP MovesGenerate::knightTarget(TEAM team, Board& board, int x, int
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::rookTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::rookTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
@@ -829,7 +847,7 @@ PIECE_TARGET_MAP MovesGenerate::rookTarget(TEAM team, Board& board, int x, int y
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::cannonTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::cannonTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
@@ -858,23 +876,28 @@ PIECE_TARGET_MAP MovesGenerate::cannonTarget(TEAM team, Board& board, int x, int
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::pawnTarget(TEAM team, Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::pawnTarget(TEAM team, Board &board, int x, int y)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
-    if (team == RED) {
+    if (team == RED)
+    {
         if (y + 1 <= 9)
             targetMap[x][y + 1] = true;
-        if (y > 4) {
+        if (y > 4)
+        {
             if (x - 1 >= 0)
                 targetMap[x - 1][y] = true;
             if (x + 1 <= 8)
                 targetMap[x + 1][y] = true;
         }
-    } else {
+    }
+    else
+    {
         if (y - 1 >= 0)
             targetMap[x][y - 1] = true;
-        if (y < 5) {
+        if (y < 5)
+        {
             if (x - 1 >= 0)
                 targetMap[x - 1][y] = true;
             if (x + 1 <= 8)
@@ -884,7 +907,7 @@ PIECE_TARGET_MAP MovesGenerate::pawnTarget(TEAM team, Board& board, int x, int y
     return targetMap;
 }
 
-PIECE_TARGET_MAP MovesGenerate::generateTargetOn(Board& board, int x, int y)
+PIECE_TARGET_MAP MovesGenerate::generateTargetOn(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);
     TEAM team = board.teamOn(x, y);
@@ -907,12 +930,13 @@ PIECE_TARGET_MAP MovesGenerate::generateTargetOn(Board& board, int x, int y)
         return PIECE_TARGET_MAP{};
 }
 
-PIECE_TARGET_MAP MovesGenerate::getTargetMap(Board& board)
+PIECE_TARGET_MAP MovesGenerate::getTargetMap(Board &board)
 {
     PIECE_TARGET_MAP targetMap{};
     targetMap.fill({});
     PIECES pieces = board.getPiecesByTeam(board.team);
-    for (const Piece& piece : pieces) {
+    for (const Piece &piece : pieces)
+    {
         PIECE_TARGET_MAP pieceMap = MovesGenerate::generateTargetOn(board, piece.x, piece.y);
         for (int x = 0; x < 9; ++x)
             for (int y = 0; y < 10; ++y)

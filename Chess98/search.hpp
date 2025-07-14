@@ -180,9 +180,9 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
-        const auto& historyMoves = search->board.historyMoves;
-        const auto& keys = search->board.hashKeyList;
-        const auto& currentSide = search->board.team;
+        const auto &historyMoves = search->board.historyMoves;
+        const auto &keys = search->board.hashKeyList;
+        const auto &currentSide = search->board.team;
         if (historyMoves.size() >= 4)
         {
             if (historyMoves.back().isCheckingMove)
@@ -191,11 +191,11 @@ public:
                 const int tailIndex = (int)historyMoves.size() - 1;
                 bool mySideChecking = true;
                 bool enemySideChecking = true;
-                for (int i = tailIndex;i >= 0;i--)
+                for (int i = tailIndex; i >= 0; i--)
                 {
-                    const auto& key = keys[i];
+                    const auto &key = keys[i];
                     positionCount[key]++;
-                    const auto& currentMove = historyMoves[i];
+                    const auto &currentMove = historyMoves[i];
                     if (impossibleRepeatMove(currentMove))
                     {
                         return TrickResult<int>{false, {}};
@@ -214,15 +214,15 @@ public:
                         {
                             if (mySideChecking == enemySideChecking)
                             {
-                                return TrickResult<int>{true, { DrawValue }};
+                                return TrickResult<int>{true, {DrawValue}};
                             }
                             else if (mySideChecking && !enemySideChecking)
                             {
-                                return TrickResult<int>{true, { -INF + search->board.distance }};
+                                return TrickResult<int>{true, {-INF + search->board.distance}};
                             }
                             else if (enemySideChecking && !mySideChecking)
                             {
-                                return TrickResult<int>{true, { INF - search->board.distance }};
+                                return TrickResult<int>{true, {INF - search->board.distance}};
                             }
                         }
                     }

@@ -235,7 +235,27 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     PIECEID_MAP pieceidMap = PIECEID_MAP{};
     int colNum = 9;
     int rowNum = 0;
-    std::map<char, PIECEID> pairs{{'R', R_ROOK}, {'N', R_KNIGHT}, {'H', R_KNIGHT}, {'B', R_BISHOP}, {'E', R_BISHOP}, {'G', R_GUARD}, {'A', R_GUARD}, {'K', R_KING}, {'C', R_CANNON}, {'P', R_PAWN}, {'r', B_ROOK}, {'n', B_KNIGHT}, {'h', B_KNIGHT}, {'b', B_BISHOP}, {'e', B_BISHOP}, {'g', B_GUARD}, {'a', B_GUARD}, {'k', B_KING}, {'c', B_CANNON}, {'p', B_PAWN}};
+    std::map<char, PIECEID> pairs{
+        {'R', R_ROOK},
+        {'N', R_KNIGHT},
+        {'H', R_KNIGHT},
+        {'B', R_BISHOP},
+        {'E', R_BISHOP},
+        {'G', R_GUARD},
+        {'A', R_GUARD},
+        {'K', R_KING},
+        {'C', R_CANNON},
+        {'P', R_PAWN},
+        {'r', B_ROOK},
+        {'n', B_KNIGHT},
+        {'h', B_KNIGHT},
+        {'b', B_BISHOP},
+        {'e', B_BISHOP},
+        {'g', B_GUARD},
+        {'a', B_GUARD},
+        {'k', B_KING},
+        {'c', B_CANNON},
+        {'p', B_PAWN}};
     for (int i = 0; i < fenCode.size(); i++)
     {
         if (fenCode[i] >= '1' && fenCode[i] <= '9')
@@ -270,7 +290,21 @@ std::string boardToFen(Board board)
 {
     std::string result = "";
     int spaceCount = 0;
-    std::map<PIECEID, char> pairs{{R_KING, 'K'}, {R_GUARD, 'A'}, {R_BISHOP, 'B'}, {R_KNIGHT, 'N'}, {R_ROOK, 'R'}, {R_CANNON, 'C'}, {R_PAWN, 'P'}, {B_KING, 'k'}, {B_GUARD, 'a'}, {B_BISHOP, 'b'}, {B_KNIGHT, 'n'}, {B_ROOK, 'r'}, {B_CANNON, 'c'}, {B_PAWN, 'p'}};
+    std::map<PIECEID, char> pairs{
+        {R_KING, 'K'},
+        {R_GUARD, 'A'},
+        {R_BISHOP, 'B'},
+        {R_KNIGHT, 'N'},
+        {R_ROOK, 'R'},
+        {R_CANNON, 'C'},
+        {R_PAWN, 'P'},
+        {B_KING, 'k'},
+        {B_GUARD, 'a'},
+        {B_BISHOP, 'b'},
+        {B_KNIGHT, 'n'},
+        {B_ROOK, 'r'},
+        {B_CANNON, 'c'},
+        {B_PAWN, 'p'}};
     for (int x = 9; x >= 0; x--)
     {
         for (int y = 0; y < 9; y++)
@@ -417,7 +451,7 @@ bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
 
 /// @brief 判断是否发生吃子以及兵过河，导致重复检测中断
 /// @param move
-bool impossibleRepeatMove(const Move& move)
+bool impossibleRepeatMove(const Move &move)
 {
     if (move.captured.pieceid != EMPTY_PIECEID)
     {
