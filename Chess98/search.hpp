@@ -188,7 +188,7 @@ public:
             if (historyMoves.back().isCheckingMove)
             {
                 std::unordered_map<int32, int> positionCount;
-                const int tailIndex = (int)historyMoves.size() - 1;
+                const int tailIndex = historyMoves.size() - 1;
                 bool mySideChecking = true;
                 bool enemySideChecking = true;
                 for (int i = tailIndex; i >= 0; i--)
