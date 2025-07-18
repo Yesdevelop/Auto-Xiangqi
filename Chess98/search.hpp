@@ -180,6 +180,7 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
+        return TrickResult<int>{false, {}};
         const auto &historyMoves = search->board.historyMoves;
         const auto &keys = search->board.hashKeyList;
         const auto &currentSide = search->board.team;
@@ -584,6 +585,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     int vlBest = -INF;
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
+    MOVES availableMoves;
 
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
@@ -616,7 +618,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (type != BETA_TYPE)
     {
         MOVES killerAvailableMoves = this->pKiller->get(board);
-        MOVES _moves = MovesGenerate::getMoves(board);
+        availableMoves = MovesGenerate::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
@@ -639,7 +641,10 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (type != BETA_TYPE)
     {
         int vl = -INF;
-        MOVES availableMoves = MovesGenerate::getMoves(board);
+        if (availableMoves.size() == 0)
+        {
+            availableMoves = MovesGenerate::getMoves(board);
+        }
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -786,6 +791,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
     int searchedCnt = 0;
+    MOVES availableMoves;
 
     // 置换表着法
     Move goodMove = this->pTransportation->getMove(board);
@@ -805,34 +811,14 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    // 杀手启发
-    if (type != BETA_TYPE)
-    {
-        MOVES killerAvailableMoves = this->pKiller->get(board);
-        MOVES _moves = MovesGenerate::getMoves(board);
-        for (const Move &move : killerAvailableMoves)
-        {
-            board.doMove(move);
-            int vl = -searchCut(depth - 1, -beta + 1);
-            board.undoMove();
-            if (vl > vlBest)
-            {
-                vlBest = vl;
-                bestMove = move;
-                if (vl >= beta)
-                {
-                    type = BETA_TYPE;
-                    break;
-                }
-            }
-        }
-    }
-
     // 搜索
     if (type != BETA_TYPE)
     {
         // 获取所有可行着法
-        MOVES availableMoves = MovesGenerate::getMoves(board);
+        if (availableMoves.size() == 0)
+        {
+            availableMoves = MovesGenerate::getMoves(board);
+        }
 
         // 历史启发
         this->pHistory->sort(availableMoves);
@@ -898,7 +884,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 返回评估结果
-    if (leftDistance <= 0)
+    if (leftDistance <= 0 || true)
     {
         return board.evaluate();
     }
