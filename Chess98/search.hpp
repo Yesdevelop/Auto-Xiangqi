@@ -684,8 +684,8 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // 置换表分数
-    int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
-    if (vlHash != -INF)
+    int vlHash = this->pTransportation->getValue(board, -INF, beta, depth);
+    if (vlHash >= beta)
     {
         return vlHash;
     }
@@ -765,10 +765,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             }
         }
     }
-    else if (!mChecking && depth >= 8 && this->board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
-    {
-        depth -= 2;
-    }
 
     // 杀手启发
     if (type != BETA_TYPE)
@@ -805,18 +801,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         for (const Move &move : availableMoves)
         {
             board.doMove(move);
-            int vl = -INF;
-            // lmr pruning
-            if (!mChecking && board.historyMoves.back().captured.pieceid == EMPTY_PIECEID && depth >= 4 &&
-                searchedCnt >= 4)
-            {
-                vl = -searchCut(depth - 2 - static_cast<int>(depth >= 4), -beta + 1);
-            }
-            else
-            {
-                vl = -searchCut(depth - 1, -beta + 1);
-            }
-
+            int vl = -searchCut(depth - 1, -beta + 1);
             board.undoMove();
 
             // 更新最佳值
