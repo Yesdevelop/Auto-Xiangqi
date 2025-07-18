@@ -437,51 +437,6 @@ void Board::initEvaluate()
         pieceWeights[B_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
     }
 
-    // 马前卒
-    const std::array<std::array<int, 10>, 9> searchPosMap{
-        {{{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
-         {{3, 0, 0, 0, 0, 0, 0, 0, 0, -3}},
-         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
-         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
-         {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}},
-         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}},
-         {{3, 0, 0, 0, 0, 0, 0, 0, 0, -3}},
-         {{0, 0, 2, 1, 0, 0, -1, -2, 0, 0}}}};
-    PIECES redKnights = this->getPiecesFromRegistry(R_KNIGHT);
-    for (auto knight : redKnights)
-    {
-        if (searchPosMap[knight.x][knight.y] * knight.team() == 2)
-        {
-            if (this->pieceidOn(knight.x, knight.y + 1) == R_PAWN)
-            {
-                pieceWeights[R_PAWN][knight.x][knight.y + 2] += KNIGHT_ROAD_REWARD;
-            }
-        }
-        else if (searchPosMap[knight.x][knight.y] * knight.team() == 3)
-        {
-            pieceWeights[R_PAWN][knight.x - 1][knight.y + 4] += KNIGHT_ROAD_REWARD;
-            pieceWeights[R_PAWN][knight.x + 1][knight.y + 4] += KNIGHT_ROAD_REWARD;
-        }
-    }
-
-    PIECES blackKnights = this->getPiecesFromRegistry(B_KNIGHT);
-    for (auto knight : blackKnights)
-    {
-        if (searchPosMap[knight.x][knight.y] * knight.team() == 2)
-        {
-            if (this->pieceidOn(knight.x, knight.y - 1) == B_PAWN)
-            {
-                pieceWeights[B_PAWN][knight.x][size_t(9) - knight.y + 2] += KNIGHT_ROAD_REWARD;
-            }
-        }
-        else if (searchPosMap[knight.x][knight.y] * knight.team() == 3)
-        {
-            pieceWeights[B_PAWN][knight.x - 1][size_t(9) - knight.y + 4] += KNIGHT_ROAD_REWARD;
-            pieceWeights[B_PAWN][knight.x + 1][size_t(9) - knight.y + 4] += KNIGHT_ROAD_REWARD;
-        }
-    }
-
     // 调整不受威胁方少掉的士象分
     this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
     this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;

@@ -61,49 +61,6 @@ public:
         }
     }
 
-    static TrickResult<int> transportationScorePV(Search &search, Board &board, int alpha, int beta, int depth)
-    {
-        const int vlHash = search.pTransportation->getValue(board, alpha, beta, depth);
-        if (vlHash != -INF)
-        {
-            if (vlHash >= beta)
-            {
-                if (search.searchQ(beta - 1, beta) >= beta)
-                {
-                    return TrickResult<int>{true, {vlHash}};
-                }
-                else if (depth <= 0)
-                {
-                    return TrickResult<int>{true, {beta}};
-                }
-            }
-            else if (vlHash <= alpha)
-            {
-                if (search.searchQ(alpha, alpha + 1) <= alpha)
-                {
-                    return TrickResult<int>{true, {vlHash}};
-                }
-                else if (depth <= 0)
-                {
-                    return TrickResult<int>{true, {alpha}};
-                }
-            }
-            else
-            {
-                const int vl1 = search.searchQ(alpha, alpha + 1);
-                if (vl1 > alpha)
-                {
-                    const int vl2 = search.searchQ(beta - 1, beta);
-                    if (vl2 < beta)
-                    {
-                        return TrickResult<int>{true, {vlHash}};
-                    }
-                }
-            }
-        }
-        return TrickResult<int>{false, {}};
-    }
-
     static TrickResult<int> nullAndDeltaPruning(Board &board, bool mChecking, int &alpha, int &beta, int &vlBest)
     {
         if (!mChecking)
@@ -546,17 +503,16 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // 置换表分数
-    TrickResult<int> ttscoreResult = SearchTricks::transportationScorePV(*this, board, alpha, beta, depth);
-    if (ttscoreResult.isSuccess)
+    const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
+    if (vlHash != -INF)
     {
-        return ttscoreResult.data[0];
+        return vlHash;
     }
 
     // 静态搜索
     if (depth <= 0)
     {
         int vl = Search::searchQ(alpha, beta);
-        this->pTransportation->add(board, Move{}, vl, EXACT_TYPE, depth);
         return vl;
     }
 
@@ -615,22 +571,39 @@ int Search::searchPV(int depth, int alpha, int beta)
     // 杀手启发
     if (type != BETA_TYPE)
     {
+        int vl = -INF;
         MOVES killerAvailableMoves = this->pKiller->get(board);
         MOVES _moves = MovesGenerate::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
-            vlBest = -searchPV(depth - 1, -beta, -alpha);
-            board.undoMove();
-            bestMove = move;
-            if (vlBest >= beta)
+            if (vlBest == -INF)
             {
-                type = BETA_TYPE;
+                vl = -searchPV(depth - 1, -beta, -alpha);
             }
-            if (vlBest > alpha)
+            else
             {
-                type = EXACT_TYPE;
-                alpha = vlBest;
+                vl = -searchCut(depth - 1, -alpha);
+                if (vl > alpha && vl < beta)
+                {
+                    vl = -searchPV(depth - 1, -beta, -alpha);
+                }
+            }
+            board.undoMove();
+            if (vl > vlBest)
+            {
+                vlBest = vl;
+                bestMove = move;
+                if (vl >= beta)
+                {
+                    type = BETA_TYPE;
+                    break;
+                }
+                if (vl > alpha)
+                {
+                    type = EXACT_TYPE;
+                    alpha = vl;
+                }
             }
         }
     }
@@ -714,19 +687,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     int vlHash = this->pTransportation->getValue(board, beta - 1, beta, depth);
     if (vlHash != -INF)
     {
-        int statisValue = Search::searchQ(beta - 1, beta);
-        if (vlHash >= beta && statisValue >= beta)
-        {
-            return vlHash;
-        }
-        else if (vlHash < beta && statisValue < beta)
-        {
-            return vlHash;
-        }
-        else if (depth <= 0)
-        {
-            return statisValue;
-        }
+        return vlHash;
     }
 
     // 静态搜索
@@ -803,6 +764,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                 type = BETA_TYPE;
             }
         }
+    }
+    else if (!mChecking && depth >= 8 && this->board.historyMoves.back().captured.pieceid == EMPTY_PIECEID)
+    {
+        depth -= 2;
     }
 
     // 杀手启发
