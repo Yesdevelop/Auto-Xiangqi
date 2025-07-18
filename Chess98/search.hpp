@@ -70,11 +70,6 @@ public:
             {
                 return TrickResult<int>{true, {vl}};
             }
-            // delta pruning
-            if (vl <= alpha - DELTA_PRUNING_MARGIN)
-            {
-                return TrickResult<int>{true, {alpha}};
-            }
             vlBest = vl;
             if (vl > alpha)
             {
@@ -886,7 +881,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     if (mChecking)
     {
         availableMoves = MovesGenerate::getMoves(board);
-        captureSort(board, availableMoves);
+        pHistory->sort(availableMoves);
         leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
     }
     else
