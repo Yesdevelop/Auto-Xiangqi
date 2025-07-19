@@ -37,7 +37,7 @@ private:
 protected:
     Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
-    HistoryHeuristic *pHistory = new HistoryHeuristic{};
+    HistoryTable *pHistory = new HistoryTable{};
     KillerTable *pKiller = new KillerTable{};
     TransportationTable *pTransportation = new TransportationTable{};
     int nodecount = 0;
@@ -132,6 +132,7 @@ public:
 
     static TrickResult<int> repeatCheck(Search *search)
     {
+        // 暂时关闭
         return TrickResult<int>{false, {}};
         const auto &historyMoves = search->board.historyMoves;
         const auto &keys = search->board.hashKeyList;
@@ -820,6 +821,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
 int Search::searchQ(int alpha, int beta, int leftDistance)
 {
+    // 暂时关闭
     nodecount++;
 
     // 检查将帅是否在棋盘上
@@ -873,10 +875,11 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     else
     {
         MOVES unordered = MovesGenerate::getCaptureMoves(board);
-        availableMoves = SEE(board, availableMoves);
+        CaptureSort::sort(board, availableMoves);
     }
 
-    Move bestMove;
+    // variables
+    Move bestMove{};
 
     // 搜索
     for (const Move &move : availableMoves)
