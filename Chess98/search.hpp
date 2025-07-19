@@ -875,7 +875,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     else
     {
         MOVES unordered = MovesGenerate::getCaptureMoves(board);
-        CaptureSort::sort(board, availableMoves);
+        CaptureSort::sortCaptureMoves(board, availableMoves);
     }
 
     // variables

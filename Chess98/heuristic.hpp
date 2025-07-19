@@ -108,7 +108,7 @@ protected:
     int hashSize = 0;
 
 public:
-    void add(Board &board, Move goodMove, int vl, int type, int depth)
+    void add(Board &board, Move goodMove, int vl, NODE_TYPE type, int depth)
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
         TransItem &t = this->items.at(pos);
@@ -219,7 +219,7 @@ public:
 class CaptureSort
 {
 public:
-    static void sort(Board &board, MOVES &moves)
+    static void sortCaptureMoves(Board &board, MOVES &moves)
     {
         MOVES result{};
         result.reserve(64);
