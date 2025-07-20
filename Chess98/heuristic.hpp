@@ -94,12 +94,10 @@ public:
 class TransportationTable
 {
 public:
-    TransportationTable(int hashLevel = 16)
-    {
-        this->hashSize = (1 << hashLevel);
-        this->hashMask = this->hashSize - 1;
-        this->items.resize(this->hashSize);
-    }
+    TransportationTable(uint64 hashLevel = 16)
+        : hashSize(1 << hashLevel),
+          hashMask((1 << hashLevel) - 1),
+          items(1ULL << hashLevel) {};
 
     void reset()
     {
@@ -217,7 +215,7 @@ public:
             return vl - nDistance;
         }
         return vl;
-    };
+    }
 };
 
 // 吃子启发

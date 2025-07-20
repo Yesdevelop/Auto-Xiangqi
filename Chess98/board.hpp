@@ -176,7 +176,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
     // 初始化局面哈希
     initHashInfo();
 
-    this->bitboard = std::make_unique<BitBoard>(BitBoard{this->pieceidMap});
+    this->bitboard = std::make_unique<BitBoard>(this->pieceidMap);
 }
 
 Piece Board::pieceIndex(PIECE_INDEX pieceIndex)

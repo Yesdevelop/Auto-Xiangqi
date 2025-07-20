@@ -32,7 +32,8 @@ void wait(int ms)
 const int INF = 1000000;
 const int BAN = INF - 2000;
 const int ILLEGAL_VAL = INF * 2;
-using U64 = unsigned long long;
+using uint64 = unsigned long long;
+using uint32 = unsigned int;
 using int32 = int;
 using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
 
@@ -105,9 +106,11 @@ class Piece
 {
 public:
     Piece() = default;
-    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex) : pieceid(pieceid), x(x), y(y), pieceIndex(pieceIndex)
-    {
-    }
+    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
+        : pieceid(pieceid),
+          x(x),
+          y(y),
+          pieceIndex(pieceIndex) {};
 
     TEAM team() const
     {
