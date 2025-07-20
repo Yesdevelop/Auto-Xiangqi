@@ -91,7 +91,7 @@ public:
     MOVES historyMoves{};
     std::vector<PIECEID_MAP> historySituations{};
     TEAM team = -1;
-    BitBoard *bitboard = nullptr;
+    std::unique_ptr<BitBoard> bitboard{nullptr};
     int distance = 0;
     int vlRed = 0;
     int vlBlack = 0;
@@ -176,7 +176,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
     // 初始化局面哈希
     initHashInfo();
 
-    this->bitboard = new BitBoard{this->pieceidMap};
+    this->bitboard = std::make_unique<BitBoard>(BitBoard{this->pieceidMap});
 }
 
 Piece Board::pieceIndex(PIECE_INDEX pieceIndex)

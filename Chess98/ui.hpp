@@ -4,7 +4,7 @@
 
 using BOARD_CODE = std::string;
 
-BOARD_CODE generateCode(Board board)
+BOARD_CODE generateCode(Board &board)
 {
     BOARD_CODE code = "";
     for (int i = 0; i < 9; i++)
@@ -34,7 +34,7 @@ PIECEID_MAP decode(BOARD_CODE code)
     return result;
 }
 
-void setBoardCode(const Board &board)
+void setBoardCode(Board &board)
 {
     const BOARD_CODE code = generateCode(board);
     const std::string historyMovesBack =

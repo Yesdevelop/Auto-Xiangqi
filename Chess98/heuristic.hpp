@@ -10,13 +10,15 @@ class HistoryTable
 {
 public:
     HistoryTable() = default;
+
     void reset()
     {
         std::memset(this->historyTable.data(), 0, sizeof(this->historyTable));
     };
 
 protected:
-    std::array<std::array<std::array<int, 90>, 90>, 2> historyTable{};
+    using TABLE = std::array<std::array<std::array<int, 90>, 90>, 2>;
+    TABLE historyTable{};
 
 public:
     void add(Move move, int depth)
@@ -24,7 +26,7 @@ public:
         int pos1 = 10 * move.x1 + move.y1;
         int pos2 = 10 * move.x2 + move.y2;
         int teamID = (move.attacker.team() + 1) >> 1;
-        this->historyTable.at(teamID).at(pos1).at(pos2) += (depth << 1);
+        this->historyTable[teamID][pos1][pos2] += (depth << 1);
     };
 
     void sort(MOVES &moves) const
@@ -56,13 +58,15 @@ class KillerTable
 {
 public:
     KillerTable() = default;
+
     void reset()
     {
-        this->killerMoves.fill({});
+        std::memset(this->killerMoves.data(), 0, sizeof(this->killerMoves));
     }
 
 protected:
-    std::array<std::array<Move, 2>, 128> killerMoves{};
+    using KILLER_MOVES = std::array<std::array<Move, 2>, 64>;
+    KILLER_MOVES killerMoves{};
 
 public:
     void add(Board &board, Move move)
@@ -103,7 +107,8 @@ public:
     }
 
 protected:
-    std::vector<TransItem> items{};
+    using HASH_ITEMS = std::vector<TransItem>;
+    HASH_ITEMS items{};
     int hashMask = 0;
     int hashSize = 0;
 
@@ -111,7 +116,7 @@ public:
     void add(Board &board, Move goodMove, int vl, NODE_TYPE type, int depth)
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-        TransItem &t = this->items.at(pos);
+        TransItem &t = this->items[pos];
         if (t.hashLock == 0)
         {
             t.hashLock = board.hashLock;
@@ -160,7 +165,7 @@ public:
     int getValue(Board &board, int vlApha, int vlBeta, int depth) const
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-        const TransItem &t = this->items.at(pos);
+        const TransItem &t = this->items[pos];
         if (t.hashLock == board.hashLock)
         {
             if (t.exactDepth >= depth)
@@ -182,7 +187,7 @@ public:
     Move getMove(Board &board) const
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
-        const TransItem &t = this->items.at(pos);
+        const TransItem &t = this->items[pos];
         if (t.hashLock == board.hashLock)
         {
             if (isValidMoveInSituation(board, t.exactMove))

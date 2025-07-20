@@ -286,7 +286,7 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
 /// @brief board转fen串
 /// @param board
 /// @return
-std::string boardToFen(Board board)
+std::string boardToFen(Board &board)
 {
     std::string result = "";
     int spaceCount = 0;
