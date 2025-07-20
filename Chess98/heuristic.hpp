@@ -14,7 +14,7 @@ public:
     void reset()
     {
         std::memset(this->historyTable.data(), 0, sizeof(this->historyTable));
-    };
+    }
 
 protected:
     using TABLE = std::array<std::array<std::array<int, 90>, 90>, 2>;
@@ -27,7 +27,7 @@ public:
         int pos2 = 10 * move.x2 + move.y2;
         int teamID = (move.attacker.team() + 1) >> 1;
         this->historyTable[teamID][pos1][pos2] += (depth << 1);
-    };
+    }
 
     void sort(MOVES &moves) const
     {
@@ -50,7 +50,7 @@ public:
             return first.moveType > second.moveType;
         }
         return first.val > second.val; });
-    };
+    }
 };
 
 // 杀手启发
@@ -97,7 +97,7 @@ public:
     TransportationTable(uint64 hashLevel = 16)
         : hashSize(1 << hashLevel),
           hashMask((1 << hashLevel) - 1),
-          items(1ULL << hashLevel) {};
+          items(1ULL << hashLevel) {}
 
     void reset()
     {
