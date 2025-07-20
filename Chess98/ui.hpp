@@ -72,27 +72,29 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     // variables
     int count = 0;
     Search s = Search(pieceidMap, team);
-    printPieceidMap(s.board.pieceidMap);
+    Board &board = s.getBoard();
 
     // 界面
     std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";
     system(cmd.c_str());
-    setBoardCode(s.board);
+    setBoardCode(board);
+    printPieceidMap(board.pieceidMap);
     std::string moveFileContent = "____";
+    
     while (true)
     {
-        if (s.board.team == team)
+        if (board.team == team)
         {
             count++;
             std::cout << count << "---------------------" << std::endl;
 
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
-            s.board.doMove(node.move);
-            if (inCheck(s.board, s.board.team))
-                s.board.historyMoves.back().isCheckingMove = true;
+            board.doMove(node.move);
+            if (inCheck(board, board.team))
+                board.historyMoves.back().isCheckingMove = true;
 
-            setBoardCode(s.board);
+            setBoardCode(board);
             moveFileContent = readFile("./_move_.txt");
         }
         else
@@ -101,14 +103,14 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
             std::string content = readFile("./_move_.txt");
 
             // 悔棋
-            if (content == "undo" && s.board.historyMoves.size() > 1)
+            if (content == "undo" && board.historyMoves.size() > 1)
             {
                 count--;
                 std::cout << "undo" << std::endl;
-                s.board.undoMove();
-                s.board.undoMove();
+                board.undoMove();
+                board.undoMove();
 
-                setBoardCode(s.board);
+                setBoardCode(board);
                 writeFile("./_move_.txt", "wait");
                 moveFileContent = "wait";
             }
@@ -124,7 +126,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
                     int x2 = std::stoi(content.substr(2, 1));
                     int y2 = std::stoi(content.substr(3, 1));
                     Move move{x1, y1, x2, y2};
-                    s.board.doMove(move);
+                    board.doMove(move);
                 }
                 catch (std::exception &e)
                 {

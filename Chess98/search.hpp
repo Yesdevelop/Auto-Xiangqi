@@ -3,9 +3,6 @@
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"
-#include <unordered_map>
-
-// Search
 
 class Search
 {
@@ -13,16 +10,7 @@ public:
     Search(PIECEID_MAP pieceidMap, TEAM team)
     {
         this->board = Board(pieceidMap, team);
-    };
-
-    Result searchMain(int maxDepth, int maxTime);
-    Result searchOpenBook();
-    Result searchRoot(int depth);
-    int searchPV(int depth, int alpha, int beta);
-    int searchCut(int depth, int beta, bool banNullMove = false);
-    int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
-
-private:
+    }
     void reset()
     {
         this->rootMoves = MOVES{};
@@ -33,6 +21,10 @@ private:
         this->pTransportation->reset();
         this->nodecount = 0;
     }
+    Board &getBoard()
+    {
+        return this->board;
+    }
 
 protected:
     Board board{PIECEID_MAP{}, EMPTY_TEAM};
@@ -42,18 +34,18 @@ protected:
     TransportationTable *pTransportation = new TransportationTable{};
     int nodecount = 0;
 
-private:
-    friend void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string fenCode);
-    friend void setBoardCode(const Board &board);
-    friend class SearchTricks;
-};
-
-// tricks
-
-class SearchTricks
-{
 public:
-    static void setCheckingMove(Board &board, bool mChecking)
+    Result searchMain(int maxDepth, int maxTime);
+
+protected:
+    Result searchOpenBook();
+    Result searchRoot(int depth);
+    int searchPV(int depth, int alpha, int beta);
+    int searchCut(int depth, int beta, bool banNullMove = false);
+    int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
+
+protected:
+    void setCheckingMove(bool mChecking)
     {
         if (mChecking && !board.historyMoves.empty())
         {
@@ -61,7 +53,7 @@ public:
         }
     }
 
-    static TrickResult<int> nullAndDeltaPruning(Board &board, bool mChecking, int &alpha, int &beta, int &vlBest)
+    TrickResult<int> nullAndDeltaPruning(bool mChecking, int alpha, int beta, int vlBest) const
     {
         if (!mChecking)
         {
@@ -79,7 +71,7 @@ public:
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> mateDistancePruning(Board &board, int alpha, int &beta)
+    TrickResult<int> mateDistancePruning(int alpha, int beta) const
     {
         const int vlDistanceMate = INF - board.distance;
         if (vlDistanceMate < beta)
@@ -93,7 +85,7 @@ public:
         return {false, {}};
     }
 
-    static TrickResult<int> futilityPruning(Board &board, int alpha, int beta, int depth)
+    TrickResult<int> futilityPruning(int alpha, int beta, int depth) const
     {
         if (depth == 1)
         {
@@ -106,7 +98,7 @@ public:
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> multiProbCut(Search *search, SEARCH_TYPE searchType, int alpha, int beta, int depth)
+    TrickResult<int> multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
     {
         if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
         {
@@ -117,11 +109,11 @@ public:
             const double t = 1.5;
             const int upperBound = int((t * sigma + beta - b) / a);
             const int lowerBound = int((-t * sigma + alpha - b) / a);
-            if (search->searchCut(depth - 2, upperBound) >= upperBound)
+            if (this->searchCut(depth - 2, upperBound) >= upperBound)
             {
                 return TrickResult<int>{true, {beta}};
             }
-            else if (searchType == PV && search->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
+            else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
             {
                 return TrickResult<int>{true, {alpha}};
             }
@@ -130,13 +122,13 @@ public:
         return TrickResult<int>{false, {}};
     }
 
-    static TrickResult<int> repeatCheck(Search *search)
+    TrickResult<int> repeatCheck() const
     {
         // 暂时关闭
         return TrickResult<int>{false, {}};
-        const auto &historyMoves = search->board.historyMoves;
-        const auto &keys = search->board.hashKeyList;
-        const auto &currentSide = search->board.team;
+        const auto &historyMoves = this->board.historyMoves;
+        const auto &keys = this->board.hashKeyList;
+        const auto &currentSide = this->board.team;
         if (historyMoves.size() >= 4)
         {
             if (historyMoves.back().isCheckingMove)
@@ -172,11 +164,11 @@ public:
                             }
                             else if (mySideChecking && !enemySideChecking)
                             {
-                                return TrickResult<int>{true, {-INF + search->board.distance}};
+                                return TrickResult<int>{true, {-INF + this->board.distance}};
                             }
                             else if (enemySideChecking && !mySideChecking)
                             {
-                                return TrickResult<int>{true, {INF - search->board.distance}};
+                                return TrickResult<int>{true, {INF - this->board.distance}};
                             }
                         }
                     }
@@ -186,8 +178,6 @@ public:
         return TrickResult<int>{false, {}};
     }
 };
-
-// functions
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
@@ -298,11 +288,10 @@ Result Search::searchOpenBook()
     };
 
     BookStruct bk{};
-    auto *pBookFileStruct = new BookFileStruct{};
+    BookFileStruct pBookFileStruct{};
 
-    if (!pBookFileStruct->open("BOOK.DAT"))
+    if (!pBookFileStruct.open("BOOK.DAT"))
     {
-        delete pBookFileStruct;
         return Result{Move{}, -1};
     }
 
@@ -317,13 +306,13 @@ Result Search::searchOpenBook()
     int32 nowHashLock = 0;
     for (nScan = 0; nScan < 2; nScan++)
     {
-        int nHigh = pBookFileStruct->nLen - 1;
+        int nHigh = pBookFileStruct.nLen - 1;
         int nLow = 0;
         nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
         while (nLow <= nHigh)
         {
             nMid = (nHigh + nLow) / 2;
-            pBookFileStruct->read(bk, nMid);
+            pBookFileStruct.read(bk, nMid);
             if (bookPosCmp(bk, nowHashLock) < 0)
             {
                 nLow = nMid + 1;
@@ -345,14 +334,14 @@ Result Search::searchOpenBook()
 
     if (nScan == 2)
     {
-        pBookFileStruct->close();
+        pBookFileStruct.close();
         return Result{Move{}, -1};
     }
 
     // 如果找到局面，则向前查找第一个着法
     for (nMid--; nMid >= 0; nMid--)
     {
-        pBookFileStruct->read(bk, nMid);
+        pBookFileStruct.read(bk, nMid);
         if (bookPosCmp(bk, nowHashLock) < 0)
         {
             break;
@@ -362,9 +351,9 @@ Result Search::searchOpenBook()
     std::vector<Move> bookMoves;
 
     // 向后依次读入属于该局面的每个着法
-    for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
+    for (nMid++; nMid < pBookFileStruct.nLen; nMid++)
     {
-        pBookFileStruct->read(bk, nMid);
+        pBookFileStruct.read(bk, nMid);
         if (bookPosCmp(bk, nowHashLock) > 0)
         {
             break;
@@ -413,9 +402,7 @@ Result Search::searchOpenBook()
         }
     }
 
-    pBookFileStruct->close();
-
-    delete pBookFileStruct;
+    pBookFileStruct.close();
 
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
@@ -487,8 +474,6 @@ Result Search::searchRoot(int depth)
     }
 }
 
-// core
-
 int Search::searchPV(int depth, int alpha, int beta)
 {
     nodecount++;
@@ -514,7 +499,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // mate distance pruning
-    TrickResult<int> result = SearchTricks::mateDistancePruning(board, alpha, beta);
+    TrickResult<int> result = this->mateDistancePruning(alpha, beta);
     if (result.isSuccess)
     {
         return result.data[0];
@@ -524,10 +509,10 @@ int Search::searchPV(int depth, int alpha, int beta)
     const bool mChecking = inCheck(board, board.team);
 
     // 验证上一步是否是将军着法
-    SearchTricks::setCheckingMove(board, mChecking);
+    this->setCheckingMove(mChecking);
 
     // 重复检测
-    TrickResult<int> repeatResult = SearchTricks::repeatCheck(this);
+    TrickResult<int> repeatResult = this->repeatCheck();
     if (repeatResult.isSuccess)
     {
         return repeatResult.data[0];
@@ -698,7 +683,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // mate distance pruning
-    TrickResult<int> trickResult = SearchTricks::mateDistancePruning(board, beta - 1, beta);
+    TrickResult<int> trickResult = this->mateDistancePruning(beta - 1, beta);
     if (trickResult.isSuccess)
     {
         return trickResult.data[0];
@@ -708,10 +693,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     const bool mChecking = inCheck(board, board.team);
 
     // 验证上一步是否是将军着法
-    SearchTricks::setCheckingMove(board, mChecking);
+    this->setCheckingMove(mChecking);
 
     // 重复检测
-    TrickResult<int> repeatResult = SearchTricks::repeatCheck(this);
+    TrickResult<int> repeatResult = this->repeatCheck();
     if (repeatResult.isSuccess)
     {
         return repeatResult.data[0];
@@ -837,7 +822,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // mate distance pruning
-    TrickResult<int> trickresult = SearchTricks::mateDistancePruning(board, alpha, beta);
+    TrickResult<int> trickresult = this->mateDistancePruning(alpha, beta);
     if (trickresult.isSuccess)
     {
         return trickresult.data[0];
@@ -848,17 +833,17 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     int vlBest = -INF;
 
     // 验证上一步是否是将军着法
-    SearchTricks::setCheckingMove(board, mChecking);
+    this->setCheckingMove(mChecking);
 
     // null and delta pruning
-    TrickResult<int> nullDeltaResult = SearchTricks::nullAndDeltaPruning(board, mChecking, alpha, beta, vlBest);
+    TrickResult<int> nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
     if (nullDeltaResult.isSuccess)
     {
         return nullDeltaResult.data[0];
     }
 
     // 重复检测
-    TrickResult<int> repeatResult = SearchTricks::repeatCheck(this);
+    TrickResult<int> repeatResult = this->repeatCheck();
     if (repeatResult.isSuccess)
     {
         return repeatResult.data[0];
