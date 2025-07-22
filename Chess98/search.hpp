@@ -162,7 +162,7 @@ protected:
             // 若ply5和ply3都是将军着法，且出现循环局面，则直接判定违规
             if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
             {
-                return false;
+                return true;
             }
             // 长捉情况比较特殊
             // 只有车、马、炮能作为长捉的发起者
