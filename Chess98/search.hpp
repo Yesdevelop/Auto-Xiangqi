@@ -126,59 +126,61 @@ protected:
 
     TrickResult<int> repeatCheck() const
     {
-        // 暂时关闭
-        return TrickResult<int>{false, {}};
-        const auto &historyMoves = this->board.historyMoves;
-        const auto &keys = this->board.hashKeyList;
-        const auto &currentSide = this->board.team;
-        if (historyMoves.size() >= 4)
+        // 这个函数只判断对方有没有违规，违规返回INF
+        const Board& board = this->board;
+        const MOVES& history = board.historyMoves;
+        const size_t size = history.size();
+        // 前面加一些快速判断的方法
+        const bool quickCheck = (
+            false // TODO
+        );
+        // 总历史着法数5个及以上才可判定是否重复
+        if (quickCheck == false && size >= 5)
         {
-            if (historyMoves.back().isCheckingMove)
+            const Move& ply1 = history[size_t(size - 1)];
+            const Move& ply2 = history[size_t(size - 2)];
+            const Move& ply3 = history[size_t(size - 3)];
+            const Move& ply4 = history[size_t(size - 4)];
+            const Move& ply5 = history[size_t(size - 5)];
+            // 判断是否出现重复局面，没有则直接false
+            // 试想如下重复局面：（格式：plyX: x1y1x2y2）
+            // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
+            const bool isRepeat = (
+                ply1 == ply5 &&
+                ply1.startpos == ply3.endpos &&
+                ply1.endpos == ply3.startpos &&
+                ply2.startpos == ply4.endpos &&
+                ply2.endpos == ply4.startpos
+            );
+            if (!isRepeat)
             {
-                std::unordered_map<int32, int> positionCount;
-                const int tailIndex = int(historyMoves.size()) - 1;
-                bool mySideChecking = true;
-                bool enemySideChecking = true;
-                for (int i = tailIndex; i >= 0; i--)
-                {
-                    const auto &key = keys[i];
-                    positionCount[key]++;
-                    const auto &currentMove = historyMoves[i];
-                    if (impossibleRepeatMove(currentMove))
-                    {
-                        return TrickResult<int>{false, {}};
-                    }
-                    if (currentMove.attacker.team() == currentSide)
-                    {
-                        mySideChecking = mySideChecking && currentMove.isCheckingMove;
-                    }
-                    else
-                    {
-                        enemySideChecking = enemySideChecking && currentMove.isCheckingMove;
-                    }
-                    if (positionCount[key] >= 2)
-                    {
-                        if (mySideChecking || enemySideChecking)
-                        {
-                            if (mySideChecking == enemySideChecking)
-                            {
-                                return TrickResult<int>{true, {DrawValue}};
-                            }
-                            else if (mySideChecking && !enemySideChecking)
-                            {
-                                return TrickResult<int>{true, {-INF + this->board.distance}};
-                            }
-                            else if (enemySideChecking && !mySideChecking)
-                            {
-                                return TrickResult<int>{true, {INF - this->board.distance}};
-                            }
-                        }
-                    }
-                }
+                return TrickResult<int>{false, {}};
+            }
+            // 长将在任何情况下都会判负
+            // 由于性能原因，isCheckingMove是被延迟设置的，ply1可能还没有被设成checkingMove
+            // 但是若判定了循环局面，ply1必然等于ply5
+            // 若ply5和ply3都是将军着法，且出现循环局面，则直接判定违规
+            if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
+            {
+                return TrickResult<int>{true, {INF}};
+            }
+            // 长捉情况比较特殊
+            // 只有车、马、炮能作为长捉的发起者
+            // 发起者不断捉同一个子，判负
+            const bool condition1 = ( // 是否是车马炮
+                abs(ply1.attacker.pieceid) == R_ROOK ||
+                abs(ply1.attacker.pieceid) == R_KNIGHT ||
+                abs(ply1.attacker.pieceid) == R_CANNON
+            );
+            const bool condition2 = (
+                false // TODO
+            );
+            if (condition1 == true && condition2 == true)
+            {
+                return TrickResult<int>{true, {INF}};
             }
         }
-        return TrickResult<int>{false, {}};
-    }
+        return TrickResult<int>{false, {}};}
 };
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
@@ -818,7 +820,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 返回评估结果
-    if (leftDistance <= 0)
+    if (leftDistance <= 0 || true)
     {
         return board.evaluate();
     }
