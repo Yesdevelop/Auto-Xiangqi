@@ -124,7 +124,7 @@ protected:
         return TrickResult<int>{false, {}};
     }
 
-    TrickResult<int> repeatCheck() const
+    bool repeatCheck() const
     {
         // 这个函数只判断对方有没有违规，违规返回INF
         const Board& board = this->board;
@@ -154,7 +154,7 @@ protected:
             );
             if (!isRepeat)
             {
-                return TrickResult<int>{false, {}};
+                return false;
             }
             // 长将在任何情况下都会判负
             // 由于性能原因，isCheckingMove是被延迟设置的，ply1可能还没有被设成checkingMove
@@ -162,7 +162,7 @@ protected:
             // 若ply5和ply3都是将军着法，且出现循环局面，则直接判定违规
             if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
             {
-                return TrickResult<int>{true, {INF}};
+                return false;
             }
             // 长捉情况比较特殊
             // 只有车、马、炮能作为长捉的发起者
@@ -177,10 +177,11 @@ protected:
             );
             if (condition1 == true && condition2 == true)
             {
-                return TrickResult<int>{true, {INF}};
+                return true;
             }
         }
-        return TrickResult<int>{false, {}};}
+        return false;
+    }
 };
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
@@ -516,10 +517,10 @@ int Search::searchPV(int depth, int alpha, int beta)
     this->setCheckingMove(mChecking);
 
     // 重复检测
-    TrickResult<int> repeatResult = this->repeatCheck();
-    if (repeatResult.isSuccess)
+    bool repeatResult = this->repeatCheck();
+    if (repeatResult == true)
     {
-        return repeatResult.data[0];
+        return INF - board.distance;
     }
 
     // variables
@@ -700,10 +701,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     this->setCheckingMove(mChecking);
 
     // 重复检测
-    TrickResult<int> repeatResult = this->repeatCheck();
-    if (repeatResult.isSuccess)
+    bool repeatResult = this->repeatCheck();
+    if (repeatResult == true)
     {
-        return repeatResult.data[0];
+        return INF - board.distance;
     }
 
     // tricks
@@ -847,10 +848,10 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 重复检测
-    TrickResult<int> repeatResult = this->repeatCheck();
-    if (repeatResult.isSuccess)
+    bool repeatResult = this->repeatCheck();
+    if (repeatResult == true)
     {
-        return repeatResult.data[0];
+        return INF - board.distance;
     }
 
     // 搜索
