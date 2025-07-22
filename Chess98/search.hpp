@@ -231,6 +231,13 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         }
     }
 
+    if (bestNode.move.id == -1)
+    {
+        // 没有着法就乱走一个
+        const Piece& king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
+        bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
+    }
+
     return bestNode;
 }
 
@@ -469,14 +476,7 @@ Result Search::searchRoot(int depth)
     // 历史启发调整根节点似乎更快
     this->pHistory->sort(rootMoves);
 
-    if (bestMove.id != -1)
-    {
-        return Result{bestMove, vlBest};
-    }
-    else
-    {
-        return Result{MovesGenerate::getMoves(board)[0], vlBest};
-    }
+    return Result{bestMove, vlBest};
 }
 
 int Search::searchPV(int depth, int alpha, int beta)
@@ -490,11 +490,11 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // 置换表分数
-    const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
+    /*const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
     if (vlHash != -INF)
     {
         return vlHash;
-    }
+    }*/
 
     // 静态搜索
     if (depth <= 0)
@@ -675,11 +675,11 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // 置换表分数
-    int vlHash = this->pTransportation->getValue(board, -INF, beta, depth);
+    /*int vlHash = this->pTransportation->getValue(board, -INF, beta, depth);
     if (vlHash >= beta)
     {
         return vlHash;
-    }
+    }*/
 
     // 静态搜索
     if (depth <= 0)
@@ -821,7 +821,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 返回评估结果
-    if (leftDistance <= 0 || true)
+    if (leftDistance <= 0)
     {
         return board.evaluate();
     }
