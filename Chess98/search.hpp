@@ -11,7 +11,7 @@ public:
     {
         this->board = Board(pieceidMap, team);
     }
-    
+
     void reset()
     {
         this->rootMoves = MOVES{};
@@ -55,7 +55,7 @@ protected:
         }
     }
 
-    TrickResult<int> nullAndDeltaPruning(bool mChecking, int alpha, int beta, int vlBest) const
+    TrickResult<int> nullAndDeltaPruning(bool mChecking, int& alpha, int& beta, int& vlBest) const
     {
         if (!mChecking)
         {
@@ -73,7 +73,7 @@ protected:
         return TrickResult<int>{false, {}};
     }
 
-    TrickResult<int> mateDistancePruning(int alpha, int beta) const
+    TrickResult<int> mateDistancePruning(int alpha, int &beta) const
     {
         const int vlDistanceMate = INF - board.distance;
         if (vlDistanceMate < beta)
@@ -818,7 +818,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 返回评估结果
-    if (leftDistance <= 0 || true)
+    if (leftDistance <= 0)
     {
         return board.evaluate();
     }
