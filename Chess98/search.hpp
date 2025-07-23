@@ -489,13 +489,6 @@ int Search::searchPV(int depth, int alpha, int beta)
         return -INF + board.distance;
     }
 
-    // 置换表分数
-    /*const int vlHash = this->pTransportation->getValue(board, alpha, beta, depth);
-    if (vlHash != -INF)
-    {
-        return vlHash;
-    }*/
-
     // 静态搜索
     if (depth <= 0)
     {
@@ -675,11 +668,11 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // 置换表分数
-    /*int vlHash = this->pTransportation->getValue(board, -INF, beta, depth);
+    int vlHash = this->pTransportation->getValue(board, -INF, beta, depth);
     if (vlHash >= beta)
     {
         return vlHash;
-    }*/
+    }
 
     // 静态搜索
     if (depth <= 0)
