@@ -347,9 +347,9 @@ bool isValidMoveInSituation(Board &board, Move move)
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
     if (attacker == 0) // 若攻击者不存在，则一定是不合理着法
         return false;
-    if (attacker != move.attacker.pieceid) // 若攻击者不一致，则一定是不合理着法
+    if (attacker != move.starter.pieceid) // 若攻击者不一致，则一定是不合理着法
         return false;
-    if (move.attacker.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
+    if (move.starter.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
         return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
     if (captured != 0 && board.teamOn(move.x2, move.y2) ==
@@ -417,53 +417,4 @@ bool isValidMoveInSituation(Board &board, Move move)
     board.undoMove();
 
     return !skip;
-}
-
-/// @brief 检查两个在同行或同列的坐标之间是否存在障碍物（要求这两个位置上必须有子）
-/// @param board
-/// @param x1
-/// @param y1
-/// @param x2
-/// @param y2
-/// @return
-bool hasBarrier(Board &board, int x1, int y1, int x2, int y2)
-{
-    if (x1 == x2)
-    {
-        BITLINE bitlineX = board.getBitLineX(x1);
-        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y1, 9);
-        if (y2 >= regionX[0] && y2 <= regionX[1])
-        {
-            return false;
-        }
-    }
-    else
-    {
-        BITLINE bitlineY = board.getBitLineY(y1);
-        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x1, 8);
-        if (x2 >= regionY[0] && x2 <= regionY[1])
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-/// @brief 判断是否发生吃子以及兵过河，导致重复检测中断
-/// @param move
-bool impossibleRepeatMove(const Move &move)
-{
-    if (move.captured.pieceid != EMPTY_PIECEID)
-    {
-        return true;
-    }
-    else if (move.attacker.pieceid == R_PAWN && move.y1 == 4)
-    {
-        return true;
-    }
-    else if (move.attacker.pieceid == B_PAWN && move.y1 == 5)
-    {
-        return true;
-    }
-    return false;
 }

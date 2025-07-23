@@ -9,9 +9,9 @@ class Board
 public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
-    Piece pieceIndex(PIECE_INDEX pieceIndex);
+    Piece pieceIndex(PIECE_INDEX pieceIndex) const;
 
-    Piece piecePosition(int x, int y);
+    Piece piecePosition(int x, int y)const;
 
     PIECEID pieceidOn(int x, int y) const;
 
@@ -179,12 +179,12 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
     this->bitboard = std::make_unique<BitBoard>(this->pieceidMap);
 }
 
-Piece Board::pieceIndex(PIECE_INDEX pieceIndex)
+Piece Board::pieceIndex(PIECE_INDEX pieceIndex) const
 {
     return this->pieces[pieceIndex];
 }
 
-Piece Board::piecePosition(int x, int y)
+Piece Board::piecePosition(int x, int y) const
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -338,7 +338,7 @@ void Board::doMove(Move move)
     this->team = -this->team;
     this->distance += 1;
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
-    this->historyMoves.back().attacker = attackStarter;
+    this->historyMoves.back().starter = attackStarter;
     this->historyMoves.back().captured = eaten;
     this->historySituations.emplace_back(this->pieceidMap);
 }
@@ -350,7 +350,7 @@ void Board::undoMove()
     const int y1 = this->historyMoves.back().y1;
     const int y2 = this->historyMoves.back().y2;
     const Piece eaten = this->historyMoves.back().captured;
-    const Piece attackStarter = this->historyMoves.back().attacker;
+    const Piece attackStarter = this->historyMoves.back().starter;
 
     // 更新棋盘数据
     this->distance -= 1;

@@ -20,7 +20,7 @@ public:
         this->pHistory->reset();
         this->pKiller->reset();
         this->pTransportation->reset();
-        this->nodecount = 0;
+        this->log_nodecount = 0;
     }
 
     Board &getBoard()
@@ -34,7 +34,8 @@ protected:
     HistoryTable *pHistory = new HistoryTable{};
     KillerTable *pKiller = new KillerTable{};
     TransportationTable *pTransportation = new TransportationTable{};
-    int nodecount = 0;
+    int log_nodecount = 0;
+    std::vector<Result> log_rootresults{};
 
 public:
     Result searchMain(int maxDepth, int maxTime);
@@ -55,7 +56,7 @@ protected:
         }
     }
 
-    TrickResult<int> nullAndDeltaPruning(bool mChecking, int& alpha, int& beta, int& vlBest) const
+    TrickResult<int> nullAndDeltaPruning(bool mChecking, int &alpha, int &beta, int &vlBest) const
     {
         if (!mChecking)
         {
@@ -124,34 +125,31 @@ protected:
         return TrickResult<int>{false, {}};
     }
 
-    bool repeatCheck() const
+    bool repeatCheck()
     {
         // 这个函数只判断对方有没有违规，违规返回INF
-        const Board& board = this->board;
-        const MOVES& history = board.historyMoves;
+        const Board &board = this->board;
+        const MOVES &history = board.historyMoves;
         const size_t size = history.size();
         // 前面加一些快速判断的方法
-        const bool quickCheck = (
-            false // TODO
+        const bool quickCheck = (false // TODO
         );
         // 总历史着法数5个及以上才可判定是否重复
         if (quickCheck == false && size >= 5)
         {
-            const Move& ply1 = history[size_t(size - 1)];
-            const Move& ply2 = history[size_t(size - 2)];
-            const Move& ply3 = history[size_t(size - 3)];
-            const Move& ply4 = history[size_t(size - 4)];
-            const Move& ply5 = history[size_t(size - 5)];
+            const Move &ply1 = history[size_t(size - 1)];
+            const Move &ply2 = history[size_t(size - 2)];
+            const Move &ply3 = history[size_t(size - 3)];
+            const Move &ply4 = history[size_t(size - 4)];
+            const Move &ply5 = history[size_t(size - 5)];
             // 判断是否出现重复局面，没有则直接false
             // 试想如下重复局面：（格式：plyX: x1y1x2y2）
             // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
-            const bool isRepeat = (
-                ply1 == ply5 &&
-                ply1.startpos == ply3.endpos &&
-                ply1.endpos == ply3.startpos &&
-                ply2.startpos == ply4.endpos &&
-                ply2.endpos == ply4.startpos
-            );
+            const bool isRepeat = (ply1 == ply5 &&
+                                   ply1.startpos == ply3.endpos &&
+                                   ply1.endpos == ply3.startpos &&
+                                   ply2.startpos == ply4.endpos &&
+                                   ply2.endpos == ply4.startpos);
             if (!isRepeat)
             {
                 return false;
@@ -167,17 +165,38 @@ protected:
             // 长捉情况比较特殊
             // 只有车、马、炮能作为长捉的发起者
             // 发起者不断捉同一个子，判负
-            const bool condition1 = ( // 是否是车马炮
-                abs(ply1.attacker.pieceid) == R_ROOK ||
-                abs(ply1.attacker.pieceid) == R_KNIGHT ||
-                abs(ply1.attacker.pieceid) == R_CANNON
-            );
-            const bool condition2 = (
-                false // TODO
-            );
-            if (condition1 == true && condition2 == true)
+            if (abs(ply1.starter.pieceid) == R_ROOK ||
+                abs(ply1.starter.pieceid) == R_KNIGHT ||
+                abs(ply1.starter.pieceid) == R_CANNON)
             {
-                return true;
+                const Piece& starter = ply1.starter;
+                const Piece& target = ply2.starter;
+                // 车
+                if (abs(starter.pieceid) == R_ROOK)
+                {
+                    if (ply5.x2 == ply4.x1)
+                    {
+                        BITLINE bitlineX = board.getBitLineX(ply5.x2);
+                        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, starter.y, 9);
+                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
+                            board.piecePosition(ply5.x2, regionX[0]).pieceIndex == target.pieceIndex)
+                        {
+                            std::cout << "Long Rook Check!" << std::endl;
+                            return true;
+                        }
+                    }
+                    else if (ply5.y2 == ply4.y1)
+                    {
+                        BITLINE bitlineY = board.getBitLineY(ply5.y2);
+                        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, starter.x, 8);
+                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
+                            board.piecePosition(regionY[1], ply5.y2).pieceIndex == target.pieceIndex)
+                        {
+                            std::cout << "Long Rook Check!" << std::endl;
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;
@@ -186,7 +205,7 @@ protected:
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
-    nodecount++;
+    log_nodecount++;
 
     if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
     {
@@ -220,8 +239,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         std::cout << " vl: " << bestNode.val;
         std::cout << " moveid: " << bestNode.move.id;
         std::cout << " duration(ms): " << clock() - start;
-        std::cout << " count: " << nodecount;
-        std::cout << " nps: " << nodecount / (clock() - start + 1) * 1000;
+        std::cout << " count: " << log_nodecount;
+        std::cout << " nps: " << log_nodecount / (clock() - start + 1) * 1000;
         std::cout << std::endl;
 
         // timeout break
@@ -234,7 +253,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     if (bestNode.move.id == -1)
     {
         // 没有着法就乱走一个
-        const Piece& king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
+        const Piece &king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
         bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
     }
 
@@ -416,7 +435,7 @@ Result Search::searchOpenBook()
 
     pBookFileStruct.close();
 
-    bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
+    bookMove.starter = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
     return isValidMoveInSituation(board, bookMove) ? Result{bookMove, 1} : Result{Move{}, -1};
@@ -460,6 +479,9 @@ Result Search::searchRoot(int depth)
                 }
             }
         }
+
+        this->log_rootresults.emplace_back(Result{ move, vl });
+
         board.undoMove();
     }
 
@@ -481,7 +503,7 @@ Result Search::searchRoot(int depth)
 
 int Search::searchPV(int depth, int alpha, int beta)
 {
-    nodecount++;
+    log_nodecount++;
 
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
@@ -659,7 +681,7 @@ int Search::searchPV(int depth, int alpha, int beta)
 
 int Search::searchCut(int depth, int beta, bool banNullMove)
 {
-    nodecount++;
+    log_nodecount++;
 
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
@@ -709,7 +731,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
             if (board.nullOkay())
             {
                 board.doNullMove();
-                int vl = -searchCut(depth - 3, -beta + 1, true);
+                int vl = -searchCut(depth - 2, -beta + 1, true);
                 board.undoNullMove();
                 if (vl >= beta)
                 {
@@ -804,8 +826,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
 int Search::searchQ(int alpha, int beta, int leftDistance)
 {
-    // 暂时关闭
-    nodecount++;
+    log_nodecount++;
 
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
