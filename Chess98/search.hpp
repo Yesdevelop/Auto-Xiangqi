@@ -197,6 +197,37 @@ protected:
                         }
                     }
                 }
+                // 炮
+                else if (abs(starter.pieceid) == R_CANNON)
+                {
+                    if (ply5.x2 == ply4.x1)
+                    {
+                        BITLINE bitlineX = board.getBitLineX(ply5.x2);
+                        REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, starter.y, 9);
+                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
+                            board.piecePosition(ply5.x2, regionX[3]).pieceIndex == target.pieceIndex)
+                        {
+                            std::cout << "Long Cannon Check!" << std::endl;
+                            return true;
+                        }
+                    }
+                    else if (ply5.y2 == ply4.y1)
+                    {
+                        BITLINE bitlineY = board.getBitLineY(ply5.y2);
+                        REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, starter.x, 8);
+                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
+                            board.piecePosition(regionY[3], ply5.y2).pieceIndex == target.pieceIndex)
+                        {
+                            std::cout << "Long Cannon Check!" << std::endl;
+                            return true;
+                        }
+                    }
+                }
+                // 马
+                else if (abs(starter.pieceid) == R_KNIGHT)
+                {
+                    
+                }
             }
         }
         return false;
@@ -212,7 +243,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         exit(0);
     }
 
-    // openbook search
+    // 开局库
     Result openbookResult = Search::searchOpenBook();
     if (openbookResult.val != -1)
     {
@@ -222,9 +253,17 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
     this->reset();
 
-    // situation info
+    // 输出局面信息
     std::cout << "situation: " << boardToFen(board) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
+
+    // 判断是否重复局面
+    if (this->repeatCheck())
+    {
+        Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
+        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
+        return Result{ move, INF };
+    }
 
     this->rootMoves = MovesGenerate::getMoves(board);
 
