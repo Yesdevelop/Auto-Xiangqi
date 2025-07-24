@@ -64,7 +64,7 @@ void setBoardCode(Board &board)
     system("node ./_put_.js");
 }
 
-void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string fenCode)
+void ui(std::string serverDir, TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
 {
     // 初始局面
     PIECEID_MAP pieceidMap = fenToPieceidMap(fenCode);
@@ -83,7 +83,7 @@ void ui(std::string serverDir, TEAM team, int maxDepth, int maxTime, std::string
     
     while (true)
     {
-        if (board.team == team)
+        if (board.team == (aiFirst ? team : -team))
         {
             count++;
             std::cout << count << "---------------------" << std::endl;
