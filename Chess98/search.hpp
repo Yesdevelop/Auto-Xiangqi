@@ -154,12 +154,16 @@ protected:
             {
                 return false;
             }
+
+            std::cout << "Repeat Status!" << std::endl;
+
             // 长将在任何情况下都会判负
             // 由于性能原因，isCheckingMove是被延迟设置的，ply1可能还没有被设成checkingMove
             // 但是若判定了循环局面，ply1必然等于ply5
             // 若ply5和ply3都是将军着法，且出现循环局面，则直接判定违规
             if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
             {
+                std::cout << "Long Check!" << std::endl;
                 return true;
             }
             // 长捉情况比较特殊
@@ -226,7 +230,19 @@ protected:
                 // 马
                 else if (abs(starter.pieceid) == R_KNIGHT)
                 {
-                    
+                    if (
+                        (starter.x + 1 == target.x && starter.y + 2 == target.y) ||
+                        (starter.x - 1 == target.x && starter.y + 2 == target.y) ||
+                        (starter.x + 1 == target.x && starter.y - 2 == target.y) ||
+                        (starter.x - 1 == target.x && starter.y - 2 == target.y) ||
+                        (starter.x + 2 == target.x && starter.y + 1 == target.y) ||
+                        (starter.x - 2 == target.x && starter.y + 1 == target.y) ||
+                        (starter.x + 2 == target.x && starter.y - 1 == target.y) ||
+                        (starter.x - 2 == target.x && starter.y - 1 == target.y)) // 这里有点担心，但是我想不到什么局面
+                        {
+                            std::cout << "Long Knight Check!" << std::endl;
+                            return true;
+                        }
                 }
             }
         }
@@ -874,7 +890,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 返回评估结果
-    if (leftDistance <= 0)
+    if (leftDistance <= 0 || true)
     {
         return board.evaluate();
     }
