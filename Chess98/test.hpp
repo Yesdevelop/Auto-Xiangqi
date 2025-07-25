@@ -18,6 +18,8 @@ void testByUI()
     // fenCode = "2raka3/2n6/4b4/9/9/4N4/9/3A5/4AK1R1/6B1c w"; // 长捉局面 - 车捉炮
     // fenCode = "2rak1c2/2n1a4/4b2R1/5N3/9/9/9/3A1K3/4A4/6B2 w"; // 有奇怪bug的局面
     // fenCode = "3akar2/9/4b4/9/6b2/9/P8/n3B4/2R1A4/3AK1B2 w"; // 长捉局面：马捉车
+    // fenCode = "2baka3/9/c3b1n2/p3p3p/1nr6/1N1r2P2/P3P3P/3CC2R1/9/1RBAKAB2 w - - 0 1"; // 走出奇怪着法的局面
+    // fenCode = "2bakab2/9/2R3n2/p1p1p1p1p/3r5/2P6/P1r1c1PcP/C3C3N/4N4/2BAKAB1R w - - 0 1"; // 智障局面
 
     ui(serverDir, team, aiFirst, maxDepth, maxTime, fenCode);
 }

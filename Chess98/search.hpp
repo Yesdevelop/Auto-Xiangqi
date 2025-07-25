@@ -522,15 +522,15 @@ Result Search::searchRoot(int depth)
             vlBest = vl;
             bestMove = move;
             // search step
-            for (Move &_move : rootMoves)
+            for (Move &move : rootMoves)
             {
-                if (bestMove == _move)
+                if (bestMove == move)
                 {
-                    _move.val = INF;
+                    move.val = INF;
                 }
                 else
                 {
-                    _move.val--;
+                    move.val--;
                 }
             }
         }
@@ -781,7 +781,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     if (!mChecking)
     {
         // multi probCut and null pruning
-        if (!banNullMove)
+        /*if (!banNullMove)
         {
             if (board.nullOkay())
             {
@@ -800,7 +800,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                     }
                 }
             }
-        }
+        }*/
     }
 
     // variables
@@ -890,7 +890,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 返回评估结果
-    if (leftDistance <= 0 || true)
+    if (leftDistance <= 0)
     {
         return board.evaluate();
     }

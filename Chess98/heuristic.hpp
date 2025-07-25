@@ -13,7 +13,10 @@ public:
 
     void reset()
     {
-        std::memset(this->historyTable.data(), 0, sizeof(this->historyTable));
+        for (std::array<std::array<int, 90>, 90>& pos : this->historyTable)
+        {
+            pos = std::array<std::array<int, 90>, 90>{};
+        }
     }
 
 protected:
@@ -61,7 +64,10 @@ public:
 
     void reset()
     {
-        std::memset(this->killerMoves.data(), 0, sizeof(this->killerMoves));
+        for (std::array<Move, 2> &moves : this->killerMoves)
+        {
+            moves.fill(Move{});
+        }
     }
 
 protected:
@@ -101,7 +107,10 @@ public:
 
     void reset()
     {
-        std::memset(this->items.data(), 0, sizeof(this->items));
+        for (TransItem& item : this->items)
+        {
+            item = TransItem{};
+        }
     }
 
 protected:
