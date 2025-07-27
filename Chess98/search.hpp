@@ -155,8 +155,6 @@ protected:
                 return false;
             }
 
-            std::cout << "Repeat Status!" << std::endl;
-
             // 长将在任何情况下都会判负
             // 由于性能原因，isCheckingMove是被延迟设置的，ply1可能还没有被设成checkingMove
             // 但是若判定了循环局面，ply1必然等于ply5
@@ -254,9 +252,19 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
     log_nodecount++;
 
+    // 预制条件检查
+    this->reset();
     if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
     {
+        // 将帅是否在棋盘上
         exit(0);
+    }
+    else if (this->repeatCheck())
+    {
+        // 是否重复局面
+        Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
+        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
+        return Result{ move, INF };
     }
 
     // 开局库
@@ -267,25 +275,14 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         return openbookResult;
     }
 
-    this->reset();
-
     // 输出局面信息
     std::cout << "situation: " << boardToFen(board) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
 
-    // 判断是否重复局面
-    if (this->repeatCheck())
-    {
-        Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
-        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
-        return Result{ move, INF };
-    }
-
+    // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
-
     Result bestNode = Result(Move(), 0);
     clock_t start = clock();
-
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(depth);
@@ -305,9 +302,9 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         }
     }
 
+    // 防止没有可行着法
     if (bestNode.move.id == -1)
     {
-        // 没有着法就乱走一个
         const Piece &king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
         bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
     }
@@ -502,6 +499,7 @@ Result Search::searchRoot(int depth)
     int vl = -INF;
     int vlBest = -INF;
 
+    // 搜索
     for (const Move &move : rootMoves)
     {
         board.doMove(move);
@@ -521,25 +519,14 @@ Result Search::searchRoot(int depth)
         {
             vlBest = vl;
             bestMove = move;
-            // search step
-            for (Move &move : rootMoves)
-            {
-                if (bestMove == move)
-                {
-                    move.val = INF;
-                }
-                else
-                {
-                    move.val--;
-                }
-            }
         }
 
-        this->log_rootresults.emplace_back(Result{ move, vl });
+        this->log_rootresults.emplace_back(Result(move, vl));
 
         board.undoMove();
     }
 
+    // 记录数据，为杀棋添加distance
     if (bestMove.id == -1)
     {
         vlBest += board.distance;
@@ -550,7 +537,6 @@ Result Search::searchRoot(int depth)
         this->pTransportation->add(board, bestMove, vlBest, EXACT_TYPE, depth);
     }
 
-    // 历史启发调整根节点似乎更快
     this->pHistory->sort(rootMoves);
 
     return Result{bestMove, vlBest};
@@ -631,7 +617,6 @@ int Search::searchPV(int depth, int alpha, int beta)
     {
         int vl = -INF;
         MOVES killerAvailableMoves = this->pKiller->get(board);
-        availableMoves = MovesGenerate::getMoves(board);
         for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
@@ -781,7 +766,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     if (!mChecking)
     {
         // multi probCut and null pruning
-        /*if (!banNullMove)
+        if (!banNullMove)
         {
             if (board.nullOkay())
             {
@@ -800,7 +785,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                     }
                 }
             }
-        }*/
+        }
     }
 
     // variables
@@ -966,5 +951,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     {
         vlBest += board.distance;
     }
+
     return vlBest;
 }
