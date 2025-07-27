@@ -123,7 +123,11 @@ public:
         PIECES result{};
         for (PIECE_INDEX pieceindex : this->pieceRegistry[pieceid])
         {
-            result.emplace_back(this->pieceIndex(pieceindex));
+            const Piece &piece = this->pieceIndex(pieceindex);
+            if (piece.isLive)
+            {
+                result.emplace_back(piece);
+            }
         }
         return result;
     }

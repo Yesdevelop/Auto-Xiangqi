@@ -470,30 +470,62 @@ MOVES MovesGenerate::getMoves(Board &board)
     MOVES result{};
     result.reserve(64);
 
-    PIECES pieces = board.getPiecesByTeam(board.team);
-    for (const Piece &piece : pieces)
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_ROOK))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        for (Move move : moves)
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_PAWN))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_CANNON))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_KNIGHT))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_BISHOP))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_GUARD))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_KING))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+
+    MOVES moves;
+    for (Move move : result)
+    {
+        board.doMove(move);
+        const bool skip = inCheck(board, -board.team);
+        board.undoMove();
+        if (!skip)
         {
-            board.doMove(move);
-            const bool skip = inCheck(board, -board.team);
-            board.undoMove();
-            if (!skip)
+            move.starter = board.piecePosition(move.x1, move.y1);
+            move.captured = board.piecePosition(move.x2, move.y2);
+            if (move.captured.pieceid != EMPTY_PIECEID)
             {
-                move.starter = board.piecePosition(move.x1, move.y1);
-                move.captured = board.piecePosition(move.x2, move.y2);
-                if (move.captured.pieceid != EMPTY_PIECEID)
-                {
-                    move.moveType = CAPTURE;
-                    move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.starter.pieceid));
-                }
-                result.emplace_back(move);
+                move.moveType = CAPTURE;
+                move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.starter.pieceid));
             }
+            moves.emplace_back(move);
         }
     }
 
-    return result;
+    return moves;
 }
 
 MOVES MovesGenerate::kingCapture(TEAM team, Board &board, int x, int y)
