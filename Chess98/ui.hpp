@@ -4,6 +4,82 @@
 
 using BOARD_CODE = std::string;
 
+const char SERVER_CODE[] = "\
+const http = require('http')\n\
+const fs = require('fs')\n\
+\n\
+let boardCode = 'null'\n\
+let computerMove = 'null'\n\
+let getBoardCode = () => boardCode\n\
+\n\
+let file = fs.openSync('./_move_.txt', 'w+')\n\
+fs.writeFileSync(file, '____')\n\
+fs.closeSync(file)\n\
+\n\
+const server = http.createServer((request, response) => {\n\
+    const { method, url } = request\n\
+    response.setHeader('Access-Control-Allow-Origin', '*')\n\
+    response.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PATCH, OPTIONS')\n\
+    response.setHeader('Access-Control-Allow-Headers', 'Content-Type')\n\
+\n\
+    if (method === 'GET' && url === '/boardcode') { // 界面端获取当前棋盘局势图\n\
+        response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
+        response.end(getBoardCode() + '\\n')\n\
+    }\n\
+    else if (method === 'PUT' && url.match('boardcode')) { // 人机方面做出决策更改服务器棋盘局势图\n\
+        response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
+        response.end('successful\\n')\n\
+        boardCode = request.url.split('=')[1]\n\
+    }\n\
+    else if (method === 'PUT' && url.match('move')) { // 获取玩家着法\n\
+        response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
+        response.end('successful\\n')\n\
+        computerMove = request.url.split('=')[1]\n\
+    }\n\
+    else if (method == 'GET' && url.match('move')) { // 执行玩家着法\n\
+        response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
+        response.end('successful\\n')\n\
+        let move = request.url.split('=')[1]\n\
+        const fileWrite = () => {\n\
+            setTimeout(() => {\n\
+                try {\n\
+                    let file = fs.openSync('./_move_.txt', 'w+')\n\
+                    fs.writeFileSync(file, move)\n\
+                    fs.closeSync(file)\n\
+                }\n\
+                catch (e) {\n\
+                    fileWrite()\n\
+                }\n\
+            }, 50)\n\
+        }\n\
+        fileWrite()\n\
+    }\n\
+    else if (method === 'GET' && url.match('computer')) { // 界面端获取电脑着法\n\
+        response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
+        response.end(computerMove + '\\n')\n\
+    }\n\
+    else if (method == 'GET' && url.match('undo')) { // 悔棋\n\
+        response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
+        response.end('successful\\n')\n\
+        const fileWrite = () => {\n\
+            setTimeout(() => {\n\
+                try {\n\
+                    let file = fs.openSync('./_move_.txt', 'w+')\n\
+                    fs.writeFileSync(file, 'undo')\n\
+                    fs.closeSync(file)\n\
+                }\n\
+                catch (e) {\n\
+                    fileWrite()\n\
+                }\n\
+            }, 50)\n\
+        }\n\
+        fileWrite()\n\
+    }\n\
+})\n\
+server.on('error', () => { })\n\
+server.listen(9494)\n\
+";
+
 BOARD_CODE generateCode(Board &board)
 {
     BOARD_CODE code = "";
@@ -75,12 +151,13 @@ void ui(std::string serverDir, TEAM team, bool aiFirst, int maxDepth, int maxTim
     Board &board = s.getBoard();
 
     // 界面
-    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node " + serverDir + "}\"";
+    writeFile("./_server_.js", SERVER_CODE);
+    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"";
     system(cmd.c_str());
     setBoardCode(board);
     printPieceidMap(board.pieceidMap);
     std::string moveFileContent = "____";
-    
+
     while (true)
     {
         if (board.team == (aiFirst ? team : -team))
