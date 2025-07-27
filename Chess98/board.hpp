@@ -11,7 +11,7 @@ public:
 
     Piece pieceIndex(PIECE_INDEX pieceIndex) const;
 
-    Piece piecePosition(int x, int y)const;
+    Piece piecePosition(int x, int y) const;
 
     PIECEID pieceidOn(int x, int y) const;
 

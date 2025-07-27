@@ -171,8 +171,8 @@ protected:
                 abs(ply1.starter.pieceid) == R_KNIGHT ||
                 abs(ply1.starter.pieceid) == R_CANNON)
             {
-                const Piece& starter = ply1.starter;
-                const Piece& target = ply2.starter;
+                const Piece &starter = ply1.starter;
+                const Piece &target = ply2.starter;
                 // 车
                 if (abs(starter.pieceid) == R_ROOK)
                 {
@@ -237,10 +237,10 @@ protected:
                         (starter.x - 2 == target.x && starter.y + 1 == target.y) ||
                         (starter.x + 2 == target.x && starter.y - 1 == target.y) ||
                         (starter.x - 2 == target.x && starter.y - 1 == target.y)) // 这里有点担心，但是我想不到什么局面
-                        {
-                            std::cout << "Long Knight Check!" << std::endl;
-                            return true;
-                        }
+                    {
+                        std::cout << "Long Knight Check!" << std::endl;
+                        return true;
+                    }
                 }
             }
         }
@@ -264,7 +264,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         // 是否重复局面
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
         std::cout << " repeat situation!" << " vl: " << INF << std::endl;
-        return Result{ move, INF };
+        return Result{move, INF};
     }
 
     // 开局库

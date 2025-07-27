@@ -13,7 +13,7 @@ public:
 
     void reset()
     {
-        for (std::array<std::array<int, 90>, 90>& pos : this->historyTable)
+        for (std::array<std::array<int, 90>, 90> &pos : this->historyTable)
         {
             pos = std::array<std::array<int, 90>, 90>{};
         }
@@ -107,7 +107,7 @@ public:
 
     void reset()
     {
-        for (TransItem& item : this->items)
+        for (TransItem &item : this->items)
         {
             item = TransItem{};
         }
