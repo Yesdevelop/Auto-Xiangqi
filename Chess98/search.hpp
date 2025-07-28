@@ -300,6 +300,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         {
             break;
         }
+
+        this->log_rootresults = {};
     }
 
     // 防止没有可行着法
