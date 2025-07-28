@@ -7,7 +7,7 @@ void testByUI()
     TEAM team = RED;
     bool aiFirst = true;
     int maxDepth = 20;
-    int maxTime = 5;
+    int maxTime = 1;
     std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
 
     // test situations
@@ -23,6 +23,7 @@ void testByUI()
     // fenCode = "3ckab2/2r1a4/2n1bc3/1RN1p3p/P5p2/9/3n2P1P/C3C3N/4A4/2B1KAB2 w - - 0 1"; // 一个不是很显眼的漏招
     // fenCode = "3k1ab2/2n1a4/4b4/1cr1C2RN/p8/4N4/4P1P1P/4B4/4A4/2BAK4 w - - 0 1"; // 大漏
     // fenCode = "3ak4/4a4/4b2c1/p3R1p1p/9/4C4/P1P1P1P1P/2N1Br3/3cNr3/2BAKA1R1 w - - 0 1"; // 大漏
-    
+    // fenCode = "1rbakab2/8r/2n3nc1/p3p1p1p/2p6/6P2/PcP1P3P/2N1C1NC1/1R7/2BAKAB1R w - - 0 1"; // 进兵
+
     ui(serverDir, team, aiFirst, maxDepth, maxTime, fenCode);
 }
