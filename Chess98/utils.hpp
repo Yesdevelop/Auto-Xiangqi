@@ -49,14 +49,14 @@ bool inCheck(Board &board, TEAM judgeTeam)
         piece7 = board.pieceidOn(x + 1, y - 2);
         piece8 = board.pieceidOn(x - 1, y - 2);
     }
-    bool c4 = abs(piece1) == R_KNIGHT && (board.team > 0 ? (piece1 < 0) : (piece1 > 0));
-    bool c5 = abs(piece2) == R_KNIGHT && (board.team > 0 ? (piece2 < 0) : (piece2 > 0));
-    bool c6 = abs(piece3) == R_KNIGHT && (board.team > 0 ? (piece3 < 0) : (piece3 > 0));
-    bool c7 = abs(piece4) == R_KNIGHT && (board.team > 0 ? (piece4 < 0) : (piece4 > 0));
-    bool c8 = abs(piece5) == R_KNIGHT && (board.team > 0 ? (piece5 < 0) : (piece5 > 0));
-    bool c9 = abs(piece6) == R_KNIGHT && (board.team > 0 ? (piece6 < 0) : (piece6 > 0));
-    bool c10 = abs(piece7) == R_KNIGHT && (board.team > 0 ? (piece7 < 0) : (piece8 > 0));
-    bool c11 = abs(piece8) == R_KNIGHT && (board.team > 0 ? (piece8 < 0) : (piece8 > 0));
+    bool c4 = abs(piece1) == R_KNIGHT && (judgeTeam > 0 ? (piece1 < 0) : (piece1 > 0));
+    bool c5 = abs(piece2) == R_KNIGHT && (judgeTeam > 0 ? (piece2 < 0) : (piece2 > 0));
+    bool c6 = abs(piece3) == R_KNIGHT && (judgeTeam > 0 ? (piece3 < 0) : (piece3 > 0));
+    bool c7 = abs(piece4) == R_KNIGHT && (judgeTeam > 0 ? (piece4 < 0) : (piece4 > 0));
+    bool c8 = abs(piece5) == R_KNIGHT && (judgeTeam > 0 ? (piece5 < 0) : (piece5 > 0));
+    bool c9 = abs(piece6) == R_KNIGHT && (judgeTeam > 0 ? (piece6 < 0) : (piece6 > 0));
+    bool c10 = abs(piece7) == R_KNIGHT && (judgeTeam > 0 ? (piece7 < 0) : (piece8 > 0));
+    bool c11 = abs(piece8) == R_KNIGHT && (judgeTeam > 0 ? (piece8 < 0) : (piece8 > 0));
 
     // 判断是否被将军
     if (c4 || c5 || c6 || c7 || c8 || c9 || c10 || c11)

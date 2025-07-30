@@ -278,6 +278,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 输出局面信息
     std::cout << "situation: " << boardToFen(board) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
+    log_rootresults = {};
 
     // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
@@ -895,7 +896,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
 
     // 验证上一步是否是将军着法
     this->setCheckingMove(mChecking);
-
     // null and delta pruning
     TrickResult<int> nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
     if (nullDeltaResult.isSuccess)
@@ -912,17 +912,17 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
 
     // 搜索
     MOVES availableMoves;
-    if (mChecking)
-    {
-        availableMoves = MovesGenerate::getMoves(board);
-        pHistory->sort(availableMoves);
-        leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
-    }
-    else
-    {
-        MOVES unordered = MovesGenerate::getCaptureMoves(board);
+     if (mChecking)
+     {
+         availableMoves = MovesGenerate::getMoves(board);
+         pHistory->sort(availableMoves);
+         leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
+     }
+     else
+     {
+        availableMoves = MovesGenerate::getCaptureMoves(board);
         CaptureSort::sortCaptureMoves(board, availableMoves);
-    }
+     }
 
     // variables
     Move bestMove{};
