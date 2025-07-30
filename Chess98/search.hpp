@@ -3,6 +3,10 @@
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"
+#define NNUE 1
+#ifdef NNUE
+#include "nnuefile.hpp"
+#endif
 
 class Search
 {
@@ -39,6 +43,7 @@ protected:
 
 public:
     Result searchMain(int maxDepth, int maxTime);
+    Result genNNUEFile(int maxDepth, int maxTime);
 
 protected:
     Result searchOpenBook();
@@ -315,6 +320,103 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     return bestNode;
 }
 
+Result Search::genNNUEFile(int maxDepth, int maxTime = 3)
+{
+    log_nodecount++;
+
+    // 预制条件检查
+    this->reset();
+    if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
+    {
+        // 将帅是否在棋盘上
+        appExit = true;
+        return Result{Move{}, 0};
+    }
+    else if (this->repeatCheck())
+    {
+        // 是否重复局面
+        Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
+        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
+        return Result{move, INF};
+    }
+
+    // 开局库
+    Result openbookResult = Search::searchOpenBook();
+    if (openbookResult.val != -1)
+    {
+        std::cout << "Find a great move from OpenBook!" << std::endl;
+        return openbookResult;
+    }
+
+    // 输出局面信息
+    std::cout << "situation: " << boardToFen(board) << std::endl;
+    std::cout << "evaluate: " << board.evaluate() << std::endl;
+
+    // 搜索
+    this->rootMoves = MovesGenerate::getMoves(board);
+    Result bestNode = Result(Move(), 0);
+    clock_t start = clock();
+
+    // nnue start
+    std::string historyStr = "";
+    for (const Move &move : board.historyMoves)
+    {
+        historyStr += std::to_string(move.id) + ",";
+    }
+    if (historyStr.size() > 0)
+    {
+        historyStr.pop_back();
+    }
+    std::string str = "{\"fen\":\"" + boardToFen(board) + "\",\"history\":[" + historyStr + "],\"data\":[";
+    for (int depth = 1; depth <= maxDepth; depth++)
+    {
+        bestNode = searchRoot(depth);
+        // log
+        std::cout << " depth: " << depth;
+        std::cout << " vl: " << bestNode.val;
+        std::cout << " moveid: " << bestNode.move.id;
+        std::cout << " duration(ms): " << clock() - start;
+        std::cout << " count: " << log_nodecount;
+        std::cout << " nps: " << log_nodecount / (clock() - start + 1) * 1000;
+        std::cout << std::endl;
+
+        // nnue 记录根节点结果
+        str += "{\"depth\":" + std::to_string(depth) + ",\"data\":[";
+        for (const Result &result : log_rootresults)
+        {
+            str += "{";
+            str += "\"moveid\":" + std::to_string(result.move.id);
+            str += ",\"vl\":" + std::to_string(result.val);
+            str += "},";
+        }
+        if (str.back() == ',')
+        {
+            str.pop_back();
+        }
+        str += "]},";
+
+        // timeout break
+        if (clock() - start >= maxTime * 1000 / 3)
+        {
+            break;
+        }
+
+        this->log_rootresults = {};
+    }
+
+    str.pop_back();
+    str += "]},";
+    nnue_str += str;
+
+    // 防止没有可行着法
+    if (bestNode.move.id == -1)
+    {
+        const Piece &king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
+        bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
+    }
+
+    return bestNode;
+}
 Result Search::searchOpenBook()
 {
     struct BookStruct
