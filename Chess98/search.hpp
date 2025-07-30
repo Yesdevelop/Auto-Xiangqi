@@ -3,10 +3,7 @@
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"
-#define NNUE
-#ifdef NNUE
 #include "nnuefile.hpp"
-#endif
 
 class Search
 {
@@ -47,7 +44,10 @@ protected:
 
 public:
     Result searchMain(int maxDepth, int maxTime);
+
+#ifdef NNUE
     Result searchGenereateNNUE(int maxDepth, int maxTime);
+#endif
 
 protected:
     Result searchOpenBook();
@@ -324,6 +324,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     return bestNode;
 }
 
+#ifdef NNUE
 Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
 {
     log_nodecount++;
@@ -342,14 +343,6 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
         std::cout << " repeat situation!" << " vl: " << INF << std::endl;
         return Result{move, INF};
-    }
-
-    // 开局库
-    Result openbookResult = Search::searchOpenBook();
-    if (openbookResult.val != -1)
-    {
-        std::cout << "Find a great move from OpenBook!" << std::endl;
-        return openbookResult;
     }
 
     // 输出局面信息
@@ -421,6 +414,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
 
     return bestNode;
 }
+#endif
 
 Result Search::searchOpenBook()
 {

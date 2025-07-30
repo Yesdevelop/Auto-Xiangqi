@@ -320,9 +320,9 @@ void writeFile(const std::string &filename, const std::string &content)
 }
 
 template <typename T>
-T getRandomFromVector(const std::vector<T>& vec)
+T getRandomFromVector(const std::vector<T> &vec)
 {
-    static std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     if (vec.empty())
         return T();
     std::uniform_int_distribution<size_t> dist(0, vec.size() - 1);

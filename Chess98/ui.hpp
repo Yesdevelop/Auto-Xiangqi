@@ -140,7 +140,7 @@ void setBoardCode(Board &board)
     system("node ./_put_.js");
 }
 
-void ui(std::string serverDir, TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
+void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
 {
     // 初始局面
     PIECEID_MAP pieceidMap = fenToPieceidMap(fenCode);
