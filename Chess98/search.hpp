@@ -3,7 +3,7 @@
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"
-#define NNUE 1
+#define NNUE
 #ifdef NNUE
 #include "nnuefile.hpp"
 #endif
@@ -32,6 +32,10 @@ public:
         return this->board;
     }
 
+#ifdef NNUE
+    friend void testGenerateNNUE();
+#endif
+
 protected:
     Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
@@ -43,7 +47,7 @@ protected:
 
 public:
     Result searchMain(int maxDepth, int maxTime);
-    Result genNNUEFile(int maxDepth, int maxTime);
+    Result searchGenereateNNUE(int maxDepth, int maxTime);
 
 protected:
     Result searchOpenBook();
@@ -320,7 +324,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     return bestNode;
 }
 
-Result Search::genNNUEFile(int maxDepth, int maxTime = 3)
+Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
 {
     log_nodecount++;
 
@@ -329,7 +333,7 @@ Result Search::genNNUEFile(int maxDepth, int maxTime = 3)
     if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
     {
         // 将帅是否在棋盘上
-        appExit = true;
+        NNUE_appexit = true;
         return Result{Move{}, 0};
     }
     else if (this->repeatCheck())
@@ -406,7 +410,7 @@ Result Search::genNNUEFile(int maxDepth, int maxTime = 3)
 
     str.pop_back();
     str += "]},";
-    nnue_str += str;
+    NNUE_filecontent += str;
 
     // 防止没有可行着法
     if (bestNode.move.id == -1)
@@ -417,6 +421,7 @@ Result Search::genNNUEFile(int maxDepth, int maxTime = 3)
 
     return bestNode;
 }
+
 Result Search::searchOpenBook()
 {
     struct BookStruct
@@ -1014,17 +1019,17 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
 
     // 搜索
     MOVES availableMoves;
-     if (mChecking)
-     {
-         availableMoves = MovesGenerate::getMoves(board);
-         pHistory->sort(availableMoves);
-         leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
-     }
-     else
-     {
+    if (mChecking)
+    {
+        availableMoves = MovesGenerate::getMoves(board);
+        pHistory->sort(availableMoves);
+        leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
+    }
+    else
+    {
         availableMoves = MovesGenerate::getCaptureMoves(board);
         CaptureSort::sortCaptureMoves(board, availableMoves);
-     }
+    }
 
     // variables
     Move bestMove{};

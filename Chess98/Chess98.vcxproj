@@ -192,6 +192,7 @@
     <ClInclude Include="hash.hpp" />
     <ClInclude Include="heuristic.hpp" />
     <ClInclude Include="moves.hpp" />
+    <ClInclude Include="nnuefile.hpp" />
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />
     <ClInclude Include="ui.hpp" />

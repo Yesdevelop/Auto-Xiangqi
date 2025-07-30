@@ -35,3 +35,45 @@ void testByUI()
 
     ui(serverDir, team, aiFirst, maxDepth, maxTime, fenCode);
 }
+
+void testGenerateNNUE()
+{
+    int randomDepth = NNUE_RANDOM_MOVE_COUNT;
+    int maxDepth = NNUE_DEPTH;
+    std::string exePath = NNUE_RESTART_EXE_FILE;
+
+    Search s{ fenToPieceidMap("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"), RED };
+    int count = 0;
+
+    try
+    {
+        // 前几步随机
+        for (int i = 0; i < randomDepth; i++)
+        {
+            count++;
+            std::cout << count << "---------------" << std::endl;
+            s.searchGenereateNNUE(maxDepth, 3);
+            Move m = getRandomFromVector<Move>(s.rootMoves);
+            s.board.doMove(m);
+            saveNNUE();
+        }
+        while (s.board.historyMoves.size() < 140 && NNUE_appexit == false)
+        {
+            count++;
+            std::cout << count << "---------------" << std::endl;
+            Result a = s.searchGenereateNNUE(maxDepth, 3);
+            if (a.move.id != -1)
+            {
+                s.board.doMove(a.move);
+            }
+            saveNNUE();
+        }
+    }
+    catch (std::exception err)
+    {
+        std::cout << "A fucking error occured" << std::endl;
+        std::cerr << err.what() << std::endl;
+        system("pause");
+    }
+    system(("start /min " + exePath).c_str());
+}

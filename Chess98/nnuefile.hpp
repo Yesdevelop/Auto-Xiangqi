@@ -5,7 +5,12 @@
 #include <ctime>
 #include "base.hpp"
 
-std::string nnue_str = "[";
+// 这里放配置
+const std::string NNUE_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录，才能写这个目录。后面要加尾随斜杠
+const int NNUE_DEPTH = 7; // 最大搜索深度
+const int NNUE_RANDOM_MOVE_COUNT = 5; // 开局随机走法次数
+const std::string NNUE_RESTART_EXE_FILE = "./a.exe"; // 跑完一局继续跑的exe文件路径
+
 std::string replaceAll(std::string resource_str, std::string sub_str, std::string new_str)
 {
     std::string dst_str = resource_str;
@@ -15,15 +20,6 @@ std::string replaceAll(std::string resource_str, std::string sub_str, std::strin
         dst_str.replace(pos, sub_str.length(), new_str);
     }
     return dst_str;
-}
-
-std::string getTimestampedFilename()
-{
-    std::time_t now = std::time(nullptr);
-    std::tm *tm = std::localtime(&now);
-    char buffer[20];
-    std::strftime(buffer, sizeof(buffer), "%Y%m%d_%H%M%S", tm);
-    return std::string(buffer);
 }
 
 std::string getUniqueRandomFilename()
@@ -50,13 +46,13 @@ std::string getUniqueRandomFilename()
     return filename;
 }
 
-std::string filename = getUniqueRandomFilename();
-bool appExit = false;
+std::string NNUE_filecontent = "[";
+bool NNUE_appexit = false;
+const std::string NNUE_FILENAME = getUniqueRandomFilename();
 
 void saveNNUE()
 {
-    nnue_str.pop_back();
-    nnue_str = replaceAll(nnue_str, "}{", "},{");
-    system("if not exist \"nnue\" mkdir nnue");
-    writeFile("nnue/" + filename + ".json", nnue_str + "]");
+    NNUE_filecontent.pop_back();
+    NNUE_filecontent = replaceAll(NNUE_filecontent, "}{", "},{");
+    writeFile(NNUE_OUTPUT_DIR + NNUE_FILENAME + ".json", NNUE_filecontent + "]");
 }

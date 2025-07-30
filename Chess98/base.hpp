@@ -278,9 +278,8 @@ FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0
     if (retryCount >= 5)
     {
         std::cerr << "Failed to open file: " << filename << std::endl;
-        std::cerr << "UI cannot run, please check the file path and permissions." << std::endl;
         system("pause");
-        throw std::runtime_error("Failed to open file after multiple attempts.");
+        return file;
     }
     if (result != 0)
     {
@@ -318,6 +317,16 @@ void writeFile(const std::string &filename, const std::string &content)
 
     fwrite(content.c_str(), 1, content.size(), file);
     fclose(file);
+}
+
+template <typename T>
+T getRandomFromVector(const std::vector<T>& vec)
+{
+    static std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    if (vec.empty())
+        return T();
+    std::uniform_int_distribution<size_t> dist(0, vec.size() - 1);
+    return vec[dist(engine)];
 }
 
 const int QUIESCENCE_EXTEND_DEPTH = 64;
