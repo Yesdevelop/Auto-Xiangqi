@@ -296,7 +296,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         bestNode = searchRoot(depth);
 
         auto end = std::chrono::high_resolution_clock::now();
-        int duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         // log
         std::cout << " depth: " << depth;
@@ -372,7 +372,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
         bestNode = searchRoot(depth);
 
         auto end = std::chrono::high_resolution_clock::now();
-        int duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         // log
         std::cout << " depth: " << depth;

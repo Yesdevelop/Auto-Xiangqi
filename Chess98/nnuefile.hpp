@@ -41,22 +41,22 @@ std::string getUniqueRandomFilename()
     std::uniform_int_distribution<size_t> distA(65, 90);  // 大写字母
     std::uniform_int_distribution<size_t> distB(97, 122); // 小写字母
     std::uniform_int_distribution<size_t> distC(48, 57);  // 数字
-    std::mt19937 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::mt19937 engine(int(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     std::string filename = "";
     for (int i = 0; i < 16; i++)
     {
-        int decision = std::uniform_int_distribution<size_t>(1, 3)(engine); // 决定
+        size_t decision = std::uniform_int_distribution<size_t>(1, 3)(engine); // 决定
         if (decision == 1)
         {
-            filename += distA(engine);
+            filename += char(distA(engine));
         }
         else if (decision == 2)
         {
-            filename += distB(engine);
+            filename += char(distB(engine));
         }
         else
         {
-            filename += distC(engine);
+            filename += char(distC(engine));
         }
     }
     return filename;
