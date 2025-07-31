@@ -137,7 +137,7 @@ void setBoardCode(Board &board)
 
     wait(200);
     writeFile("./_put_.js", jsPutCode);
-    system("node ./_put_.js");
+    system_("node ./_put_.js");
 }
 
 void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
@@ -152,8 +152,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
 
     // 界面
     writeFile("./_server_.js", SERVER_CODE);
-    std::string cmd = "powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"";
-    system(cmd.c_str());
+    system_("powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"");
     setBoardCode(board);
     printPieceidMap(board.pieceidMap);
     std::string moveFileContent = "____";
@@ -209,7 +208,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
                 {
                     // 避免转换失败导致崩溃
                     std::cerr << "Invalid move: " << moveFileContent << std::endl;
-                    system("pause");
+                    system_("pause");
                     throw e;
                 }
             }

@@ -453,7 +453,7 @@ Result Search::searchOpenBook()
         void read(BookStruct &bk, int nMid) const
         {
             fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
-            fread(&bk, sizeof(BookStruct), 1, fp);
+            fread_(&bk, sizeof(BookStruct), 1, fp);
         }
 
         void write(const BookStruct &bk, int nMid) const

@@ -375,3 +375,4 @@ cmake-build-release
 **/package.json
 **/package-lock.json
 nnue/data/*.json
+**/*.out

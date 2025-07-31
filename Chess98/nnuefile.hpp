@@ -9,7 +9,11 @@
 const std::string NNUE_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录，才能写这个目录。后面要加尾随斜杠
 const int NNUE_DEPTH = 7;                            // 最大搜索深度
 const int NNUE_RANDOM_MOVE_COUNT = 5;                // 开局随机走法次数
+#ifdef _WIN32
 const std::string NNUE_RESTART_EXE_FILE = "./a.exe"; // 跑完一局继续跑的exe文件路径
+#elif __unix__
+const std::string NNUE_RESTART_LINUX_FILE = "./a.out"; // 跑完一局继续跑的unix执行文件路径
+#endif
 
 std::string replaceAll(std::string resource_str, std::string sub_str, std::string new_str)
 {

@@ -3,6 +3,8 @@
 #include <windows.h>
 #elif __unix__
 #include <unistd.h>
+#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+using errno_t = int;
 #endif
 #include <algorithm>
 #include <array>
@@ -27,6 +29,16 @@ void wait(int ms)
 #elif __unix__
     sleep(ms / 1000);
 #endif
+}
+
+void system_(std::string str)
+{
+    int res = system(str.c_str());
+}
+
+void fread_(void *_Buffer, size_t _ElementSize, size_t _ElementCount, FILE *_Stream)
+{
+    int res = fread(_Buffer, _ElementSize, _ElementCount, _Stream);
 }
 
 const int INF = 1000000;
@@ -278,7 +290,7 @@ FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0
     if (retryCount >= 5)
     {
         std::cerr << "Failed to open file: " << filename << std::endl;
-        system("pause");
+        system_("pause");
         return file;
     }
     if (result != 0)
@@ -302,7 +314,7 @@ std::string readFile(const std::string &filename)
     fseek(file, 0, SEEK_SET);
 
     std::string content(length, '\0');
-    fread(&content[0], 1, length, file);
+    fread_(&content[0], 1, length, file);
     fclose(file);
     return content;
 }

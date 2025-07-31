@@ -35,7 +35,11 @@ void testGenerateNNUE()
 {
     int randomDepth = NNUE_RANDOM_MOVE_COUNT;
     int maxDepth = NNUE_DEPTH;
+#ifdef _WIN32
     std::string exePath = NNUE_RESTART_EXE_FILE;
+#elif __unix__
+    std::string exePath = NNUE_RESTART_LINUX_FILE;
+#endif
 
     Search s{fenToPieceidMap("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"), RED};
     int count = 0;
@@ -68,8 +72,12 @@ void testGenerateNNUE()
     {
         std::cout << "A fucking error occured" << std::endl;
         std::cerr << err.what() << std::endl;
-        system("pause");
+        system_("pause");
     }
-    system(("start /min " + exePath).c_str());
+#ifdef _WIN32
+    system_("start /min " + exePath);
+#elif __unix__
+    system_("nohup " + exePath + " &");
+#endif
 }
 #endif
