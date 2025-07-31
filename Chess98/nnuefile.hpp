@@ -1,7 +1,5 @@
 #pragma once
 
-#define NNUE
-
 #ifdef NNUE
 #include "base.hpp"
 
@@ -14,6 +12,16 @@ const std::string NNUE_RESTART_EXE_FILE = "./a.exe"; // 跑完一局继续跑的
 #elif __unix__
 const std::string NNUE_RESTART_LINUX_FILE = "./a.out"; // 跑完一局继续跑的unix执行文件路径
 #endif
+
+template <typename T>
+T getRandomFromVector(const std::vector<T> &vec)
+{
+    std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    if (vec.empty())
+        return T();
+    std::uniform_int_distribution<size_t> dist(0, vec.size() - 1);
+    return vec[dist(engine)];
+}
 
 std::string replaceAll(std::string resource_str, std::string sub_str, std::string new_str)
 {
@@ -32,9 +40,9 @@ std::string getUniqueRandomFilename()
     for (int i = 0; i < 16; i++)
     {
         std::mt19937 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-        std::uniform_int_distribution<size_t> distA(65, 90); // 大写字母
-        std::uniform_int_distribution<size_t> distB(97, 122); // 小写字母
-        std::uniform_int_distribution<size_t> distC(48, 57); // 数字
+        std::uniform_int_distribution<size_t> distA(65, 90);                // 大写字母
+        std::uniform_int_distribution<size_t> distB(97, 122);               // 小写字母
+        std::uniform_int_distribution<size_t> distC(48, 57);                // 数字
         int decision = std::uniform_int_distribution<size_t>(1, 3)(engine); // 决定
         if (decision == 1)
         {

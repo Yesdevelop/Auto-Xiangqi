@@ -9,7 +9,7 @@ bool inCheck(Board &board, TEAM judgeTeam)
     Piece king = judgeTeam == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
     int x = king.x;
     int y = king.y;
-    int team = king.team();
+    int team = king.team;
 
     // 判断敌方的兵是否在附近
     bool c1 = abs(board.pieceidOn(x + 1, y)) == R_PAWN;
@@ -349,7 +349,7 @@ bool isValidMoveInSituation(Board &board, Move move)
         return false;
     if (attacker != move.starter.pieceid) // 若攻击者不一致，则一定是不合理着法
         return false;
-    if (move.starter.team() != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
+    if (move.starter.team != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
         return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
     if (captured != 0 && board.teamOn(move.x2, move.y2) ==

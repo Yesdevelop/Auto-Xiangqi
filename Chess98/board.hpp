@@ -88,6 +88,11 @@ public:
         return result;
     }
 
+    void print() const
+    {
+        printPieceidMap(this->pieceidMap);
+    }
+
     MOVES historyMoves{};
     std::vector<PIECEID_MAP> historySituations{};
     TEAM team = -1;
@@ -264,7 +269,7 @@ PIECES Board::getPiecesByTeam(TEAM team)
     PIECES allPieces = this->getAllLivePieces();
     for (Piece piece : allPieces)
     {
-        if (piece.team() == team)
+        if (piece.team == team)
         {
             result.emplace_back(piece);
         }
@@ -303,7 +308,7 @@ void Board::doMove(Move move)
     }
     this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
-    if (attackStarter.team() == RED)
+    if (attackStarter.team == RED)
     {
         int valNewPos = pieceWeights[attackStarter.pieceid][x2][y2];
         int valOldPos = pieceWeights[attackStarter.pieceid][x1][y1];
@@ -382,7 +387,7 @@ void Board::undoMove()
         this->isBlackKingLive = true;
     }
     // 更新评估分
-    if (attackStarter.team() == RED)
+    if (attackStarter.team == RED)
     {
         int valPos1 = pieceWeights[attackStarter.pieceid][x1][y1];
         int valPos2 = pieceWeights[attackStarter.pieceid][x2][y2];
@@ -505,7 +510,7 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
     for (const Piece &piece : this->getAllLivePieces())
     {
         PIECEID pid = std::abs(piece.pieceid);
-        if (piece.team() == RED)
+        if (piece.team == RED)
         {
             if (piece.y >= 5)
             {
@@ -527,7 +532,7 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
                 }
             }
         }
-        else if (piece.team() == BLACK)
+        else if (piece.team == BLACK)
         {
             if (piece.y <= 4)
             {

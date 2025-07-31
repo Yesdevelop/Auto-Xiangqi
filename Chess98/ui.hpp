@@ -135,7 +135,7 @@ void setBoardCode(Board &board)
         http.request(options2).end();\n\
             ";
 
-    wait(200);
+    sleep_(200);
     writeFile("./_put_.js", jsPutCode);
     system_("node ./_put_.js");
 }
@@ -154,7 +154,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     writeFile("./_server_.js", SERVER_CODE);
     system_("powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"");
     setBoardCode(board);
-    printPieceidMap(board.pieceidMap);
+    board.print();
     std::string moveFileContent = "____";
 
     while (true)
@@ -213,6 +213,6 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
                 }
             }
         }
-        wait(50);
+        sleep_(50);
     }
 }

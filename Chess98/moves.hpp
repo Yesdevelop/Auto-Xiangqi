@@ -429,31 +429,26 @@ MOVES MovesGenerate::generateMovesOn(Board &board, int x, int y)
 MOVES MovesGenerate::getMoves(Board &board)
 {
     // 对面笑
-    for (int y = board.getPieceFromRegistry(R_KING, 0).y + 1; y <= 9; y++)
+    const Piece &rKing = board.getPieceFromRegistry(board.team * R_KING, 0);
+    const Piece &bKing = board.getPieceFromRegistry(board.team * B_KING, 0);
+    if (rKing.x == bKing.x)
     {
-        if (board.pieceidOn(board.getPieceFromRegistry(R_KING, 0).x, y) == B_KING)
+        BITLINE bitlineX = board.getBitLineX(rKing.x);
+        REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
+        if (region[1] == bKing.y)
         {
+            MOVES result;
             if (board.team == RED)
             {
-                return MOVES{
-                    Move{
-                        board.getPieceFromRegistry(R_KING, 0).x,
-                        board.getPieceFromRegistry(R_KING, 0).y,
-                        board.getPieceFromRegistry(B_KING, 0).x,
-                        board.getPieceFromRegistry(B_KING, 0).y}};
+                result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
+                result[0].starter = rKing;
             }
             else
             {
-                return MOVES{
-                    Move{board.getPieceFromRegistry(B_KING, 0).x,
-                         board.getPieceFromRegistry(B_KING, 0).y,
-                         board.getPieceFromRegistry(R_KING, 0).x,
-                         board.getPieceFromRegistry(R_KING, 0).y}};
+                result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
+                result[0].starter = bKing;
             }
-        }
-        if (board.teamOn(board.getPieceFromRegistry(R_KING, 0).x, y) != EMPTY_TEAM)
-        {
-            break;
+            return result;
         }
     }
 
@@ -899,24 +894,26 @@ MOVES MovesGenerate::generateCaptureMovesOn(Board &board, int x, int y)
 MOVES MovesGenerate::getCaptureMoves(Board &board)
 {
     // 对面笑
-    for (int y = board.getPieceFromRegistry(R_KING, 0).y + 1; y <= 9; y++)
+    const Piece &rKing = board.getPieceFromRegistry(board.team * R_KING, 0);
+    const Piece &bKing = board.getPieceFromRegistry(board.team * B_KING, 0);
+    if (rKing.x == bKing.x)
     {
-        if (board.pieceidOn(board.getPieceFromRegistry(R_KING, 0).x, y) == B_KING)
+        BITLINE bitlineX = board.getBitLineX(rKing.x);
+        REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
+        if (region[1] == bKing.y)
         {
+            MOVES result;
             if (board.team == RED)
             {
-                return MOVES{Move{board.getPieceFromRegistry(R_KING, 0).x, board.getPieceFromRegistry(R_KING, 0).y, board.getPieceFromRegistry(B_KING, 0).x,
-                                  board.getPieceFromRegistry(B_KING, 0).y}};
+                result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
+                result[0].starter = rKing;
             }
             else
             {
-                return MOVES{Move{board.getPieceFromRegistry(B_KING, 0).x, board.getPieceFromRegistry(B_KING, 0).y, board.getPieceFromRegistry(R_KING, 0).x,
-                                  board.getPieceFromRegistry(R_KING, 0).y}};
+                result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
+                result[0].starter = bKing;
             }
-        }
-        if (board.teamOn(board.getPieceFromRegistry(R_KING, 0).x, y) != EMPTY_TEAM)
-        {
-            break;
+            return result;
         }
     }
 

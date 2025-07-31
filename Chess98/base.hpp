@@ -3,7 +3,7 @@
 #include <windows.h>
 #elif __unix__
 #include <unistd.h>
-#define fopen_s(pFile,filename,mode) ((*(pFile))=fopen((filename),  (mode)))==NULL
+#define fopen_s(pFile, filename, mode) ((*(pFile)) = fopen((filename), (mode))) == NULL
 using errno_t = int;
 #endif
 #include <algorithm>
@@ -17,30 +17,15 @@ using errno_t = int;
 #include <random>
 #include <string>
 #include <vector>
-#include <thread>
 #include <functional>
 #include <chrono>
 #include <unordered_map>
+#include <memory>
 
-void wait(int ms)
-{
-#ifdef _WIN32
-    Sleep(ms);
-#elif __unix__
-    sleep(ms / 1000);
-#endif
-}
+// 基本定义
 
-void system_(std::string str)
-{
-    int res = system(str.c_str());
-}
-
-void fread_(void *_Buffer, size_t _ElementSize, size_t _ElementCount, FILE *_Stream)
-{
-    int res = fread(_Buffer, _ElementSize, _ElementCount, _Stream);
-}
-
+const int QUIESCENCE_EXTEND_DEPTH = 64;
+const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
 const int INF = 1000000;
 const int BAN = INF - 2000;
 const int ILLEGAL_VAL = INF * 2;
@@ -48,10 +33,8 @@ using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
 using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
-
 using PIECE_INDEX = int;
 const PIECE_INDEX EMPTY_INDEX = -1;
-
 using PIECEID = int;
 const PIECEID EMPTY_PIECEID = 0;
 const PIECEID R_KING = 1;
@@ -69,13 +52,11 @@ const PIECEID B_ROOK = -5;
 const PIECEID B_CANNON = -6;
 const PIECEID B_PAWN = -7;
 const PIECEID OVERFLOW_PIECEID = 8;
-
 using TEAM = int;
 const TEAM EMPTY_TEAM = 0;
 const TEAM RED = 1;
 const TEAM BLACK = -1;
 const TEAM OVERFLOW_TEAM = 2;
-
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
 std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
@@ -95,7 +76,6 @@ std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
     {B_PAWN, "BP"},
     {EMPTY_PIECEID, "__"},
     {OVERFLOW_PIECEID, "  "}};
-
 std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
     {"RK", R_KING},
     {"RG", R_GUARD},
@@ -113,102 +93,6 @@ std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
     {"BP", B_PAWN},
     {"__", EMPTY_PIECEID},
     {"  ", OVERFLOW_PIECEID}};
-
-class Piece
-{
-public:
-    Piece() = default;
-    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
-        : pieceid(pieceid),
-          x(x),
-          y(y),
-          pieceIndex(pieceIndex) {};
-
-    TEAM team() const
-    {
-        if (this->pieceid == EMPTY_PIECEID)
-        {
-            return EMPTY_TEAM;
-        }
-        else if (this->pieceid == OVERFLOW_PIECEID)
-        {
-            return OVERFLOW_TEAM;
-        }
-        else if (this->pieceid > 0)
-        {
-            return RED;
-        }
-        else
-        {
-            return BLACK;
-        }
-    }
-
-    PIECEID pieceid = EMPTY_PIECEID;
-    int x = -1;
-    int y = -1;
-    PIECE_INDEX pieceIndex = -1;
-    bool isLive = true;
-};
-
-using PIECES = std::vector<Piece>;
-
-class Move
-{
-public:
-    Move() = default;
-    Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
-        : x1(x1),
-          y1(y1),
-          x2(x2),
-          y2(y2),
-          id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
-          startpos(x1 * 10 + y1),
-          endpos(x2 * 10 + y2),
-          val(val),
-          moveType(moveType) {};
-    int id = -1;
-    int startpos = -1;
-    int endpos = -1;
-    int x1 = -1;
-    int y1 = -1;
-    int x2 = -1;
-    int y2 = -1;
-    int val = 0;
-    int moveType = 0;
-    bool isCheckingMove = false;
-    Piece starter{};
-    Piece captured{};
-
-    constexpr bool operator==(const Move &move) const
-    {
-        return this->id == move.id;
-    }
-
-    constexpr bool operator!=(const Move &move) const
-    {
-        return this->id != move.id;
-    }
-};
-
-using MOVES = std::vector<Move>;
-
-class Result
-{
-public:
-    Result(Move move, int score) : move(move), val(score) {};
-    Move move{};
-    int val = 0;
-};
-
-template <typename T>
-class TrickResult
-{
-public:
-    TrickResult(bool isSuccess, std::vector<T> data) : isSuccess(isSuccess), data(std::move(data)) {};
-    bool isSuccess = false;
-    std::vector<T> data;
-};
 
 enum MOVE_TYPE
 {
@@ -235,53 +119,26 @@ enum SEARCH_TYPE
     QUIESC = 3
 };
 
-struct TransItem
-{
-    int32 hashLock = 0;
-    int32 vlExact = -INF;
-    int32 vlBeta = -INF;
-    int32 vlAlpha = -INF;
-    int32 exactDepth = 0;
-    int32 betaDepth = 0;
-    int32 alphaDepth = 0;
-    Move exactMove{};
-    Move betaMove{};
-    Move alphaMove{};
-};
+// 基本函数
 
-void printPieceidMap(PIECEID_MAP pieceidMap)
+void sleep_(int ms)
 {
-    for (int i = -1; i <= 8; i++)
-    {
-        for (int j = -1; j <= 9; j++)
-        {
-            if (i == -1)
-            {
-                if (j == -1)
-                {
-                    std::cout << "X ";
-                }
-                else
-                {
-                    std::cout << j << " ";
-                }
-            }
-            else
-            {
-                if (j == -1)
-                {
-                    std::cout << i << " ";
-                }
-                else
-                {
-                    std::cout << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
-                }
-            }
-        }
-        std::cout << "\n";
-    }
-    std::cout << std::endl;
-};
+#ifdef _WIN32
+    Sleep(ms);
+#elif __unix__
+    sleep(ms / 1000);
+#endif
+}
+
+void system_(std::string str)
+{
+    int res = system(str.c_str());
+}
+
+void fread_(void *_Buffer, size_t _ElementSize, size_t _ElementCount, FILE *_Stream)
+{
+    size_t res = fread(_Buffer, _ElementSize, _ElementCount, _Stream);
+}
 
 FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0)
 {
@@ -295,7 +152,7 @@ FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0
     }
     if (result != 0)
     {
-        wait(50);
+        sleep_(50);
         return openFile(filename, mode, retryCount + 1);
     }
     return file;
@@ -331,17 +188,163 @@ void writeFile(const std::string &filename, const std::string &content)
     fclose(file);
 }
 
-template <typename T>
-T getRandomFromVector(const std::vector<T> &vec)
+void printPieceidMap(PIECEID_MAP pieceidMap)
 {
-    std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    if (vec.empty())
-        return T();
-    std::uniform_int_distribution<size_t> dist(0, vec.size() - 1);
-    return vec[dist(engine)];
+    for (int i = -1; i <= 8; i++)
+    {
+        for (int j = -1; j <= 9; j++)
+        {
+            if (i == -1)
+            {
+                if (j == -1)
+                {
+                    std::cout << "X ";
+                }
+                else
+                {
+                    std::cout << j << " ";
+                }
+            }
+            else
+            {
+                if (j == -1)
+                {
+                    std::cout << i << " ";
+                }
+                else
+                {
+                    std::cout << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
+                }
+            }
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
 }
 
-const int QUIESCENCE_EXTEND_DEPTH = 64;
-const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
+// 基本类
 
-const int DrawValue = 20;
+class Piece
+{
+public:
+    Piece() = default;
+    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
+        : pieceid(pieceid),
+          x(x),
+          y(y),
+          pieceIndex(pieceIndex)
+    {
+        if (this->pieceid == EMPTY_PIECEID)
+        {
+            this->team = EMPTY_TEAM;
+        }
+        else if (this->pieceid == OVERFLOW_PIECEID)
+        {
+            this->team = OVERFLOW_TEAM;
+        }
+        else if (this->pieceid > 0)
+        {
+            this->team = RED;
+        }
+        else
+        {
+            this->team = BLACK;
+        }
+    }
+
+public:
+    PIECEID pieceid = EMPTY_PIECEID;
+    int x = -1;
+    int y = -1;
+    PIECE_INDEX pieceIndex = -1;
+    int team = -2;
+    bool isLive = true;
+};
+
+using PIECES = std::vector<Piece>;
+
+class Move
+{
+public:
+    Move() = default;
+
+    Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
+        : x1(x1),
+          y1(y1),
+          x2(x2),
+          y2(y2),
+          id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
+          startpos(x1 * 10 + y1),
+          endpos(x2 * 10 + y2),
+          val(val),
+          moveType(moveType) {};
+
+    constexpr bool operator==(const Move &move) const
+    {
+        return this->id == move.id;
+    }
+
+    constexpr bool operator!=(const Move &move) const
+    {
+        return this->id != move.id;
+    }
+
+public:
+    int id = -1;
+    int startpos = -1;
+    int endpos = -1;
+    int x1 = -1;
+    int y1 = -1;
+    int x2 = -1;
+    int y2 = -1;
+    int val = 0;
+    int moveType = 0;
+    bool isCheckingMove = false;
+    Piece starter{};
+    Piece captured{};
+};
+
+using MOVES = std::vector<Move>;
+
+class Result
+{
+public:
+    Result(Move move, int score)
+        : move(move),
+          val(score) {};
+
+public:
+    Move move{};
+    int val = 0;
+};
+
+template <typename T>
+class TrickResult
+{
+public:
+    TrickResult(bool isSuccess, std::vector<T> data)
+        : isSuccess(isSuccess),
+          data(std::move(data)) {};
+
+public:
+    bool isSuccess = false;
+    std::vector<T> data;
+};
+
+class TransItem
+{
+public:
+    TransItem() = default;
+
+public:
+    int32 hashLock = 0;
+    int32 vlExact = -INF;
+    int32 vlBeta = -INF;
+    int32 vlAlpha = -INF;
+    int32 exactDepth = 0;
+    int32 betaDepth = 0;
+    int32 alphaDepth = 0;
+    Move exactMove{};
+    Move betaMove{};
+    Move alphaMove{};
+};

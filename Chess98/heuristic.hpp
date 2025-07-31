@@ -15,7 +15,10 @@ public:
     {
         for (std::array<std::array<int, 90>, 90> &pos : this->historyTable)
         {
-            pos = std::array<std::array<int, 90>, 90>{};
+            for (std::array<int, 90> &pos2 : pos)
+            {
+                pos2 = std::array<int, 90>{};
+            }
         }
     }
 
@@ -28,7 +31,7 @@ public:
     {
         int pos1 = 10 * move.x1 + move.y1;
         int pos2 = 10 * move.x2 + move.y2;
-        int teamID = (move.starter.team() + 1) >> 1;
+        int teamID = (move.starter.team + 1) >> 1;
         this->historyTable[teamID][pos1][pos2] += (depth << 1);
     }
 
@@ -40,7 +43,7 @@ public:
             {
                 int pos1 = 10 * move.x1 + move.y1;
                 int pos2 = 10 * move.x2 + move.y2;
-                int teamID = (move.starter.team() + 1) >> 1;
+                int teamID = (move.starter.team + 1) >> 1;
                 move.moveType = HISTORY;
                 move.val = this->historyTable[teamID][pos1][pos2];
             }

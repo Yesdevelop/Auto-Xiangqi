@@ -26,6 +26,7 @@ void testByUI()
     // fenCode = "C2a5/5k1P1/3a5/9/9/6r2/9/9/1cp1p3C/4KA3 w - - 0 1"; // 杀棋送将
     // fenCode = "2bak1C2/4a1R2/c6c1/p3p1p2/1r6p/9/P3P1P1P/6NR1/3r5/3AKAB2 w - - 0 1"; // 深度不够
     // fenCode = "2bak4/3Ra4/3n5/p8/2b2PP1p/2NR5/P1r1N3P/1r2n4/4A4/2BK1A3 w - - 0 1" // 深度不够
+    // fenCode = "4k4/9/9/9/9/9/9/9/9/4K4 w"; // 测试对面笑的局面
 
     ui(team, aiFirst, maxDepth, maxTime, fenCode);
 }
@@ -41,7 +42,8 @@ void testGenerateNNUE()
     std::string exePath = NNUE_RESTART_LINUX_FILE;
 #endif
 
-    Search s{fenToPieceidMap("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"), RED};
+    const std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
+    Search s{fenToPieceidMap(fenCode), RED};
     int count = 0;
 
     try

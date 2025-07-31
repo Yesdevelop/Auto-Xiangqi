@@ -29,10 +29,6 @@ public:
         return this->board;
     }
 
-#ifdef NNUE
-    friend void testGenerateNNUE();
-#endif
-
 protected:
     Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
@@ -45,16 +41,18 @@ protected:
 public:
     Result searchMain(int maxDepth, int maxTime);
 
-#ifdef NNUE
-    Result searchGenereateNNUE(int maxDepth, int maxTime);
-#endif
-
 protected:
     Result searchOpenBook();
     Result searchRoot(int depth);
     int searchPV(int depth, int alpha, int beta);
     int searchCut(int depth, int beta, bool banNullMove = false);
     int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
+
+#ifdef NNUE
+public:
+    friend void testGenerateNNUE();
+    Result searchGenereateNNUE(int maxDepth, int maxTime);
+#endif
 
 protected:
     void setCheckingMove(bool mChecking)
