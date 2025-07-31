@@ -32,6 +32,7 @@ const int ILLEGAL_VAL = INF * 2;
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
+using TIME = std::chrono::steady_clock::time_point;
 using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
 using PIECE_INDEX = int;
 const PIECE_INDEX EMPTY_INDEX = -1;

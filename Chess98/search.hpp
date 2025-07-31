@@ -290,21 +290,25 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
     Result bestNode = Result(Move(), 0);
-    clock_t start = clock();
+    TIME start = std::chrono::high_resolution_clock::now();
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(depth);
+
+        TIME end = std::chrono::high_resolution_clock::now();
+        int duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
         // log
         std::cout << " depth: " << depth;
         std::cout << " vl: " << bestNode.val;
         std::cout << " moveid: " << bestNode.move.id;
-        std::cout << " duration(ms): " << clock() - start;
+        std::cout << " duration(ms): " << duration;
         std::cout << " count: " << log_nodecount;
-        std::cout << " nps: " << log_nodecount / (clock() - start + 1) * 1000;
+        std::cout << " nps: " << log_nodecount / (duration + 1) * 1000;
         std::cout << std::endl;
 
         // timeout break
-        if (clock() - start >= maxTime * 1000 / 3)
+        if (duration >= maxTime * 1000 / 3)
         {
             break;
         }
@@ -350,7 +354,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
     Result bestNode = Result(Move(), 0);
-    clock_t start = clock();
+    TIME start = std::chrono::high_resolution_clock::now();
 
     // nnue start
     std::string historyStr = "";
@@ -366,13 +370,17 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(depth);
+
+        TIME end = std::chrono::high_resolution_clock::now();
+        int duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
         // log
         std::cout << " depth: " << depth;
         std::cout << " vl: " << bestNode.val;
         std::cout << " moveid: " << bestNode.move.id;
-        std::cout << " duration(ms): " << clock() - start;
+        std::cout << " duration(ms): " << duration;
         std::cout << " count: " << log_nodecount;
-        std::cout << " nps: " << log_nodecount / (clock() - start + 1) * 1000;
+        std::cout << " nps: " << log_nodecount / (duration + 1) * 1000;
         std::cout << std::endl;
 
         // nnue 记录根节点结果
@@ -391,7 +399,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
         str += "]},";
 
         // timeout break
-        if (clock() - start >= maxTime * 1000 / 3)
+        if (duration >= maxTime * 1000 / 3)
         {
             break;
         }
