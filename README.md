@@ -4,22 +4,40 @@
 
 ## 使用
 
-> 环境要求：
-> - 操作系统：Windows, Linux (MacOS 暂未测试)
-> - 依赖：Node.js (要求终端能够使用node命令，以启用UI)
-> - 编译器：目前 g++, MSVC 都能过编译
+环境要求：
+- 操作系统：Windows, Linux (MacOS 暂未测试)
+- 依赖：Node.js (要求终端能够使用node命令，以启用UI)
+- 编译器：目前 g++, MSVC 都能过编译
 
-如果想要下棋，请确保 `Chess98/nnuefile.hpp` 中没有 `#define NNUE`，否则会切换到 nnue generate file模式
+如果想要下棋，请确保 `Chess98/nnuefile.hpp` 中没有 `#define NNUE`，否则会运行跑谱器
 
 确保 localhost:9494 没有被占用，这是 UI 的服务器端口。
 
 编译 Chess98/main.cpp 后直接运行输出文件，然后在 `tools/ui/ui.html` 下棋
 
+## 开发
+
+Chess98 项目的目录是这样的：
+
+- Chess98 项目的源代码文件夹
+- nnue 存放 nnue 相关开发内容
+    - data 存放跑谱器生成的 json
+- tools 存放项目相关的一些工具
+    - auto 自动测试
+    - chess_matrix_convert 象眼格式转换，做开局库的时候用到
+    - openbook 开局库文件
+    - ui 界面
+- .gitignore Git忽略文件
+- LICENSE 许可证
+- README.md 介绍文件
+- Chess98.sln Visual Studio 项目文件
+- CMakeLists.txt CLion 项目文件
+
 ### 使用自动测试工具
 
-> 环境要求：
-> - 操作系统：Windows (Linux, MacOS 暂未测试)
-> - 依赖：Node.js, Selenium-Webdriver, Microsoft Edge
+环境要求：
+- 操作系统：Windows (Linux, MacOS 暂未测试)
+- 依赖：Node.js, Selenium-Webdriver, Microsoft Edge
 
 一个基于 https://play.xiangqi.com/ 使用 selenium 编写的自动测试工具，
 
@@ -28,3 +46,34 @@
 3. 终端运行 `node z`，开始自动测试
 
 可以在 `tools/auto/z.js` 的文件头部更改对方人机等级
+
+### 跑谱器
+
+在 `Chess98/nnuefile.hpp` 内加上 `#define NNUE` 启用跑谱器，输出 json 文件到指定目录下
+
+配置可以在 nnuefile.hpp 的开头调整几个常量
+
+json 内容结构如下：
+
+```
+[
+    {
+        fenCode(string),
+        history: [...(int)],
+        data: [
+            {
+                depth(int),
+                data: [
+                    {
+                        moveid(int),
+                        vl(int)
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    },
+    ...
+]
+```
