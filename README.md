@@ -2,26 +2,29 @@
 
 一个借鉴了象眼引擎的中国象棋 AI，正在持续开发中。
 
-## CLion编译
-
-需要在CLion中指定程序的工作路径在main.cpp所在目录
-
 ## 使用
 
-1. Node.js 环境(界面要用，很简单，一路next即可)：https://nodejs.org/en/download
-2. 编译Chess98目录下的main.cpp，**输出放在main.cpp同级目录下**
-3. 将开局库文件BOOK.DAT解压并放到和编译出的exe文件同级的目录下
-4. 双击运行exe文件
+> 环境要求：
+> - 操作系统：Windows, Linux (MacOS 暂未测试)
+> - 依赖：Node.js (要求终端能够使用node命令，以启用UI)
+> - 编译器：目前 g++, MSVC 都能过编译
 
-## 自动测试
+如果想要下棋，请确保 `Chess98/nnuefile.hpp` 中没有 `#define NNUE`，否则会切换到 nnue generate file模式
 
-环境要求：**windows，node.js，并开启一个稳定的代理**
+确保 localhost:9494 没有被占用，这是 UI 的服务器端口。
+
+编译 Chess98/main.cpp 后直接运行输出文件，然后在 `tools/ui/ui.html` 下棋
+
+### 使用自动测试工具
+
+> 环境要求：
+> - 操作系统：Windows (Linux, MacOS 暂未测试)
+> - 依赖：Node.js, Selenium-Webdriver, Microsoft Edge
+
+一个基于 https://play.xiangqi.com/ 使用 selenium 编写的自动测试工具，
 
 1. 先运行一个 chess98 的 exe 实例
-2. cd 到Tools/Auto/，若第一次使用则先运行 `npm i selenium webdriver`
-3. 运行 `node webdriver.js` 指令
+2. cd 到 `tools/Auto/`，若第一次使用则先运行 `npm i selenium-webdriver`，下载 webdriver
+3. 终端运行 `node z`，开始自动测试
 
-## 注意事项
-
-g++可能会编译不通过，请在 https://github.com/meganz/mingw-std-threads/releases/tag/1.0.0 中下载thread库
-并放在编译器 include path 或者 main.cpp 的同级目录下面
+可以在 `tools/auto/z.js` 的文件头部更改对方人机等级

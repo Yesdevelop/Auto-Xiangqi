@@ -1,7 +1,5 @@
 #pragma once
 
-#define NNUE
-
 #ifdef NNUE
 #include "base.hpp"
 
@@ -38,13 +36,13 @@ std::string replaceAll(std::string resource_str, std::string sub_str, std::strin
 
 std::string getUniqueRandomFilename()
 {
+    std::uniform_int_distribution<size_t> distA(65, 90);  // 大写字母
+    std::uniform_int_distribution<size_t> distB(97, 122); // 小写字母
+    std::uniform_int_distribution<size_t> distC(48, 57);  // 数字
+    std::mt19937 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     std::string filename = "";
     for (int i = 0; i < 16; i++)
     {
-        std::mt19937 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-        std::uniform_int_distribution<size_t> distA(65, 90);                // 大写字母
-        std::uniform_int_distribution<size_t> distB(97, 122);               // 小写字母
-        std::uniform_int_distribution<size_t> distC(48, 57);                // 数字
         int decision = std::uniform_int_distribution<size_t>(1, 3)(engine); // 决定
         if (decision == 1)
         {
