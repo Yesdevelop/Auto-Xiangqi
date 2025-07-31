@@ -290,12 +290,12 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
     Result bestNode = Result(Move(), 0);
-    TIME start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(depth);
 
-        TIME end = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::high_resolution_clock::now();
         int duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
         // log
@@ -354,7 +354,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
     Result bestNode = Result(Move(), 0);
-    TIME start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::high_resolution_clock::now();
 
     // nnue start
     std::string historyStr = "";
@@ -371,7 +371,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     {
         bestNode = searchRoot(depth);
 
-        TIME end = std::chrono::high_resolution_clock::now();
+        auto end = std::chrono::high_resolution_clock::now();
         int duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
         // log
