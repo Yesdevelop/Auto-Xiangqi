@@ -1,6 +1,6 @@
 /////////////////////////////
-const OPPONENT_LEVEL = 9
-const CPPFILE_RELATIVE_PATH_DIRECTORY = "../../Chess98/"
+const OPPONENT_LEVEL = 9 // 挑战的人机等级
+const USER_PROFILE_DIR = "E:\\Users\\Yeshui\\AppData\\Local\\Microsoft\\Edge\\User Data" // 你的浏览器profile目录, 一般来说改一下用户名就行了
 /////////////////////////////
 
 const { Builder, By, Key, until, WebDriver } = require("selenium-webdriver")
@@ -147,7 +147,7 @@ async function doMoveOnWeb(driver) {
     if ((await getWebBoard(driver)).toString() != webLastBoard.toString()) {
         webLastBoard[9 - x1][y1] = 1
         webLastBoard[9 - x2][y2] = 0
-        console.error("步进失败，尝试重新步进")
+        console.error("步进失败, 尝试重新步进")
         await driver.sleep(400)
         await doMoveOnWeb(driver)
     }
@@ -175,7 +175,7 @@ async function getWebMove(driver, lastBoard, currentBoard) {
     let move = { x1: -1, y1: -1, x2: -1, y2: -1 }
 
     // moveFrom
-    // 若原来是1，现是0，则为起点
+    // 若原来是1, 现是0, 则为起点
     for (let i = 0; i < lastBoard.length; i++) {
         for (let j = 0; j < lastBoard[i].length; j++) {
             if (lastBoard[i][j] === 1 && currentBoard[i][j] === 0) {
@@ -222,7 +222,7 @@ async function updateXiangqiaiChangeToChess98UI(driver, move) {
     const y2 = String(move.y2)
     const moveString = y1 + x1 + y2 + x2
     if (moveString.match(/-/g)) {
-        console.error("步进失败，坐标不合法", moveString)
+        console.error("步进失败, 坐标不合法", moveString)
         return await getChess98LastMove(driver)
     }
     console.log("着法被发送至服务器", moveString)
@@ -240,7 +240,7 @@ async function init() {
     const options = new edge.Options()
 
     options.addArguments(
-        `--user-data-dir=C:\\Users\\Yeshui\\AppData\\Local\\Microsoft\\Edge\\User Data`,
+        `--user-data-dir=${USER_PROFILE_DIR}`,
         `--profile-directory=Default`,
         `--log-level=3`
     )

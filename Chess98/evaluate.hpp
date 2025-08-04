@@ -4,11 +4,11 @@
 
 using WEIGHT_MAP = std::array<std::array<int, 10>, 9>;
 
-// 权重表所记录的数值都是红方位置 -> 分数，黑方评分则需要倒置这张表，我的习惯是红在上，横放
+// 权重表所记录的数值都是红方位置 -> 分数, 黑方评分则需要倒置这张表, 我的习惯是红在上, 横放
 
-// OPEN,END 开局，残局
-// ATTACK，DEFEND 进攻，防守
-// SAFE,DANGER 安全，受到威胁的
+// OPEN,END 开局, 残局
+// ATTACK, DEFEND 进攻, 防守
+// SAFE,DANGER 安全, 受到威胁的
 
 WEIGHT_MAP OPEN_ATTACK_KING_PAWN_WEIGHT = {
     {{0, 0, 0, 21, 21, 67, 97, 97, 97, 7},
@@ -162,18 +162,18 @@ WEIGHT_MAP END_CANNON_WEIGHT = {
         {300, 300, 300, 300, 300, 300, 300, 300, 300, 300},
     }};
 
-// 越接近残局，子力会越来越少，因此可以按照给车马炮等棋子的加权分判断对局进程
+// 越接近残局, 子力会越来越少, 因此可以按照给车马炮等棋子的加权分判断对局进程
 
 const int ROOK_MIDGAME_VALUE = 6;
 const int KNIGHT_CANNON_MIDGAME_VALUE = 3;
 const int OTHER_MIDGAME_VALUE = 1;
 const int TOTAL_MIDGAME_VALUE = ROOK_MIDGAME_VALUE * 4 + KNIGHT_CANNON_MIDGAME_VALUE * 8 + OTHER_MIDGAME_VALUE * 18;
 
-// 先行权的基础分值，可以按照出子效率的紧迫程度去调整（开局更紧迫）
+// 先行权的基础分值, 可以按照出子效率的紧迫程度去调整（开局更紧迫）
 
 const int TOTAL_ADVANCED_VALUE = 3;
 
-// 对方越偏向进攻，过河进入我方地界的棋子就越多，因此可以按照敌方过河子数量调整攻防策略
+// 对方越偏向进攻, 过河进入我方地界的棋子就越多, 因此可以按照敌方过河子数量调整攻防策略
 
 const int TOTAL_ATTACK_VALUE = 8;
 const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 60 * 4;
@@ -186,7 +186,7 @@ const int END_PAWN_VAL = 120;
 
 std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack)
 {
-    // 兵，帅
+    // 兵, 帅
     WEIGHT_MAP RED_KING_PAWN_WEIGHT = {0};
     WEIGHT_MAP BLACK_KING_PAWN_WEIGHT = {0};
     for (int x = 0; x < 9; x++)
@@ -263,7 +263,7 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
         }
     }
 
-    // 士，象
+    // 士, 象
     WEIGHT_MAP RED_GUARD_BISHOP_WEIGHT = {0};
     WEIGHT_MAP BLACK_GUARD_BISHOP_WEIGHT = {0};
     for (int x = 0; x < 9; x++)

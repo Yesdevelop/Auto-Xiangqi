@@ -345,23 +345,23 @@ std::string boardToFen(Board &board)
 bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
-    if (attacker == 0) // 若攻击者不存在，则一定是不合理着法
+    if (attacker == 0) // 若攻击者不存在, 则一定是不合理着法
         return false;
-    if (attacker != move.starter.pieceid) // 若攻击者不一致，则一定是不合理着法
+    if (attacker != move.starter.pieceid) // 若攻击者不一致, 则一定是不合理着法
         return false;
-    if (move.starter.team != board.team) // 若攻击者的队伍和当前队伍不一致，则一定是不合理着法
+    if (move.starter.team != board.team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
         return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
     if (captured != 0 && board.teamOn(move.x2, move.y2) ==
-                             board.teamOn(move.x1, move.y1)) // 吃子着法，若吃子者和被吃者同队伍，则一定不合理
+                             board.teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
         return false;
 
     // 分类
     if (abs(attacker) == R_ROOK)
     {
-        if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法，若横纵坐标都不相同，则一定不合理
+        if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法, 若横纵坐标都不相同, 则一定不合理
             return false;
-        // 生成车的着法范围，看是否有障碍物
+        // 生成车的着法范围, 看是否有障碍物
         BITLINE bitlineX = board.getBitLineX(move.x1);
         REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, move.y1, 9);
         if (move.y2 < regionX[0] || move.y2 > regionX[1])
@@ -392,13 +392,13 @@ bool isValidMoveInSituation(Board &board, Move move)
     }
     else if (abs(attacker) == R_BISHOP)
     {
-        // 象走法，不能有障碍物
+        // 象走法, 不能有障碍物
         if (board.pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0)
             return false;
     }
     else if (abs(attacker) == R_CANNON)
     {
-        if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法，若横纵坐标都不同，则一定不合理
+        if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法, 若横纵坐标都不同, 则一定不合理
             return false;
         // 生成炮的着法范围
         BITLINE bitlineX = board.getBitLineX(move.x1);

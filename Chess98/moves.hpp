@@ -31,7 +31,7 @@ MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
     MOVES result;
     result.reserve(8);
 
-    // 横坐标应当在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
+    // 横坐标应当在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
     const int right = x + 1;
     const int up = y + 1;
@@ -76,7 +76,7 @@ MOVES MovesGenerate::guard(TEAM team, Board &board, int x, int y)
     MOVES result{};
     result.reserve(8);
 
-    // 横坐标也应在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
+    // 横坐标也应在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
     const int right = x + 1;
     const int up = y + 1;
@@ -140,7 +140,7 @@ MOVES MovesGenerate::bishop(TEAM team, Board &board, int x, int y)
     MOVES result{};
     result.reserve(8);
 
-    // 横坐标应在0, 9之间，纵坐标的话，红方在0, 4之间，黑方在5, 9之间
+    // 横坐标应在0, 9之间, 纵坐标的话, 红方在0, 4之间, 黑方在5, 9之间
     if (team == RED)
     {
         if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) != team)
@@ -528,7 +528,7 @@ MOVES MovesGenerate::kingCapture(TEAM team, Board &board, int x, int y)
     MOVES result{};
     result.reserve(8);
 
-    // 横坐标应当在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
+    // 横坐标应当在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
     const int right = x + 1;
     const int up = y + 1;
@@ -573,7 +573,7 @@ MOVES MovesGenerate::guardCapture(TEAM team, Board &board, int x, int y)
     MOVES result{};
     result.reserve(8);
 
-    // 横坐标也应在3, 5之间，纵坐标的话，红方在0, 2之间，黑方在7, 9之间
+    // 横坐标也应在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
     const int right = x + 1;
     const int up = y + 1;
@@ -637,7 +637,7 @@ MOVES MovesGenerate::bishopCapture(TEAM team, Board &board, int x, int y)
     MOVES result{};
     result.reserve(8);
 
-    // 横坐标应在0, 9之间，纵坐标的话，红方在0, 4之间，黑方在5, 9之间
+    // 横坐标应在0, 9之间, 纵坐标的话, 红方在0, 4之间, 黑方在5, 9之间
     if (team == RED)
     {
         if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) == -team)

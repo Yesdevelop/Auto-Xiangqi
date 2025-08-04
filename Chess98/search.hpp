@@ -134,7 +134,7 @@ protected:
 
     bool repeatCheck()
     {
-        // 这个函数只判断对方有没有违规，违规返回INF
+        // 这个函数只判断对方有没有违规, 违规返回INF
         const Board &board = this->board;
         const MOVES &history = board.historyMoves;
         const size_t size = history.size();
@@ -149,7 +149,7 @@ protected:
             const Move &ply3 = history[size_t(size - 3)];
             const Move &ply4 = history[size_t(size - 4)];
             const Move &ply5 = history[size_t(size - 5)];
-            // 判断是否出现重复局面，没有则直接false
+            // 判断是否出现重复局面, 没有则直接false
             // 试想如下重复局面：（格式：plyX: x1y1x2y2）
             // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
             const bool isRepeat = (ply1 == ply5 &&
@@ -163,9 +163,9 @@ protected:
             }
 
             // 长将在任何情况下都会判负
-            // 由于性能原因，isCheckingMove是被延迟设置的，ply1可能还没有被设成checkingMove
-            // 但是若判定了循环局面，ply1必然等于ply5
-            // 若ply5和ply3都是将军着法，且出现循环局面，则直接判定违规
+            // 由于性能原因, isCheckingMove是被延迟设置的, ply1可能还没有被设成checkingMove
+            // 但是若判定了循环局面, ply1必然等于ply5
+            // 若ply5和ply3都是将军着法, 且出现循环局面, 则直接判定违规
             if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
             {
                 std::cout << "Long Check!" << std::endl;
@@ -173,7 +173,7 @@ protected:
             }
             // 长捉情况比较特殊
             // 只有车、马、炮能作为长捉的发起者
-            // 发起者不断捉同一个子，判负
+            // 发起者不断捉同一个子, 判负
             if (abs(ply1.starter.pieceid) == R_ROOK ||
                 abs(ply1.starter.pieceid) == R_KNIGHT ||
                 abs(ply1.starter.pieceid) == R_CANNON)
@@ -243,7 +243,7 @@ protected:
                         (starter.x + 2 == target.x && starter.y + 1 == target.y) ||
                         (starter.x - 2 == target.x && starter.y + 1 == target.y) ||
                         (starter.x + 2 == target.x && starter.y - 1 == target.y) ||
-                        (starter.x - 2 == target.x && starter.y - 1 == target.y)) // 这里有点担心，但是我想不到什么局面
+                        (starter.x - 2 == target.x && starter.y - 1 == target.y)) // 这里有点担心, 但是我想不到什么局面
                     {
                         std::cout << "Long Knight Check!" << std::endl;
                         return true;
@@ -531,7 +531,7 @@ Result Search::searchOpenBook()
         return Result{Move{}, -1};
     }
 
-    // 如果找到局面，则向前查找第一个着法
+    // 如果找到局面, 则向前查找第一个着法
     for (nMid--; nMid >= 0; nMid--)
     {
         pBookFileStruct.read(bk, nMid);
@@ -636,7 +636,7 @@ Result Search::searchRoot(int depth)
         board.undoMove();
     }
 
-    // 记录数据，为杀棋添加distance
+    // 记录数据, 为杀棋添加distance
     if (bestMove.id == -1)
     {
         vlBest += board.distance;

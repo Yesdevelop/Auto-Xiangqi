@@ -470,7 +470,7 @@ void Board::initEvaluate()
 
 void Board::vlOpenCalculator(int &vlOpen)
 {
-    // 首先判断局势处于开中局还是残局阶段，方法是计算各种棋子的数量，按照车=6、马炮=3、其它=1相加
+    // 首先判断局势处于开中局还是残局阶段, 方法是计算各种棋子的数量, 按照车=6、马炮=3、其它=1相加
     int rookLiveSum = 0;
     int knightCannonLiveSum = 0;
     int otherLiveSum = 0;
@@ -491,14 +491,14 @@ void Board::vlOpenCalculator(int &vlOpen)
         }
     }
     vlOpen = rookLiveSum * 6 + knightCannonLiveSum * 3 + otherLiveSum;
-    // 使用二次函数，子力很少时才认为接近残局
+    // 使用二次函数, 子力很少时才认为接近残局
     vlOpen = (2 * TOTAL_MIDGAME_VALUE - vlOpen) * vlOpen;
     vlOpen /= TOTAL_MIDGAME_VALUE;
 }
 
 void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
 {
-    // 然后判断各方是否处于进攻状态，方法是计算各种过河棋子的数量，按照车马2炮兵1相加
+    // 然后判断各方是否处于进攻状态, 方法是计算各种过河棋子的数量, 按照车马2炮兵1相加
     int redAttackLiveRookSum = 0;
     int blackAttackLiveRookSum = 0;
     int redAttackLiveKnightSum = 0;
@@ -565,7 +565,7 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
     vlBlackAttack += blackAttackLiveKnightSum * 2;
     vlBlackAttack += blackAttackLiveCannonSum;
     vlBlackAttack += blackAttackLivePawnSum;
-    // 如果本方轻子数比对方多，那么每多一个轻子(车算2个轻子)威胁值加2。威胁值最多不超过8
+    // 如果本方轻子数比对方多, 那么每多一个轻子(车算2个轻子)威胁值加2。威胁值最多不超过8
     int redSimpleValues = 0;
     int blackSimpleValues = 0;
     // 红

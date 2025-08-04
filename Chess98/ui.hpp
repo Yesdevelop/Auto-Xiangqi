@@ -191,7 +191,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
                 moveFileContent = "wait";
             }
 
-            // 如果内容和上次内容不一致，则执行步进
+            // 如果内容和上次内容不一致, 则执行步进
             if (content != "wait" && content != "undo" && content != moveFileContent)
             {
                 try
