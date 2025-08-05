@@ -1,6 +1,6 @@
 /////////////////////////////
 const OPPONENT_LEVEL = 9 // 挑战的人机等级
-const USER_PROFILE_DIR = "E:\\Users\\Yeshui\\AppData\\Local\\Microsoft\\Edge\\User Data" // 你的浏览器profile目录, 一般来说改一下用户名就行了
+const USER_PROFILE_DIR = "C:\\Users\\Yeshui\\AppData\\Local\\Microsoft\\Edge\\User Data" // 你的浏览器profile目录, 一般来说改一下用户名就行了
 /////////////////////////////
 
 const { Builder, By, Key, until, WebDriver } = require("selenium-webdriver")
