@@ -30,9 +30,10 @@ void testByUI()
     // fenCode = "2bak1C2/4a1R2/c6c1/p3p1p2/1r6p/9/P3P1P1P/6NR1/3r5/3AKAB2 w - - 0 1"; // 深度不够 - 卧槽马 解决
     // fenCode = "4k4/9/9/9/9/9/9/9/9/4K4 w"; // 测试对面笑的局面 解决
 
-    // fenCode = "2bak4/3Ra4/3n5/p8/2b2PP1p/2NR5/P1r1N3P/1r2n4/4A4/2BK1A3 w - - 0 1"; // 深度不够 - 卧槽马 未解决
-    // fenCode = "3ckab2/2r1a4/2n1bc3/1RN1p3p/P5p2/9/3n2P1P/C3C3N/4A4/2B1KAB2 w - - 0 1"; // 一个不是很显眼的漏招 未解决
-    // fenCode = "5R3/C3k4/5a3/p1P4cp/2r3b2/3N5/P2n4P/B8/4A4/4KAB2 w - - 0 1"; // 深度不够 - 卧槽马 未解决
+    // fenCode = "2bak4/3Ra4/3n5/p8/2b2PP1p/2NR5/P1r1N3P/1r2n4/4A4/2BK1A3 w - - 0 1"; // 漏招 未解决
+    // fenCode = "3ckab2/2r1a4/2n1bc3/1RN1p3p/P5p2/9/3n2P1P/C3C3N/4A4/2B1KAB2 w - - 0 1"; // 漏招 未解决
+    // fenCode = "5R3/C3k4/5a3/p1P4cp/2r3b2/3N5/P2n4P/B8/4A4/4KAB2 w - - 0 1"; // 漏招 未解决
+    // fenCode = "r1baka3/6R2/1c2b4/pC2p3p/2n3P2/9/P3r3P/3C5/4N4/R1BAKAB2 w - - 0 1"; // 漏招 - 深度问题 未解决
 
     ui(team, aiFirst, maxDepth, maxTime, fenCode);
 }
