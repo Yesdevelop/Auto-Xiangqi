@@ -266,7 +266,7 @@ public:
                 {
                     PIECEID pieceid = board.pieceidOn(captured.x, captured.y);
                     if (pieceid == R_KNIGHT || pieceid == R_CANNON || pieceid == R_ROOK ||
-                        isRiveredPawn(board, captured.x, captured.y))
+                        isRivercrossedPawn(board, captured.x, captured.y))
                     {
                         score = 1;
                     }

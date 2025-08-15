@@ -1,97 +1,161 @@
 #pragma once
 #include "board.hpp"
 
+bool isRivercrossedPawn(Board &board, int x, int y)
+{
+    PIECEID pieceid = board.pieceidOn(x, y);
+    if (pieceid == R_PAWN)
+    {
+        return y >= 5 && y <= 9;
+    }
+    if (pieceid == B_PAWN)
+    {
+        return y >= 0 && y <= 4;
+    }
+}
+
+bool hasCrossedRiver(Board &board, int x, int y)
+{
+    TEAM team = board.teamOn(x, y);
+    if (team == RED)
+    {
+        return y >= 5 && y <= 9;
+    }
+    else if (team == BLACK)
+    {
+        return y >= 0 && y <= 4;
+    }
+}
+
+bool isInPalace(Board &board, int x, int y)
+{
+    TEAM team = board.teamOn(x, y);
+    if (team == RED)
+    {
+        return x >= 3 && x <= 5 && y >= 7 && y <= 9;
+    }
+    else if (team == BLACK)
+    {
+        return x >= 3 && x <= 5 && y >= 0 && y <= 2;
+    }
+}
+
 /// @brief 是否被将军
 /// @param board
 /// @return
 bool inCheck(Board &board, TEAM judgeTeam)
 {
-    Piece king = judgeTeam == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
-    int x = king.x;
-    int y = king.y;
-    int team = king.team;
+    const Piece &king = judgeTeam == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
+    const int &x = king.x;
+    const int &y = king.y;
+    const TEAM &team = king.team;
 
-    // 判断敌方的兵是否在附近
-    bool c1 = abs(board.pieceidOn(x + 1, y)) == R_PAWN;
-    bool c2 = abs(board.pieceidOn(x - 1, y)) == R_PAWN;
-    bool c3 = abs(board.pieceidOn(x, (team == RED ? y - 1 : y + 1))) == R_PAWN;
-    if (c1 || c2 || c3)
+    // 兵
+    const PIECEID ENEMY_PAWN = R_PAWN * -team;
+    if (board.pieceidOn(x + 1, y) == ENEMY_PAWN)
+    {
+        return true;
+    }
+    if (board.pieceidOn(x - 1, y) == ENEMY_PAWN)
+    {
+        return true;
+    }
+    if (board.pieceidOn(x, (team == RED ? y - 1 : y + 1)) == ENEMY_PAWN)
     {
         return true;
     }
 
-    // 判断敌方的马是否在附近
-    PIECEID piece1 = 0;
-    PIECEID piece2 = 0;
-    PIECEID piece3 = 0;
-    PIECEID piece4 = 0;
-    PIECEID piece5 = 0;
-    PIECEID piece6 = 0;
-    PIECEID piece7 = 0;
-    PIECEID piece8 = 0;
-    if (board.pieceidOn(x + 1, y) != 0)
+    // 马
+    const PIECEID ENEMY_KNIGHT = R_KNIGHT * -team;
+    if (board.pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
     {
-        piece1 = board.pieceidOn(x + 2, y + 1);
-        piece2 = board.pieceidOn(x + 2, y - 1);
+        if (board.pieceidOn(x + 2, y + 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (board.pieceidOn(x + 1, y + 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
     }
-    if (board.pieceidOn(x - 1, y) != 0)
+    if (board.pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
     {
-        piece3 = board.pieceidOn(x - 2, y + 1);
-        piece4 = board.pieceidOn(x - 2, y - 1);
+        if (board.pieceidOn(x - 2, y + 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (board.pieceidOn(x - 1, y + 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
     }
-    if (board.pieceidOn(x, y + 1) != 0)
+    if (board.pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
     {
-        piece5 = board.pieceidOn(x + 1, y + 2);
-        piece6 = board.pieceidOn(x - 1, y + 2);
+        if (board.pieceidOn(x + 2, y - 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (board.pieceidOn(x + 1, y - 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
     }
-    if (board.pieceidOn(x, y - 1) != 0)
+    if (board.pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
     {
-        piece7 = board.pieceidOn(x + 1, y - 2);
-        piece8 = board.pieceidOn(x - 1, y - 2);
+        if (board.pieceidOn(x - 2, y - 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (board.pieceidOn(x - 1, y - 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
     }
-    bool c4 = abs(piece1) == R_KNIGHT && (judgeTeam > 0 ? (piece1 < 0) : (piece1 > 0));
-    bool c5 = abs(piece2) == R_KNIGHT && (judgeTeam > 0 ? (piece2 < 0) : (piece2 > 0));
-    bool c6 = abs(piece3) == R_KNIGHT && (judgeTeam > 0 ? (piece3 < 0) : (piece3 > 0));
-    bool c7 = abs(piece4) == R_KNIGHT && (judgeTeam > 0 ? (piece4 < 0) : (piece4 > 0));
-    bool c8 = abs(piece5) == R_KNIGHT && (judgeTeam > 0 ? (piece5 < 0) : (piece5 > 0));
-    bool c9 = abs(piece6) == R_KNIGHT && (judgeTeam > 0 ? (piece6 < 0) : (piece6 > 0));
-    bool c10 = abs(piece7) == R_KNIGHT && (judgeTeam > 0 ? (piece7 < 0) : (piece8 > 0));
-    bool c11 = abs(piece8) == R_KNIGHT && (judgeTeam > 0 ? (piece8 < 0) : (piece8 > 0));
 
-    // 判断是否被将军
-    if (c4 || c5 || c6 || c7 || c8 || c9 || c10 || c11)
-    {
-        return true;
-    }
+    // 将、车、炮
+    const PIECEID ENEMY_ROOK = R_ROOK * -team;
+    const PIECEID ENEMY_CANNON = R_CANNON * -team;
+    const PIECEID ENEMY_KING = R_KING * -team;
 
-    // 白脸将、车、炮
-    // 横向着法
     BITLINE bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
-    if ((abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[1] - 1, y)) == R_KING) &&
-        board.teamOn(regionY[1] - 1, y) != team)
+    if (board.pieceidOn(regionY[1] - 1, y) == ENEMY_ROOK)
+    {
         return true;
-    if ((abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK || abs(board.pieceidOn(regionY[2] + 1, y)) == R_KING) &&
-        board.teamOn(regionY[2] + 1, y) != team)
+    }
+    if (board.pieceidOn(regionY[2] + 1, y) == ENEMY_ROOK)
+    {
         return true;
-    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && board.teamOn(regionY[0], y) != team)
+    }
+    if (board.pieceidOn(regionY[0], y) == ENEMY_CANNON)
+    {
         return true;
-    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && board.teamOn(regionY[3], y) != team)
+    }
+    if (board.pieceidOn(regionY[3], y) == ENEMY_CANNON)
+    {
         return true;
+    }
 
-    // 纵向着法
     BITLINE bitlineX = board.getBitLineX(x);
     REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
-    if ((abs(board.pieceidOn(x, regionX[1] - 1)) == R_ROOK || abs(board.pieceidOn(x, regionX[1] - 1)) == R_KING) &&
-        board.teamOn(x, regionX[1] - 1) != team)
+    const PIECEID &p1 = board.pieceidOn(x, regionX[1] - 1);
+    if (p1 == ENEMY_ROOK || p1 == ENEMY_KING)
+    {
         return true;
-    if ((abs(board.pieceidOn(x, regionX[2] + 1)) == R_ROOK || abs(board.pieceidOn(x, regionX[2] + 1)) == R_KING) &&
-        board.teamOn(x, regionX[2] + 1) != team)
+    }
+    const PIECEID &p2 = board.pieceidOn(x, regionX[2] + 1);
+    if (p2 == ENEMY_ROOK || p2 == ENEMY_KING)
+    {
         return true;
-    if (abs(board.pieceidOn(x, regionX[0])) == R_CANNON && board.teamOn(x, regionX[0]) != team)
+    }
+    if (board.pieceidOn(x, regionX[0]) == ENEMY_CANNON)
+    {
         return true;
-    if (abs(board.pieceidOn(x, regionX[3])) == R_CANNON && board.teamOn(x, regionX[3]) != team)
+    }
+    if (board.pieceidOn(x, regionX[3]) == ENEMY_CANNON)
+    {
         return true;
+    }
 
     return false;
 }
@@ -103,124 +167,179 @@ bool inCheck(Board &board, TEAM judgeTeam)
 /// @return
 bool hasProtector(Board &board, int x, int y)
 {
-    TEAM team = -board.teamOn(x, y);
+    const Piece &piece = board.piecePosition(x, y);
+    const TEAM &team = piece.team;
 
-    // 兵、将
-    if ((abs(board.pieceidOn(x + 1, y)) == R_PAWN || abs(board.pieceidOn(x + 1, y) == R_KING)) &&
-        board.teamOn(x + 1, y) != team)
+    // 兵
+    const PIECEID MY_PAWN = R_PAWN * team;
+    if (isRivercrossedPawn(board, x + 1, y))
+    {
         return true;
-    if ((abs(board.pieceidOn(x - 1, y)) == R_PAWN || abs(board.pieceidOn(x - 1, y) == R_KING)) &&
-        board.teamOn(x - 1, y) != team)
+    }
+    if (isRivercrossedPawn(board, x - 1, y))
+    {
         return true;
-    if (abs(board.pieceidOn(x, (team == RED) ? y - 1 : y + 1)) == R_PAWN &&
-        board.teamOn(x, (team == RED) ? y - 1 : y + 1) != team)
+    }
+    if (board.pieceidOn(x, (team == RED ? y - 1 : y + 1)) == MY_PAWN)
+    {
         return true;
-    if (abs(board.pieceidOn(x, y + 1)) == R_KING && board.teamOn(x, y + 1) != team)
-        return true;
-    if (abs(board.pieceidOn(x, y - 1)) == R_KING && board.teamOn(x, y - 1) != team)
-        return true;
+    }
 
     // 马
-    if (board.pieceidOn(x + 1, y) == 0)
+    const PIECEID MY_KNIGHT = R_KNIGHT * team;
+    if (board.pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
     {
-        if (abs(board.pieceidOn(x + 2, y + 1)) == R_KNIGHT && board.teamOn(x + 2, y + 1) != team)
+        if (board.pieceidOn(x + 2, y + 1) == MY_KNIGHT)
+        {
             return true;
-        if (abs(board.pieceidOn(x + 2, y - 1)) == R_KNIGHT && board.teamOn(x + 2, y - 1) != team)
+        }
+        if (board.pieceidOn(x + 1, y + 2) == MY_KNIGHT)
+        {
             return true;
+        }
     }
-    if (board.pieceidOn(x - 1, y) == 0)
+    if (board.pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
     {
-        if (abs(board.pieceidOn(x - 2, y + 1)) == R_KNIGHT && board.teamOn(x - 2, y + 1) != team)
+        if (board.pieceidOn(x - 2, y + 1) == MY_KNIGHT)
+        {
             return true;
-        if (abs(board.pieceidOn(x - 2, y - 1)) == R_KNIGHT && board.teamOn(x - 2, y - 1) != team)
+        }
+        if (board.pieceidOn(x - 1, y + 2) == MY_KNIGHT)
+        {
             return true;
+        }
     }
-    if (board.pieceidOn(x, y + 1) == 0)
+    if (board.pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
     {
-        if (abs(board.pieceidOn(x + 1, y + 2)) == R_KNIGHT && board.teamOn(x + 1, y + 2) != team)
+        if (board.pieceidOn(x + 2, y - 1) == MY_KNIGHT)
+        {
             return true;
-        if (abs(board.pieceidOn(x - 1, y + 2)) == R_KNIGHT && board.teamOn(x - 1, y + 2) != team)
+        }
+        if (board.pieceidOn(x + 1, y - 2) == MY_KNIGHT)
+        {
             return true;
+        }
     }
-    if (board.pieceidOn(x, y - 1) == 0)
+    if (board.pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
     {
-        if (abs(board.pieceidOn(x + 1, y - 2)) == R_KNIGHT && board.teamOn(x + 1, y - 2) != team)
+        if (board.pieceidOn(x - 2, y - 1) == MY_KNIGHT)
+        {
             return true;
-        if (abs(board.pieceidOn(x - 1, y - 2)) == R_KNIGHT && board.teamOn(x - 1, y - 2) != team)
+        }
+        if (board.pieceidOn(x - 1, y - 2) == MY_KNIGHT)
+        {
             return true;
-    }
-
-    // 士、象
-    if (board.pieceidOn(x + 1, y + 1) == 0)
-    {
-        if (abs(board.pieceidOn(x + 2, y + 2)) == R_BISHOP && board.teamOn(x + 2, y + 2) != team)
-            return true;
-    }
-    if (board.pieceidOn(x - 1, y + 1) == 0)
-    {
-        if (abs(board.pieceidOn(x - 2, y + 2)) == R_BISHOP && board.teamOn(x - 2, y + 2) != team)
-            return true;
-    }
-    if (board.pieceidOn(x + 1, y - 1) == 0)
-    {
-        if (abs(board.pieceidOn(x + 2, y - 2)) == R_BISHOP && board.teamOn(x + 2, y - 2) != team)
-            return true;
-    }
-    if (board.pieceidOn(x - 1, y - 1) == 0)
-    {
-        if (abs(board.pieceidOn(x - 2, y - 2)) == R_BISHOP && board.teamOn(x - 2, y - 2) != team)
-            return true;
+        }
     }
 
-    if (abs(board.pieceidOn(x + 1, y + 1)) == R_GUARD && board.teamOn(x + 1, y + 1) != team)
-        return true;
-    if (abs(board.pieceidOn(x - 1, y + 1)) == R_GUARD && board.teamOn(x - 1, y + 1) != team)
-        return true;
-    if (abs(board.pieceidOn(x + 1, y - 1)) == R_GUARD && board.teamOn(x + 1, y - 1) != team)
-        return true;
-    if (abs(board.pieceidOn(x - 1, y - 1)) == R_GUARD && board.teamOn(x - 1, y - 1) != team)
-        return true;
+    // 士、象、将
+    const PIECEID MY_BISHOP = R_BISHOP * team;
+    const PIECEID MY_GUARD = R_GUARD * team;
+    const PIECEID MY_KING = R_KING * team;
+    if (hasCrossedRiver(board, x, y) == false)
+    {
+        if (board.pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
+        {
+            if (board.pieceidOn(x + 2, y + 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (board.pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
+        {
+            if (board.pieceidOn(x - 2, y + 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (board.pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
+        {
+            if (board.pieceidOn(x + 2, y - 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (board.pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
+        {
+            if (board.pieceidOn(x - 2, y - 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (isInPalace(board, x, y))
+        {
+            if (board.pieceidOn(x + 1, y) == MY_GUARD)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x - 1, y) == MY_GUARD)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x, y + 1) == MY_GUARD)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x, y - 1) == MY_GUARD)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x + 1, y) == MY_KING)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x - 1, y) == MY_KING)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x, y + 1) == MY_KING)
+            {
+                return true;
+            }
+            if (board.pieceidOn(x, y - 1) == MY_KING)
+            {
+                return true;
+            }
+        }
+    }
 
     // 车、炮
+    const PIECEID MY_ROOK = R_ROOK * team;
+    const PIECEID MY_CANNON = R_CANNON * team;
+
     BITLINE bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
-    if (abs(board.pieceidOn(regionY[1] - 1, y)) == R_ROOK && board.teamOn(regionY[1] - 1, y) != team)
-        return true;
-    if (abs(board.pieceidOn(regionY[2] + 1, y)) == R_ROOK && board.teamOn(regionY[2] + 1, y) != team)
-        return true;
-    if (abs(board.pieceidOn(regionY[0], y)) == R_CANNON && regionY[0] != x && board.teamOn(regionY[0], y) != team)
-        return true;
-    if (abs(board.pieceidOn(regionY[3], y)) == R_CANNON && regionY[3] != x && board.teamOn(regionY[3], y) != team)
-        return true;
-
-    // 纵向着法
-    BITLINE bitlineX = board.getBitLineX(x);
-    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
-    if (abs(board.pieceidOn(x, regionX[1] - 1)) == R_ROOK && board.teamOn(x, regionX[1] - 1) != team)
-        return true;
-    if (abs(board.pieceidOn(x, regionX[2] + 1)) == R_ROOK && board.teamOn(x, regionX[2] + 1) != team)
-        return true;
-    if (abs(board.pieceidOn(x, regionX[0])) == R_CANNON && regionX[0] != y && board.teamOn(x, regionX[0]) != team)
-        return true;
-    if (abs(board.pieceidOn(x, regionX[3])) == R_CANNON && regionX[3] != y && board.teamOn(x, regionX[3]) != team)
-        return true;
-
-    return false;
-}
-
-/// @brief 判断一个兵是否过河
-/// @param board
-/// @param x
-/// @param y
-/// @return
-bool isRiveredPawn(Board &board, int x, int y)
-{
-    PIECEID pieceid = board.pieceidOn(x, y);
-    if (pieceid == R_PAWN && y >= 5 && y <= 9)
+    if (board.pieceidOn(regionY[1] - 1, y) == MY_ROOK)
     {
         return true;
     }
-    if (pieceid == B_PAWN && y >= 0 && y <= 4)
+    if (board.pieceidOn(regionY[2] + 1, y) == MY_ROOK)
+    {
+        return true;
+    }
+    if (board.pieceidOn(regionY[0], y) == MY_CANNON)
+    {
+        return true;
+    }
+    if (board.pieceidOn(regionY[3], y) == MY_CANNON)
+    {
+        return true;
+    }
+    BITLINE bitlineX = board.getBitLineX(x);
+    REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
+    if (board.pieceidOn(x, regionX[1] - 1) == MY_ROOK)
+    {
+        return true;
+    }
+    if (board.pieceidOn(x, regionX[2] + 1) == MY_ROOK)
+    {
+        return true;
+    }
+    if (board.pieceidOn(x, regionX[0]) == MY_CANNON)
+    {
+        return true;
+    }
+    if (board.pieceidOn(x, regionX[3]) == MY_CANNON)
     {
         return true;
     }
