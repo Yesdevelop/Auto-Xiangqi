@@ -44,6 +44,7 @@ def fen_to_matrix(fen: str) -> np.ndarray:
     rows = fen.split('/')
     if len(rows) != 10:
         raise ValueError("FEN 棋盘部分应该由 10 行组成，用 '/' 分隔")
+    rows[-1] = rows[-1].split(' ')[0]
 
     for y in range(10):
         row_str = rows[y]
@@ -118,9 +119,27 @@ class Situation:
     def flip_updown(self):
         # 上下翻转棋盘 -> y轴反转
         self.matrix = self.matrix[:, :, ::-1]  # 只翻转 y轴 (axis=2)
-        # 也要更新 fen（可选，这里暂不实现 fen 同步更新）
+        return self.matrix
 
     # 左右旋转
     def flip_leftright(self):
         # 左右翻转棋盘 -> x轴反转
         self.matrix = self.matrix[:, ::-1, :]  # 只翻转 x轴 (axis=1)
+        return self.matrix
+
+if __name__ == "__main__":
+    # 测试 fen 转矩阵
+    fen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
+    situation = Situation(fen)
+    print(situation)
+    print("棋盘矩阵：")
+    print(situation.matrix)
+
+    # 测试翻转
+    situation.flip_updown()
+    print("上下翻转后的矩阵：")
+    print(situation.matrix)
+
+    situation.flip_leftright()
+    print("左右翻转后的矩阵：")
+    print(situation.matrix)

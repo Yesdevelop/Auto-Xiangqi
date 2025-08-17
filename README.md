@@ -66,7 +66,7 @@ json 内容结构如下：
 ```
 [
     {
-        fenCode(string),
+        fen(string),
         history: [...(int)],
         data: [
             {
