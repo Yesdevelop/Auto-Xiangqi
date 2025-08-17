@@ -1,24 +1,11 @@
 # base.py
 import numpy as np
 
-# 棋子编码
+# 棋子编码（保持不变）
 EMPTY = 0
-
-R_KING = 1
-R_GUARD = 2
-R_BISHOP = 3
-R_KNIGHT = 4
-R_ROOK = 5
-R_CANNON = 6
-R_PAWN = 7
-
-B_KING = -1
-B_GUARD = -2
-B_BISHOP = -3
-B_KNIGHT = -4
-B_ROOK = -5
-B_CANNON = -6
-B_PAWN = -7
+R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN = 1, 2, 3, 4, 5, 6, 7
+B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN = -1, -2, -3, -4, -5, -6, -7
+Red, Black = 1, 0
 
 
 def fen_to_matrix(fen: str) -> np.ndarray:
@@ -28,13 +15,12 @@ def fen_to_matrix(fen: str) -> np.ndarray:
         'k': B_KING, 'a': B_GUARD, 'b': B_BISHOP, 'n': B_KNIGHT, 'r': B_ROOK, 'c': B_CANNON, 'p': B_PAWN,
     }
 
-    board = np.zeros((10, 9), dtype=int)  # 10行（y），9列（x）
+    board = np.zeros((10, 9), dtype=int)
     rows = fen.split('/')
     if len(rows) != 10:
         raise ValueError("FEN 棋盘部分应为10行，用'/'分隔")
 
-    # 去除最后的空格和多余信息（如 ' w - - 0 1'）
-    rows[-1] = rows[-1].strip().split()[0]
+    rows[-1] = rows[-1].strip().split()[0]  # 去除元信息
 
     for y in range(10):
         x = 0
@@ -50,16 +36,13 @@ def fen_to_matrix(fen: str) -> np.ndarray:
             else:
                 raise ValueError(f"未知字符: {c}")
 
-    # 构建 7 通道输出：每个通道对应一种棋子类型
-    output = np.zeros((7, 9, 10), dtype=int)  # (通道, x, y)
-
+    output = np.zeros((7, 9, 10), dtype=int)
     for y in range(10):
         for x in range(9):
             piece = board[y, x]
             if piece == EMPTY:
                 continue
-            abs_p = abs(piece)
-            channel = abs_p - 1  # K=0, A=1, ..., P=6
+            channel = abs(piece) - 1
             sign = 1 if piece > 0 else -1
             output[channel, x, y] = sign
 
@@ -67,20 +50,27 @@ def fen_to_matrix(fen: str) -> np.ndarray:
 
 
 class Situation:
-    """棋局状态类，支持翻转增强"""
+    """棋局状态类，支持翻转增强 → 返回新对象"""
     def __init__(self, fen: str):
         self.fen = fen
+        self.actor_flag = Red if "w" in fen else Black
         self.matrix = fen_to_matrix(fen)
 
     def __str__(self):
-        return f"Situation(fen='{self.fen[:30]}...', matrix_shape={self.matrix.shape})"
+        return f"Situation(actor_flag={self.actor_flag}, matrix_shape={self.matrix.shape})"
 
-    def flip_leftright(self):
-        """左右翻转：x轴反转（in-place）"""
-        self.matrix = self.matrix[:, ::-1, :]
-        return self
+    def flip_left_and_right(self):
+        """左右翻转：返回新对象"""
+        new = object.__new__(Situation)
+        new.fen = self.fen
+        new.actor_flag = self.actor_flag
+        new.matrix = self.matrix[:, ::-1, :].copy()  # x轴反转
+        return new
 
-    def flip_updown(self):
-        """上下翻转：y轴反转（in-place）"""
-        self.matrix = self.matrix[:, :, ::-1]
-        return self
+    def flip_up_and_down(self):
+        """上下翻转 + 颜色反转 + 切换走子方：返回新对象"""
+        new = object.__new__(Situation)
+        new.fen = self.fen
+        new.actor_flag = 1 - self.actor_flag  # 轮到对方走
+        new.matrix = (-self.matrix)[:, :, ::-1].copy()  # 颜色反转 + y轴反转
+        return new
