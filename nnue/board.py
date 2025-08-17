@@ -7,7 +7,6 @@ R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN = 1, 2, 3, 4, 5, 6
 B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN = -1, -2, -3, -4, -5, -6, -7
 Red, Black = 1, 0
 
-
 def fen_to_matrix(fen: str) -> np.ndarray:
     """将中国象棋 FEN 字符串转换为 7×9×10 的输入张量"""
     PIECE_TO_INT = {
@@ -47,7 +46,6 @@ def fen_to_matrix(fen: str) -> np.ndarray:
             output[channel, x, y] = sign
 
     return output
-
 
 class Situation:
     """棋局状态类，支持翻转增强 → 返回新对象"""
