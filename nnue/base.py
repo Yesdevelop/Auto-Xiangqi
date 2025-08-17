@@ -1,5 +1,7 @@
+# base.py
 import numpy as np
 
+# 棋子编码
 EMPTY = 0
 
 R_KING = 1
@@ -18,128 +20,67 @@ B_ROOK = -5
 B_CANNON = -6
 B_PAWN = -7
 
-# fen转矩阵，7 * 9 * 10
-def fen_to_matrix(fen: str) -> np.ndarray:
-    # 棋盘：10行（y: 0~9，从下到上），9列（x: 0~8，从左到右）
-    PIECE_TO_INT = {
-        'K': R_KING,     # 红帅
-        'A': R_GUARD,    # 红仕
-        'B': R_BISHOP,   # 红相
-        'N': R_KNIGHT,   # 红马
-        'R': R_ROOK,     # 红车
-        'C': R_CANNON,   # 红炮
-        'P': R_PAWN,     # 红兵
 
-        'k': B_KING,     # 黑将
-        'a': B_GUARD,    # 黑仕
-        'b': B_BISHOP,   # 黑相
-        'n': B_KNIGHT,   # 黑马
-        'r': B_ROOK,     # 黑车
-        'c': B_CANNON,   # 黑炮
-        'p': B_PAWN,     # 黑兵
+def fen_to_matrix(fen: str) -> np.ndarray:
+    """将中国象棋 FEN 字符串转换为 7×9×10 的输入张量"""
+    PIECE_TO_INT = {
+        'K': R_KING, 'A': R_GUARD, 'B': R_BISHOP, 'N': R_KNIGHT, 'R': R_ROOK, 'C': R_CANNON, 'P': R_PAWN,
+        'k': B_KING, 'a': B_GUARD, 'b': B_BISHOP, 'n': B_KNIGHT, 'r': B_ROOK, 'c': B_CANNON, 'p': B_PAWN,
     }
 
-    board = np.zeros((10, 9), dtype=int)
-
+    board = np.zeros((10, 9), dtype=int)  # 10行（y），9列（x）
     rows = fen.split('/')
     if len(rows) != 10:
-        raise ValueError("FEN 棋盘部分应该由 10 行组成，用 '/' 分隔")
-    rows[-1] = rows[-1].split(' ')[0]
+        raise ValueError("FEN 棋盘部分应为10行，用'/'分隔")
+
+    # 去除最后的空格和多余信息（如 ' w - - 0 1'）
+    rows[-1] = rows[-1].strip().split()[0]
 
     for y in range(10):
-        row_str = rows[y]
         x = 0
-        for c in row_str:
+        for c in rows[y]:
             if c.isdigit():
-                num_empty = int(c)
-                x += num_empty
-            else:
-                piece_int = PIECE_TO_INT.get(c, EMPTY)
+                x += int(c)
+            elif c in PIECE_TO_INT:
                 if x < 9:
-                    board[y, x] = piece_int
+                    board[y, x] = PIECE_TO_INT[c]
                     x += 1
                 else:
-                    raise ValueError(f"棋盘列溢出：y={y}, x={x}, 棋子={c}")
+                    raise ValueError(f"列溢出：y={y}, x={x}, 棋子={c}")
+            else:
+                raise ValueError(f"未知字符: {c}")
 
-    # 初始化输出矩阵：7个通道（红方棋子类型），每个是 9x10
-    output = np.zeros((7, 9, 10), dtype=int)  # shape: (7, 9, 10)
+    # 构建 7 通道输出：每个通道对应一种棋子类型
+    output = np.zeros((7, 9, 10), dtype=int)  # (通道, x, y)
 
-    for y in range(10):     # 棋盘行 0~9 （从下到上）
-        for x in range(9):  # 棋盘列 0~8 （从左到右）
+    for y in range(10):
+        for x in range(9):
             piece = board[y, x]
             if piece == EMPTY:
                 continue
-            # 判断是哪种棋子，并设置对应通道
-            if piece == R_KING:
-                output[0, x, y] = 1
-            elif piece == R_GUARD:
-                output[1, x, y] = 1
-            elif piece == R_BISHOP:
-                output[2, x, y] = 1
-            elif piece == R_KNIGHT:
-                output[3, x, y] = 1
-            elif piece == R_ROOK:
-                output[4, x, y] = 1
-            elif piece == R_CANNON:
-                output[5, x, y] = 1
-            elif piece == R_PAWN:
-                output[6, x, y] = 1
-            elif piece == B_KING:
-                output[0, x, y] = -1
-            elif piece == B_GUARD:
-                output[1, x, y] = -1
-            elif piece == B_BISHOP:
-                output[2, x, y] = -1
-            elif piece == B_KNIGHT:
-                output[3, x, y] = -1
-            elif piece == B_ROOK:
-                output[4, x, y] = -1
-            elif piece == B_CANNON:
-                output[5, x, y] = -1
-            elif piece == B_PAWN:
-                output[6, x, y] = -1
+            abs_p = abs(piece)
+            channel = abs_p - 1  # K=0, A=1, ..., P=6
+            sign = 1 if piece > 0 else -1
+            output[channel, x, y] = sign
 
     return output
 
-# 局势类
-class Situation:
-    fen = None
-    matrix = None
 
-    # 初始化，初始matrix和fen
+class Situation:
+    """棋局状态类，支持翻转增强"""
     def __init__(self, fen: str):
         self.fen = fen
         self.matrix = fen_to_matrix(fen)
 
-    # 转字符串
     def __str__(self):
         return f"Situation(fen='{self.fen[:30]}...', matrix_shape={self.matrix.shape})"
 
-    # 上下旋转
-    def flip_updown(self):
-        # 上下翻转棋盘 -> y轴反转
-        self.matrix = self.matrix[:, :, ::-1]  # 只翻转 y轴 (axis=2)
-        return self.matrix
-
-    # 左右旋转
     def flip_leftright(self):
-        # 左右翻转棋盘 -> x轴反转
-        self.matrix = self.matrix[:, ::-1, :]  # 只翻转 x轴 (axis=1)
-        return self.matrix
+        """左右翻转：x轴反转（in-place）"""
+        self.matrix = self.matrix[:, ::-1, :]
+        return self
 
-if __name__ == "__main__":
-    # 测试 fen 转矩阵
-    fen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1"
-    situation = Situation(fen)
-    print(situation)
-    print("棋盘矩阵：")
-    print(situation.matrix)
-
-    # 测试翻转
-    situation.flip_updown()
-    print("上下翻转后的矩阵：")
-    print(situation.matrix)
-
-    situation.flip_leftright()
-    print("左右翻转后的矩阵：")
-    print(situation.matrix)
+    def flip_updown(self):
+        """上下翻转：y轴反转（in-place）"""
+        self.matrix = self.matrix[:, :, ::-1]
+        return self
