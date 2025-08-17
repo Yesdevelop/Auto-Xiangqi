@@ -1,4 +1,4 @@
-# base.py
+# board.py
 import numpy as np
 
 # 棋子编码（保持不变）
