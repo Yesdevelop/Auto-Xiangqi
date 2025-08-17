@@ -7,7 +7,7 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 import json
 from model import NNUE
-from base import Situation, Red, Black
+from board import Situation, Red, Black
 
 # 自动选择设备
 public_device = 'cuda' if torch.cuda.is_available() else 'cpu'
