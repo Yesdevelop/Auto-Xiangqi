@@ -1,15 +1,14 @@
 # base.py
 import numpy as np
 
-# 棋子编码（保持不变）
+# 棋子编码
 EMPTY = 0
 R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN = 1, 2, 3, 4, 5, 6, 7
 B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN = -1, -2, -3, -4, -5, -6, -7
 Red, Black = 1, 0
 
-
 def fen_to_matrix(fen: str) -> np.ndarray:
-    """将中国象棋 FEN 字符串转换为 7×9×10 的输入张量"""
+    """将中国象棋 FEN 字符串转换为 7x9x10 的输入张量"""
     PIECE_TO_INT = {
         'K': R_KING, 'A': R_GUARD, 'B': R_BISHOP, 'N': R_KNIGHT, 'R': R_ROOK, 'C': R_CANNON, 'P': R_PAWN,
         'k': B_KING, 'a': B_GUARD, 'b': B_BISHOP, 'n': B_KNIGHT, 'r': B_ROOK, 'c': B_CANNON, 'p': B_PAWN,
@@ -18,7 +17,7 @@ def fen_to_matrix(fen: str) -> np.ndarray:
     board = np.zeros((10, 9), dtype=int)
     rows = fen.split('/')
     if len(rows) != 10:
-        raise ValueError("FEN 棋盘部分应为10行，用'/'分隔")
+        raise ValueError("FEN 棋盘部分应为10行, 用'/'分隔")
 
     rows[-1] = rows[-1].strip().split()[0]  # 去除元信息
 
@@ -47,7 +46,6 @@ def fen_to_matrix(fen: str) -> np.ndarray:
             output[channel, x, y] = sign
 
     return output
-
 
 class Situation:
     """棋局状态类，支持翻转增强 → 返回新对象"""

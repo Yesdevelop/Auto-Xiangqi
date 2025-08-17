@@ -378,3 +378,4 @@ nnue/data/*.json
 **/*.out
 **/pytorch_env
 **/example/
+**/runs

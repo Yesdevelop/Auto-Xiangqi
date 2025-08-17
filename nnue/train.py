@@ -19,7 +19,6 @@ os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
 print(f"TensorBoard 日志将保存到: {log_dir}")
 
-
 def collect_json_files(num=-1):
     """收集 JSON 数据文件"""
     print("正在收集 JSON 文件...")
@@ -39,7 +38,6 @@ def collect_json_files(num=-1):
 
     print(f"找到 {len(files)} 个 JSON 文件")
     return files
-
 
 def analyze_json_files(json_files):
     """解析所有 JSON 文件，提取 (fen, value, actor_flag) 样本"""
@@ -61,7 +59,6 @@ def analyze_json_files(json_files):
             continue
     print(f"共提取 {len(samples)} 个训练样本")
     return samples
-
 
 # train.py 片段：create_dataloader
 def create_dataloader(samples, batch_size=32, clip_value=1000.0):
@@ -100,14 +97,13 @@ def create_dataloader(samples, batch_size=32, clip_value=1000.0):
 
         yield x_batch, y_batch, flags_batch
 
-
 if __name__ == "__main__":
     # 超参数
     hidden_size = 90
     lr = 1e-4
     batch_size = 32
     epochs = 10
-    num_files = 10  # 调试用，-1 表示全部
+    num_files = -1  # 调试用，-1 表示全部
 
     # 构建模型
     model = NNUE(input_size=7*9*10, hidden_size=hidden_size).to(public_device)
