@@ -74,3 +74,15 @@ class Situation:
         new.actor_flag = 1 - self.actor_flag  # 轮到对方走
         new.matrix = (-self.matrix)[:, :, ::-1].copy()  # 颜色反转 + y轴反转
         return new
+
+if __name__ == "__main__":
+    test_fen = 'rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0'
+    s1 = Situation(fen=test_fen)
+    print(s1.matrix[0],s1.actor_flag)
+    print()
+    s2 = s1.flip_left_and_right()
+    print(s2.matrix[0],s2.actor_flag)
+    print()
+    s3 = s1.flip_up_and_down()
+    print(s3.matrix[0],s3.actor_flag)
+    print()
