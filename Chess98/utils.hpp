@@ -40,9 +40,6 @@ bool isInPalace(Board &board, int x, int y)
     }
 }
 
-/// @brief 是否被将军
-/// @param board
-/// @return
 bool inCheck(Board &board, TEAM judgeTeam)
 {
     const Piece &king = judgeTeam == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
@@ -160,11 +157,6 @@ bool inCheck(Board &board, TEAM judgeTeam)
     return false;
 }
 
-/// @brief 是否有保护
-/// @param board
-/// @param x
-/// @param y
-/// @return
 bool hasProtector(Board &board, int x, int y)
 {
     const Piece &piece = board.piecePosition(x, y);
@@ -346,121 +338,6 @@ bool hasProtector(Board &board, int x, int y)
     return false;
 }
 
-/// @brief fen转pieceidmap
-/// @param fenCode
-/// @return
-PIECEID_MAP fenToPieceidMap(std::string fenCode)
-{
-    PIECEID_MAP pieceidMap = PIECEID_MAP{};
-    int colNum = 9;
-    int rowNum = 0;
-    std::map<char, PIECEID> pairs{
-        {'R', R_ROOK},
-        {'N', R_KNIGHT},
-        {'H', R_KNIGHT},
-        {'B', R_BISHOP},
-        {'E', R_BISHOP},
-        {'G', R_GUARD},
-        {'A', R_GUARD},
-        {'K', R_KING},
-        {'C', R_CANNON},
-        {'P', R_PAWN},
-        {'r', B_ROOK},
-        {'n', B_KNIGHT},
-        {'h', B_KNIGHT},
-        {'b', B_BISHOP},
-        {'e', B_BISHOP},
-        {'g', B_GUARD},
-        {'a', B_GUARD},
-        {'k', B_KING},
-        {'c', B_CANNON},
-        {'p', B_PAWN}};
-    for (int i = 0; i < fenCode.size(); i++)
-    {
-        if (fenCode[i] >= '1' && fenCode[i] <= '9')
-        {
-            rowNum += fenCode[i] - '0';
-            continue;
-        }
-        else if (fenCode[i] == '/')
-        {
-            rowNum = 0;
-            colNum--;
-            continue;
-        }
-        else if (fenCode[i] == ' ')
-        {
-            break;
-        }
-        else
-        {
-            pieceidMap[rowNum][colNum] = pairs.at(fenCode[i]);
-        }
-        rowNum++;
-    }
-
-    return pieceidMap;
-}
-
-/// @brief board转fen串
-/// @param board
-/// @return
-std::string boardToFen(Board &board)
-{
-    std::string result = "";
-    int spaceCount = 0;
-    std::map<PIECEID, char> pairs{
-        {R_KING, 'K'},
-        {R_GUARD, 'A'},
-        {R_BISHOP, 'B'},
-        {R_KNIGHT, 'N'},
-        {R_ROOK, 'R'},
-        {R_CANNON, 'C'},
-        {R_PAWN, 'P'},
-        {B_KING, 'k'},
-        {B_GUARD, 'a'},
-        {B_BISHOP, 'b'},
-        {B_KNIGHT, 'n'},
-        {B_ROOK, 'r'},
-        {B_CANNON, 'c'},
-        {B_PAWN, 'p'}};
-    for (int x = 9; x >= 0; x--)
-    {
-        for (int y = 0; y < 9; y++)
-        {
-            PIECEID pieceid = board.pieceidOn(y, x);
-            if (pieceid == EMPTY_PIECEID)
-            {
-                spaceCount++;
-            }
-            else
-            {
-                if (spaceCount > 0)
-                {
-                    result += std::to_string(spaceCount);
-                    spaceCount = 0;
-                }
-                result += pairs.at(pieceid);
-            }
-        }
-        if (spaceCount > 0)
-        {
-            result += std::to_string(spaceCount);
-            spaceCount = 0;
-        }
-        result += "/";
-    }
-    result.pop_back();
-    result += board.team == RED ? " w" : " b";
-    result += " - - 0 1";
-
-    return result;
-}
-
-/// @brief 检查一个着法在当前局面是否合法
-/// @param board
-/// @param move
-/// @return
 bool isValidMoveInSituation(Board &board, Move move)
 {
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
@@ -536,4 +413,109 @@ bool isValidMoveInSituation(Board &board, Move move)
     board.undoMove();
 
     return !skip;
+}
+
+PIECEID_MAP fenToPieceidMap(std::string fenCode)
+{
+    PIECEID_MAP pieceidMap = PIECEID_MAP{};
+    int colNum = 9;
+    int rowNum = 0;
+    std::map<char, PIECEID> pairs{
+        {'R', R_ROOK},
+        {'N', R_KNIGHT},
+        {'H', R_KNIGHT},
+        {'B', R_BISHOP},
+        {'E', R_BISHOP},
+        {'G', R_GUARD},
+        {'A', R_GUARD},
+        {'K', R_KING},
+        {'C', R_CANNON},
+        {'P', R_PAWN},
+        {'r', B_ROOK},
+        {'n', B_KNIGHT},
+        {'h', B_KNIGHT},
+        {'b', B_BISHOP},
+        {'e', B_BISHOP},
+        {'g', B_GUARD},
+        {'a', B_GUARD},
+        {'k', B_KING},
+        {'c', B_CANNON},
+        {'p', B_PAWN}};
+    for (int i = 0; i < fenCode.size(); i++)
+    {
+        if (fenCode[i] >= '1' && fenCode[i] <= '9')
+        {
+            rowNum += fenCode[i] - '0';
+            continue;
+        }
+        else if (fenCode[i] == '/')
+        {
+            rowNum = 0;
+            colNum--;
+            continue;
+        }
+        else if (fenCode[i] == ' ')
+        {
+            break;
+        }
+        else
+        {
+            pieceidMap[rowNum][colNum] = pairs.at(fenCode[i]);
+        }
+        rowNum++;
+    }
+
+    return pieceidMap;
+}
+
+std::string boardToFen(Board &board)
+{
+    std::string result = "";
+    int spaceCount = 0;
+    std::map<PIECEID, char> pairs{
+        {R_KING, 'K'},
+        {R_GUARD, 'A'},
+        {R_BISHOP, 'B'},
+        {R_KNIGHT, 'N'},
+        {R_ROOK, 'R'},
+        {R_CANNON, 'C'},
+        {R_PAWN, 'P'},
+        {B_KING, 'k'},
+        {B_GUARD, 'a'},
+        {B_BISHOP, 'b'},
+        {B_KNIGHT, 'n'},
+        {B_ROOK, 'r'},
+        {B_CANNON, 'c'},
+        {B_PAWN, 'p'}};
+    for (int x = 9; x >= 0; x--)
+    {
+        for (int y = 0; y < 9; y++)
+        {
+            PIECEID pieceid = board.pieceidOn(y, x);
+            if (pieceid == EMPTY_PIECEID)
+            {
+                spaceCount++;
+            }
+            else
+            {
+                if (spaceCount > 0)
+                {
+                    result += std::to_string(spaceCount);
+                    spaceCount = 0;
+                }
+                result += pairs.at(pieceid);
+            }
+        }
+        if (spaceCount > 0)
+        {
+            result += std::to_string(spaceCount);
+            spaceCount = 0;
+        }
+        result += "/";
+    }
+    result.pop_back();
+    result += board.team == RED ? " w" : " b";
+    result += " - - 0 1";
+
+    return result;
 }
