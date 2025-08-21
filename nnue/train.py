@@ -48,11 +48,12 @@ def analyze_json_files(json_files):
             with open(file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             for ply in data:
-                fen = ply['fen']
-                current_flag = Red if 'w' in fen else Black  # 红=1, 黑=0
                 for step in ply.get('data', []):
                     for move in step.get('data', []):
                         vl = float(move['vl'])
+                        fen = move['fen_after_move']
+                        # 这里我觉得应该反过来哈，因为步进之后改变了走子方
+                        current_flag = Black if 'w' in fen else Red  # 红=1, 黑=0
                         samples.append((fen, vl, current_flag))
         except Exception as e:
             print(f"跳过文件 {file}: {e}")
@@ -85,7 +86,7 @@ def create_dataloader(samples, batch_size=32, clip_value=1000.0):
             ]
 
             for sit in aug_situations:
-                x = torch.tensor(sit.matrix, dtype=torch.float32).view(-1)
+                x = torch.tensor(sit.matrix.copy(), dtype=torch.float32).view(-1)
                 batch_x.append(x)
                 batch_y.append(norm_vl)           # 已裁剪归一化
                 batch_flags.append(sit.actor_flag)

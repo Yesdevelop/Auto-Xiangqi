@@ -74,6 +74,7 @@ json 内容结构如下：
                 data: [
                     {
                         moveid(int),
+                        fen_after_move(string),
                         vl(int)
                     },
                     ...

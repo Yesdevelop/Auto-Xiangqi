@@ -389,6 +389,9 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
         {
             str += "{";
             str += "\"moveid\":" + std::to_string(result.move.id);
+            board.doMove(result.move);
+            str += ",\"fen_after_move\":\"" + boardToFen(board) + "\"";
+            board.undoMove();
             str += ",\"vl\":" + std::to_string(result.val);
             str += "},";
         }
