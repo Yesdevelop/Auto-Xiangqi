@@ -12,6 +12,7 @@ bool isRivercrossedPawn(Board &board, int x, int y)
     {
         return y >= 0 && y <= 4;
     }
+    return false;
 }
 
 bool hasCrossedRiver(Board &board, int x, int y)
@@ -25,6 +26,7 @@ bool hasCrossedRiver(Board &board, int x, int y)
     {
         return y >= 0 && y <= 4;
     }
+    return false;
 }
 
 bool isInPalace(Board &board, int x, int y)
@@ -38,6 +40,7 @@ bool isInPalace(Board &board, int x, int y)
     {
         return x >= 3 && x <= 5 && y >= 0 && y <= 2;
     }
+    return false;
 }
 
 bool inCheck(Board &board, TEAM judgeTeam)
