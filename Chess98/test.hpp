@@ -84,7 +84,7 @@ void testGenerateNNUE()
     }
     catch (std::exception err)
     {
-        std::cout << "A fucking error occured" << std::endl;
+        std::cout << "An unknown error occured" << std::endl;
         std::cerr << err.what() << std::endl;
         system_("pause");
     }
