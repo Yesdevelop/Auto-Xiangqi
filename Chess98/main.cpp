@@ -9,7 +9,10 @@ int main()
 #else
     std::cout << "You're running in NNUE file generate mode. And it could be disabled by remove 'define NNUE' in nnuefile.hpp!\n"
               << std::endl;
-    testGenerateNNUE();
+    while (true)
+    {
+        testGenerateNNUE();
+    }
 #endif
 
     return 0;

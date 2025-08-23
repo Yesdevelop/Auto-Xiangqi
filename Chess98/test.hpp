@@ -42,6 +42,7 @@ void testByUI()
 #ifdef NNUE
 void testGenerateNNUE()
 {
+    NNUE_filename = getUniqueRandomFilename();
     int randomDepth = NNUE_RANDOM_MOVE_COUNT;
     int maxDepth = NNUE_DEPTH;
 #ifdef _WIN32
@@ -54,40 +55,26 @@ void testGenerateNNUE()
     Search s{fenToPieceidMap(fenCode), RED};
     int count = 0;
 
-    try
+    // 前几步随机
+    for (int i = 0; i < randomDepth; i++)
     {
-        // 前几步随机
-        for (int i = 0; i < randomDepth; i++)
-        {
-            count++;
-            std::cout << count << "---------------" << std::endl;
-            s.searchGenereateNNUE(maxDepth, 3);
-            Move m = getRandomFromVector<Move>(s.rootMoves);
-            s.board.doMove(m);
-            saveNNUE();
-        }
-        while (s.board.historyMoves.size() < 140 && NNUE_appexit == false)
-        {
-            count++;
-            std::cout << count << "---------------" << std::endl;
-            Result a = s.searchGenereateNNUE(maxDepth, 3);
-            if (a.move.id != -1)
-            {
-                s.board.doMove(a.move);
-            }
-            saveNNUE();
-        }
+        count++;
+        std::cout << count << "---------------" << std::endl;
+        s.searchGenereateNNUE(maxDepth, 3);
+        Move m = getRandomFromVector<Move>(s.rootMoves);
+        s.board.doMove(m);
+        saveNNUE();
     }
-    catch (std::exception err)
+    while (s.board.historyMoves.size() < MAX_MOVES && NNUE_appexit == false)
     {
-        std::cout << "A fucking error occured" << std::endl;
-        std::cerr << err.what() << std::endl;
-        system_("pause");
+        count++;
+        std::cout << count << "---------------" << std::endl;
+        Result a = s.searchGenereateNNUE(maxDepth, 3);
+        if (a.move.id != -1)
+        {
+            s.board.doMove(a.move);
+        }
+        saveNNUE();
     }
-#ifdef _WIN32
-    system_("start /min " + exePath);
-#elif __unix__
-    system_("nohup " + exePath + " &");
-#endif
 }
 #endif

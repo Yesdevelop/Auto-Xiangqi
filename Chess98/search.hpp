@@ -366,9 +366,10 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     {
         historyStr.pop_back();
     }
-    std::string str = "{\"fen\":\"" + boardToFen(board) + "\",\"history\":[" + historyStr + "],\"data\":[";
+    std::string str = "";
     for (int depth = 1; depth <= maxDepth; depth++)
     {
+        str = "{\"fen\":\"" + boardToFen(board) + "\",\"history\":[" + historyStr + "],\"data\":[";
         bestNode = searchRoot(depth);
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -401,13 +402,13 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
         }
         str += "]},";
 
+        this->log_rootresults = {};
+
         // timeout break
         if (duration >= maxTime * 1000 / 3)
         {
             break;
         }
-
-        this->log_rootresults = {};
     }
 
     str.pop_back();

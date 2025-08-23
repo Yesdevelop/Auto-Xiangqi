@@ -6,11 +6,12 @@
 #include "base.hpp"
 
 // 这里放配置
-const std::string NNUE_OUTPUT_DIR = "E:/Projects_chess/Chess98/nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
-const int NNUE_DEPTH = 7;                            // 最大搜索深度
-const int NNUE_RANDOM_MOVE_COUNT = 5;                // 开局随机走法次数
+const std::string NNUE_OUTPUT_DIR = "F:/Projects/Chess98/nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
+const int NNUE_DEPTH = 6;                                             // 最大搜索深度
+const int NNUE_RANDOM_MOVE_COUNT = 5;
+const int MAX_MOVES = 10;
 #ifdef _WIN32
-const std::string NNUE_RESTART_EXE_FILE = "E:/Projects_chess/Chess98/x64/Release/Chess98.exe"; // 跑完一局继续跑的exe文件路径
+const std::string NNUE_RESTART_EXE_FILE = "F:/Projects/Chess98/x64/Release/Chess98.exe"; // 跑完一局继续跑的exe文件路径
 #elif __unix__
 const std::string NNUE_RESTART_LINUX_FILE = "./a.out"; // 跑完一局继续跑的unix执行文件路径
 #endif
@@ -64,7 +65,7 @@ std::string getUniqueRandomFilename()
 
 std::string NNUE_filecontent = "[";
 bool NNUE_appexit = false;
-const std::string NNUE_FILENAME = getUniqueRandomFilename();
+std::string NNUE_filename = getUniqueRandomFilename();
 
 void saveNNUE()
 {
@@ -73,6 +74,6 @@ void saveNNUE()
         NNUE_filecontent.pop_back();
     }
     NNUE_filecontent = replaceAll(NNUE_filecontent, "}{", "},{");
-    writeFile(NNUE_OUTPUT_DIR + NNUE_FILENAME + ".json", NNUE_filecontent + "]");
+    writeFile(NNUE_OUTPUT_DIR + NNUE_filename + ".json", NNUE_filecontent + "]");
 }
 #endif
