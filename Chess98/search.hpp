@@ -342,9 +342,8 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     else if (this->repeatCheck())
     {
         // 是否重复局面
-        Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
-        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
-        return Result{move, INF};
+        std::cout << " repeat situation!" << std::endl;
+        return Result{Move{}, 0};
     }
 
     // 输出局面信息
@@ -414,13 +413,6 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     str.pop_back();
     str += "]},";
     NNUE_filecontent += str;
-
-    // 防止没有可行着法
-    if (bestNode.move.id == -1)
-    {
-        const Piece &king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
-        bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
-    }
 
     return bestNode;
 }

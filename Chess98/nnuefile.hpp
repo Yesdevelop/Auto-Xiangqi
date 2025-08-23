@@ -9,7 +9,7 @@
 const std::string NNUE_OUTPUT_DIR = "F:/Projects/Chess98/nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
 const int NNUE_DEPTH = 6;                                             // 最大搜索深度
 const int NNUE_RANDOM_MOVE_COUNT = 5;
-const int MAX_MOVES = 10;
+const int MAX_MOVES = 140;
 #ifdef _WIN32
 const std::string NNUE_RESTART_EXE_FILE = "F:/Projects/Chess98/x64/Release/Chess98.exe"; // 跑完一局继续跑的exe文件路径
 #elif __unix__
