@@ -39,7 +39,7 @@ echo.
 echo Launching Chess98 instances...
 
 :: Launch many program instances
-for /L %%i in (1,1,16) do (
+for /L %%i in (1,1,12) do (
     echo Launching instance %%i...
     start "" "E:\Projects_chess\Chess98\x64\Release\Chess98.exe"
     timeout /t 1 >nul
