@@ -60,9 +60,17 @@ void testGenerateNNUE()
     {
         count++;
         std::cout << count << "---------------" << std::endl;
-        s.searchGenereateNNUE(maxDepth, 3);
-        Move m = getRandomFromVector<Move>(s.rootMoves);
-        s.board.doMove(m);
+        Result a = s.searchGenereateNNUE(maxDepth, 3);
+        if (a.move.id != -1)
+        {
+            Move m = getRandomFromVector<Move>(s.rootMoves);
+            s.board.doMove(m);
+        }
+        else
+        {
+            NNUE_appexit = true;
+            break;
+        }
         saveNNUE();
     }
     while (s.board.historyMoves.size() < MAX_MOVES && NNUE_appexit == false)
@@ -73,6 +81,11 @@ void testGenerateNNUE()
         if (a.move.id != -1)
         {
             s.board.doMove(a.move);
+        }
+        else 
+        {
+            NNUE_appexit = true;
+            break;
         }
         saveNNUE();
     }
