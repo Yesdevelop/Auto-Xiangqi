@@ -342,9 +342,8 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     else if (this->repeatCheck())
     {
         // 是否重复局面
-        Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
-        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
-        return Result{move, INF};
+        std::cout << " repeat situation!" << std::endl;
+        return Result{Move{}, 0};
     }
 
     // 输出局面信息

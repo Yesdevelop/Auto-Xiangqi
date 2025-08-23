@@ -75,6 +75,10 @@ void testGenerateNNUE()
             {
                 s.board.doMove(a.move);
             }
+            else
+            {
+                break;
+            }
             saveNNUE();
         }
     }
