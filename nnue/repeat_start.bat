@@ -12,7 +12,7 @@ echo.
 echo =====================================================
 echo         Chess98 Multi-instance Launcher
 echo =====================================================
-echo This script will launch 12 instances of Chess98.
+echo This script will launch many instances of Chess98.
 echo.
 echo Usage:
 echo   1. Double-click to run this batch file
@@ -38,8 +38,8 @@ cd /d %~dp0
 echo.
 echo Launching Chess98 instances...
 
-:: Launch 12 program instances
-for /L %%i in (1,1,12) do (
+:: Launch many program instances
+for /L %%i in (1,1,16) do (
     echo Launching instance %%i...
     start "" "E:\Projects_chess\Chess98\x64\Release\Chess98.exe"
     timeout /t 1 >nul
