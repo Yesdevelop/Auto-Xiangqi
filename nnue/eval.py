@@ -48,6 +48,7 @@ if __name__ == "__main__":
         ["3k5/9/9/9/9/9/9/9/4A4/4CK3 w - - 0 1","残局，红帅居起始位置右侧，帅后店士，士后垫炮，除黑将外再无任何子力"],
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","开局尚未动任何一子"],
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/4K4/RNBA1ABNR b - - 0 1","帅五进一"],
+        ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBA1ABNR w - - 0 1","红缺帅"]
 
     ]
     for fen,info in fens:
