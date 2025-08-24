@@ -8,12 +8,11 @@ device = "cpu"
 
 # 与训练参数保持一致
 input_size = 7 * 9 * 10
-hidden_size = 64
-model_path = "./nnue/model.pth"
+model_path = "models/epoch_1.pth"
 
 # 初始化模型
-model = NNUE(input_size=input_size, hidden_size=hidden_size)
-model.load_state_dict(torch.load(model_path, map_location=torch.device(device)))
+model = NNUE(input_size=input_size)
+model.load_state_dict(torch.load(model_path, map_location=torch.device(device),weights_only=True))
 model.to(device)
 model.eval()
 
