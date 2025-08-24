@@ -106,7 +106,7 @@ if __name__ == "__main__":
     num_files = -1
     num_workers = 1
 
-    model = NNUE(input_size=7 * 9 * 10, hidden_size=hidden_size).to(public_device)
+    model = NNUE(input_size=7 * 9 * 10).to(public_device)
 
     # model.load_state_dict(torch.load("models/epoch_1.pth",map_location=public_device))
 
