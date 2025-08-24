@@ -30,7 +30,6 @@ def evaluate(fen):
 
 # 示例
 if __name__ == "__main__":
-    os.system("cls")
     fen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/1NBAKABNR w - - 0 1" # 让单车
     score1 = -evaluate(fen) # 我的队伍还是搞反了，需要反过来获取分数
     print(f"让单车，评估分数: {score1:.2f}")
