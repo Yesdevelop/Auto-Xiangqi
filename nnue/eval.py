@@ -52,4 +52,5 @@ if __name__ == "__main__":
     ]
     for fen,info in fens:
         score = evaluate(fen)
-        print(f'{info} => {score:.2f}')
+        flag = '红方' if 'w' in fen else '红方'
+        print(f'{info} | {flag}先行动 => {score:.2f}')
