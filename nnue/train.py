@@ -111,14 +111,18 @@ if __name__ == "__main__":
     # model.load_state_dict(torch.load("models/epoch_1.pth",map_location=public_device))
 
     optimizer = optim.RAdam(model.parameters(), lr=lr)
-    criterion = nn.L1Loss()
+
+    # 更改为均方误差损失函数用于训练
+    criterion_train = nn.MSELoss()
+    # 保留平均绝对误差作为评估指标
+    criterion_eval = nn.L1Loss()
 
     hparams = {
         'hidden_size': hidden_size,
         'lr': lr,
         'batch_size': batch_size,
         'optimizer': 'RAdam',
-        'loss': 'MSELoss',
+        'loss': 'MSELoss',  # 记录实际使用的损失函数
         'epochs': epochs,
         'data_files': num_files,
         'device': public_device,
@@ -132,7 +136,6 @@ if __name__ == "__main__":
 
     model.train()
     global_step = 0
-    avg_loss = None
 
     print(f"\n开始训练，batch_size={batch_size}")
     print(f"数据加载为流式，不预先计算总样本数和总步数。")
@@ -145,7 +148,8 @@ if __name__ == "__main__":
         model_name = f"epoch_{epoch+1}.pth"
         model_path = os.path.join(model_dir, model_name)
 
-        epoch_loss = 0.0
+        epoch_mse_loss = 0.0
+        epoch_l1_loss = 0.0
         step = 0
 
         for x_batch, y_batch, flags_batch in train_dataloader:
@@ -158,26 +162,35 @@ if __name__ == "__main__":
             selected_indices = flags_batch.unsqueeze(1)
             selected_scores = torch.gather(all_scores, 1, selected_indices)
 
-            loss = criterion(selected_scores, y_batch)
+            # 使用 MSE 损失进行反向传播
+            loss = criterion_train(selected_scores, y_batch)
             loss.backward()
             optimizer.step()
 
-            epoch_loss += loss.item()
+            # 计算 L1 损失用于监控
+            l1_loss = criterion_eval(selected_scores, y_batch)
+
+            epoch_mse_loss += loss.item()
+            epoch_l1_loss += l1_loss.item()
             global_step += 1
             step += 1
 
+            # 记录 MSE 和 L1 损失
             writer.add_scalar('Loss/step', loss.item(), global_step)
+            writer.add_scalar('L1_Loss/step', l1_loss.item(), global_step)
             writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], global_step)
 
             if global_step % 1000 == 0:
                 torch.save(model.state_dict(), model_path)
                 print(f"模型已保存至: {model_path}")
-                print(f"步骤 {global_step}, 损失: {loss.item():.6f}")
+                print(f"步骤 {global_step}, MSE损失: {loss.item():.6f}, L1损失: {l1_loss.item():.6f}")
 
         if step > 0:
-            avg_loss = epoch_loss / step
-            writer.add_scalar('Loss/epoch', avg_loss, epoch)
-            print(f"第 {epoch+1} 轮平均损失: {avg_loss:.6f}")
+            avg_mse_loss = epoch_mse_loss / step
+            avg_l1_loss = epoch_l1_loss / step
+            writer.add_scalar('Loss/epoch', avg_mse_loss, epoch)
+            writer.add_scalar('L1_Loss/epoch', avg_l1_loss, epoch)
+            print(f"第 {epoch+1} 轮平均损失: MSE={avg_mse_loss:.6f}, L1={avg_l1_loss:.6f}")
         else:
             print(f"第 {epoch+1} 轮没有处理任何样本。")
 
