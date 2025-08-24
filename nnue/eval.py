@@ -51,9 +51,6 @@ if __name__ == "__main__":
     fen = "rnbakabnr/9/9/p1p1p1p1p/9/9/9/9/9/RN5NR w - - 0 1" # 缺帅
     score7 = -evaluate(fen)
     print(f"缺帅，评估分数: {score7:.2f}")
-    fen = "9/9/9/9/9/9/9/9/9/9 w - - 0 1" # 空盘
-    score8 = -evaluate(fen)
-    print(f"空盘，评估分数: {score8:.2f}")
     fen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR b - - 0 1" # 红让双车，黑让单炮
-    score9 = evaluate(fen) # 黑方视角
-    print(f"红让双车，黑让单炮，评估分数: {score9:.2f}")
+    score8 = -evaluate(fen)
+    print(f"红让双车，黑让单炮，评估分数: {score8:.2f}")
