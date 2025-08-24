@@ -42,7 +42,9 @@ if __name__ == "__main__":
         ["r1bakabnr/9/1cn4c1/p1p1p1p1p/9/2P6/P3P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","兵七进一->马2进3"],
         ["rnbakab1r/9/1c4nc1/p1p1p1p1p/9/2P6/P3P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","兵七进一->马8进7"],
         ["rnbakabnr/9/1c5c1/p1p1p3p/6p2/2P6/P3P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","兵七进一->兵7进1"],
-        ["rnbakabnr/9/1c7/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/1NBAKABN1 w - - 0 1","开局红方让双车，黑方让单炮"]
+        ["rnbakabnr/9/1c7/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/1NBAKABN1 w - - 0 1","开局红方让双车，黑方让单炮"],
+        ["3k5/9/9/9/9/9/9/4K4/4A4/4C4 w - - 0 1","残局，红帅升天居中，帅后店士，士后垫炮，除黑将外再无任何子力"],
+        ["3k5/9/9/9/9/9/9/5K3/4A4/4C4 w - - 0 1","残局，红帅升天局右，帅后店士，士后垫炮，除黑将外再无任何子力"],
     ]
     for fen,info in fens:
         score = evaluate(fen)
