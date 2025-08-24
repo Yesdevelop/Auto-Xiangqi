@@ -7,9 +7,9 @@ class NNUE(nn.Module):
         super(NNUE, self).__init__()
         self.input_size = input_size
         self.fc = nn.Sequential(
-            nn.Linear(in_features=input_size, out_features=hidden_size),  # 第一层：630 -> hidden_size
-            nn.ReLU(),                       # ReLU 激活
-            nn.Linear(in_features=hidden_size, out_features=2)        # 第二层：hidden_size -> 2
+            nn.Linear(in_features=input_size, out_features=hidden_size),
+            nn.ReLU(),
+            nn.Linear(in_features=hidden_size, out_features=2)
         )
 
     def forward(self, x):
