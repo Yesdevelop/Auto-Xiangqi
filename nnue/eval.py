@@ -41,6 +41,8 @@ if __name__ == "__main__":
         ["2bak4/9/3a5/p1p1c1p1p/5r3/2P1P4/P7P/9/4A4/2BK1Ar2 w - - 0 1","去掉红方沉底炮，黑方双车带炮占大优"],
         ["r1bakabnr/9/1cn4c1/p1p1p1p1p/9/2P6/P3P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","兵七进一->马2进3"],
         ["rnbakab1r/9/1c4nc1/p1p1p1p1p/9/2P6/P3P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","兵七进一->马8进7"],
+        ["rnbakabnr/9/1c5c1/p1p1p3p/6p2/2P6/P3P1P1P/1C5C1/9/RNBAKABNR w - - 0 1","兵七进一->兵7进1"],
+        ["rnbakabnr/9/1c7/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/1NBAKABN1 w - - 0 1","开局红方让双车，黑方让单炮"]
     ]
     for fen,info in fens:
         score = evaluate(fen)
