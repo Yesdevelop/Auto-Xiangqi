@@ -32,6 +32,8 @@ if __name__ == "__main__":
         ["rnbakab1r/9/1c5cn/p1p1p1p1p/9/9/P1P1P1P1P/1C2C4/9/RNBAKABNR w - - 0 1","炮二平五->马8进9"],
         ["rnbakab1r/9/1c4nc1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C4/9/RNBAKABNR w - - 0 1","炮二平五->马8进7"],
         ["rnbakab1r/9/1c5cn/p1p1C1p1p/9/9/P1P1P1P1P/1C7/9/RNBAKABNR b - - 0 1","炮二平五->马8进9->炮五进四"],
+        ["rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1","炮八进七"],
+        ["1rbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR w - - 0 1","炮八进七->车2平1"]
     ]
     for fen,info in fens:
         score = evaluate(fen)
