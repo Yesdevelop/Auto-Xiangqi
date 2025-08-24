@@ -22,7 +22,7 @@ def evaluate(fen):
     with torch.no_grad():
         output = model(input_tensor)  # [1, 2]
     flag = Red if 'w' in fen else Black
-    score = output[0, 1 - flag].item() * 1000
+    score = output[0, flag].item() * 1000
     return score
 
 # 示例
@@ -33,7 +33,8 @@ if __name__ == "__main__":
         ["rnbakab1r/9/1c4nc1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C4/9/RNBAKABNR w - - 0 1","炮二平五->马8进7"],
         ["rnbakab1r/9/1c5cn/p1p1C1p1p/9/9/P1P1P1P1P/1C7/9/RNBAKABNR b - - 0 1","炮二平五->马8进9->炮五进四"],
         ["rCbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR b - - 0 1","炮八进七"],
-        ["1rbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR w - - 0 1","炮八进七->车2平1"]
+        ["1rbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/7C1/9/RNBAKABNR w - - 0 1","炮八进七->车2平1"],
+        ["rnbakabnr/1N1R1R3/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/2BAKABN1 w - - 0 1","红方双车卡黑方九宫肋道，辅以红马叫杀"]
     ]
     for fen,info in fens:
         score = evaluate(fen)
