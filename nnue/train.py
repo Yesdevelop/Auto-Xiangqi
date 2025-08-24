@@ -1,33 +1,28 @@
-# train.py
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import IterableDataset, DataLoader, get_worker_info
 from torch.utils.tensorboard import SummaryWriter
 import os
 import json
+import numpy as np
+import random
 from model import NNUE
 from board import Situation, Red, Black
 
-# 自动选择设备
 public_device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(f"使用设备: {public_device}")
 
-# 创建日志目录
-log_dir = "runs/nnue_dualhead"
+log_dir = "runs"
 os.makedirs(log_dir, exist_ok=True)
 writer = SummaryWriter(log_dir)
-print(f"TensorBoard 日志将保存到: {log_dir}")
 
-def collect_json_files(num=-1):
-    """收集 JSON 数据文件"""
-    print("正在收集 JSON 文件...")
-    PATH = 'nnue/data' if os.path.exists('nnue/data') else 'data'
-    if not os.path.exists(PATH):
-        raise FileNotFoundError(f"找不到数据目录: {PATH}")
+def collect_json_files(root_path,num=-1):
+    print("正在收集 JSON 文件路径...")
+    if not os.path.exists(root_path):
+        raise FileNotFoundError(f"找不到数据目录: {root_path}")
 
     files = []
-    for root, _, fs in os.walk(PATH):
+    for root, _, fs in os.walk(root_path):
         for f in sorted(fs):
             if f.endswith('.json'):
                 files.append(os.path.join(root, f))
@@ -39,83 +34,85 @@ def collect_json_files(num=-1):
     print(f"找到 {len(files)} 个 JSON 文件")
     return files
 
-def analyze_json_files(json_files):
-    """解析所有 JSON 文件，提取 (fen, value, actor_flag) 样本"""
-    print("正在解析 JSON 文件...")
-    samples = []
-    for file in json_files:
-        try:
-            with open(file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+class NNUEDataset(IterableDataset):
+    def __init__(self, json_files, clip_value=1000.0):
+        self.json_files = json_files
+        self.clip_value = clip_value
+
+    def __iter__(self):
+        worker_info = get_worker_info()
+        if worker_info is None:
+            iter_files = self.json_files
+        else:
+            worker_id = worker_info.id
+            num_workers = worker_info.num_workers
+            iter_files = [self.json_files[i] for i in range(len(self.json_files)) if i % num_workers == worker_id]
+
+        random.shuffle(iter_files)
+
+        for file_path in iter_files:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            except Exception as e:
+                print(f"跳过文件 {file_path}: {e}")
+                continue
+
+            samples_in_file = []
             for ply in data:
                 for step in ply.get('data', []):
                     for move in step.get('data', []):
                         vl = float(move['vl'])
                         fen = move['fen_after_move']
-                        # 这里我觉得应该反过来哈，因为步进之后改变了走子方
-                        current_flag = Black if 'w' in fen else Red  # 红=1, 黑=0
-                        samples.append((fen, vl, current_flag))
-        except Exception as e:
-            print(f"跳过文件 {file}: {e}")
-            continue
-    print(f"共提取 {len(samples)} 个训练样本")
-    return samples
+                        samples_in_file.append((fen, vl))
 
-# train.py 片段：create_dataloader
-def create_dataloader(samples, batch_size=32, clip_value=1000.0):
-    """生成 batch 数据，每次增强都创建独立副本，并对价值标签进行裁剪归一化"""
-    indices = torch.randperm(len(samples))
-    for i in range(0, len(samples), batch_size):
-        batch_indices = indices[i:i+batch_size]
-        batch_x, batch_y, batch_flags = [], [], []
+            random.shuffle(samples_in_file)
 
-        for idx in batch_indices:
-            fen, vl, _ = samples[idx]
+            for fen, vl in samples_in_file:
+                try:
+                    clipped_vl = max(-self.clip_value, min(self.clip_value, vl))
+                    norm_vl = clipped_vl / self.clip_value
 
-            # --- 关键修复：裁剪并归一化 ---
-            clipped_vl = max(-clip_value, min(clip_value, vl))  # 裁剪到 [-1000, 1000]
-            norm_vl = clipped_vl / clip_value  # 归一化到 [-1, 1]
-            # -----------------------------
+                    aug_situations = [
+                        Situation(fen),
+                        Situation(fen).flip_left_and_right(),
+                        Situation(fen).flip_up_and_down(),
+                        Situation(fen).flip_left_and_right().flip_up_and_down()
+                    ]
+                    sit = aug_situations[np.random.randint(0, 4)]
 
-            # 四种增强
-            aug_situations = [
-                Situation(fen),
-                Situation(fen).flip_left_and_right(),
-                Situation(fen).flip_up_and_down(),
-                Situation(fen).flip_left_and_right().flip_up_and_down()
-            ]
+                    x = torch.tensor(sit.matrix.copy(), dtype=torch.float32).view(-1)
+                    y = torch.tensor(norm_vl, dtype=torch.float32).unsqueeze(0)
+                    flag = torch.tensor(sit.actor_flag, dtype=torch.long)
 
-            for sit in aug_situations:
-                x = torch.tensor(sit.matrix.copy(), dtype=torch.float32).view(-1)
-                batch_x.append(x)
-                batch_y.append(norm_vl)           # 已裁剪归一化
-                batch_flags.append(sit.actor_flag)
+                    yield x, y, flag
+                except Exception as e:
+                    # print(e.args)
+                    pass
 
-        # 转为张量
-        x_batch = torch.stack(batch_x).to(public_device)
-        y_batch = torch.tensor(batch_y, dtype=torch.float32).unsqueeze(1).to(public_device)
-        flags_batch = torch.tensor(batch_flags, dtype=torch.long).to(public_device)
-
-        yield x_batch, y_batch, flags_batch
+def create_dataloader(json_files, batch_size=32, clip_value=1000.0, num_workers=4):
+    dataset = NNUEDataset(json_files, clip_value)
+    dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
+    return dataloader
 
 if __name__ == "__main__":
-    # 超参数
-    hidden_size = 90
-    lr = 1e-4
-    batch_size = 32
-    epochs = 10
-    num_files = -1  # 调试用，-1 表示全部
+    print(f"使用设备: {public_device}")
+    print(f"TensorBoard 日志将保存到: {log_dir}")
+    #
+    hidden_size = 64
+    lr = 5e-5
+    batch_size = 1024
+    epochs = 1
+    num_files = -1
+    num_workers = 4
 
-    # 构建模型
-    model = NNUE(input_size=7*9*10, hidden_size=hidden_size).to(public_device)
+    model = NNUE(input_size=7 * 9 * 10, hidden_size=hidden_size).to(public_device)
     optimizer = optim.RAdam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 
-    # 写入模型图（使用虚拟输入）
     dummy_input = torch.zeros(1, 7 * 9 * 10).to(public_device)
     writer.add_graph(model, dummy_input)
 
-    # 记录超参数
     hparams = {
         'hidden_size': hidden_size,
         'lr': lr,
@@ -124,42 +121,43 @@ if __name__ == "__main__":
         'loss': 'MSELoss',
         'epochs': epochs,
         'data_files': num_files,
-        'device': public_device
+        'device': public_device,
+        'num_workers': num_workers
     }
-    writer.add_hparams(hparams, {'hparam/final_loss': 0})  # 占位
+    writer.add_hparams(hparams, {'hparam/final_loss': 0})
 
-    # 数据加载
-    json_files = collect_json_files(num=num_files)
-    samples = analyze_json_files(json_files)
-    if len(samples) == 0:
-        raise ValueError("无有效训练样本")
+    json_files = collect_json_files(root_path=r"F:\chess_data",num=num_files)
+    train_dataloader = create_dataloader(json_files, batch_size=batch_size, num_workers=num_workers)
 
-    # 训练循环
     model.train()
     global_step = 0
-    total_steps = (len(samples) // batch_size + 1) * epochs
+    avg_loss = None
 
-    print(f"\n开始训练，总样本数: {len(samples)}, batch_size={batch_size}, 约 {total_steps} 步")
+    print(f"\n开始训练，batch_size={batch_size}")
+    print(f"数据加载为流式，不预先计算总样本数和总步数。")
+    print(f"训练将进行直到所有数据处理完毕。")
 
     for epoch in range(epochs):
         print(f"\n=== 第 {epoch+1}/{epochs} 轮训练 ===")
+        model_dir = "models"
+        os.makedirs(model_dir, exist_ok=True)
+        model_name = f"epoch_{epoch+1}.pth"
+        model_path = os.path.join(model_dir, model_name)
+
         epoch_loss = 0.0
         step = 0
 
-        for x_batch, y_batch, flags_batch in create_dataloader(samples, batch_size=batch_size):
+        for x_batch, y_batch, flags_batch in train_dataloader:
+            x_batch = x_batch.to(public_device)
+            y_batch = y_batch.to(public_device)
+            flags_batch = flags_batch.to(public_device)
+
             optimizer.zero_grad()
+            all_scores = model(x_batch)
+            selected_indices = flags_batch.unsqueeze(1)
+            selected_scores = torch.gather(all_scores, 1, selected_indices)
 
-            # 前向传播: 输出 (B, 2) -> [red_score, black_score]
-            all_scores = model(x_batch)  # (B, 2)
-
-            # 使用 flags 选择对应头的输出: flags_batch 是 (B,) -> 变成 (B,1)
-            selected_indices = flags_batch.unsqueeze(1)  # (B, 1)
-            selected_scores = torch.gather(all_scores, 1, selected_indices)  # (B, 1)
-
-            # 计算损失
             loss = criterion(selected_scores, y_batch)
-
-            # 反向传播
             loss.backward()
             optimizer.step()
 
@@ -167,26 +165,28 @@ if __name__ == "__main__":
             global_step += 1
             step += 1
 
-            # TensorBoard 记录
             writer.add_scalar('Loss/step', loss.item(), global_step)
             writer.add_scalar('Learning Rate', optimizer.param_groups[0]['lr'], global_step)
 
-            if global_step % 100 == 0:
-                print(f"步骤 {global_step}/{total_steps}, 损失: {loss.item():.6f}")
+            if global_step % 1000 == 0:
+                torch.save(model.state_dict(), model_path)
+                print(f"模型已保存至: {model_path}")
+                print(f"步骤 {global_step}, 损失: {loss.item():.6f}")
 
-        avg_loss = epoch_loss / step
-        writer.add_scalar('Loss/epoch', avg_loss, epoch)
-        print(f"第 {epoch+1} 轮平均损失: {avg_loss:.6f}")
+        if step > 0:
+            avg_loss = epoch_loss / step
+            writer.add_scalar('Loss/epoch', avg_loss, epoch)
+            print(f"第 {epoch+1} 轮平均损失: {avg_loss:.6f}")
+        else:
+            print(f"第 {epoch+1} 轮没有处理任何样本。")
 
-        # 更新 hparams（最后一轮）
-        if epoch == epochs - 1:
-            writer.add_hparams(hparams, {'hparam/final_loss': avg_loss})
+        torch.save(model.state_dict(), model_path)
+        print(f"模型已保存至: {model_path}")
 
-    # 保存模型
-    model_path = "nnue_dualhead_model.pth"
-    torch.save(model.state_dict(), model_path)
-    print(f"\n 训练完成！模型已保存至: {model_path}")
-    print(f" 使用以下命令查看 TensorBoard：")
-    print(f"   tensorboard --logdir={log_dir}")
+    writer.add_hparams(hparams, {'hparam/final_loss': avg_loss if avg_loss is not None else 0})
+
+    print(f"\n训练完成！")
+    print(f"使用以下命令查看 TensorBoard：")
+    print(f"  tensorboard --logdir={log_dir}")
 
     writer.close()

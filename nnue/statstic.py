@@ -13,8 +13,9 @@ def get_filepaths(directory,extension="txt"):
 if __name__ == "__main__":
     filepaths = get_filepaths(directory=r"data",extension="json")
     cnt = 0
-    for filepath in filepaths:
+    for file_idx,filepath in enumerate(filepaths):
         json_data = json.load(open(filepath,"r",encoding="utf-8"))
         for base_status in json_data:
             cnt += len(base_status['data'][0]['data'])
-    print(cnt)
+        print(file_idx + 1,len(filepaths))
+        print(cnt,cnt * len(filepaths) // (file_idx + 1))
