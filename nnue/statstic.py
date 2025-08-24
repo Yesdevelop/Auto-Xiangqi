@@ -11,10 +11,10 @@ def get_filepaths(directory,extension="txt"):
     return filepaths
 
 if __name__ == "__main__":
-    filepaths = get_filepaths(directory=r"F:\chess_data",extension="json")
+    filepaths = get_filepaths(directory=r"data",extension="json")
     cnt = 0
     for filepath in filepaths:
         json_data = json.load(open(filepath,"r",encoding="utf-8"))
         for base_status in json_data:
-            cnt += len(base_status['data'])
+            cnt += len(base_status['data'][0]['data'])
     print(cnt)
