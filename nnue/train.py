@@ -101,17 +101,17 @@ if __name__ == "__main__":
     #
     hidden_size = 64
     lr = 5e-5
-    batch_size = 1024
-    epochs = 1
+    batch_size = 128
+    epochs = 10000
     num_files = -1
-    num_workers = 4
+    num_workers = 1
 
     model = NNUE(input_size=7 * 9 * 10, hidden_size=hidden_size).to(public_device)
-    optimizer = optim.RAdam(model.parameters(), lr=lr)
-    criterion = nn.MSELoss()
 
-    dummy_input = torch.zeros(1, 7 * 9 * 10).to(public_device)
-    writer.add_graph(model, dummy_input)
+    # model.load_state_dict(torch.load("models/epoch_1.pth",map_location=public_device))
+
+    optimizer = optim.RAdam(model.parameters(), lr=lr)
+    criterion = nn.L1Loss()
 
     hparams = {
         'hidden_size': hidden_size,
@@ -124,9 +124,10 @@ if __name__ == "__main__":
         'device': public_device,
         'num_workers': num_workers
     }
-    writer.add_hparams(hparams, {'hparam/final_loss': 0})
-
     json_files = collect_json_files(root_path=r"F:\chess_data",num=num_files)
+    #
+    random.shuffle(json_files)
+    #
     train_dataloader = create_dataloader(json_files, batch_size=batch_size, num_workers=num_workers)
 
     model.train()
@@ -182,8 +183,6 @@ if __name__ == "__main__":
 
         torch.save(model.state_dict(), model_path)
         print(f"模型已保存至: {model_path}")
-
-    writer.add_hparams(hparams, {'hparam/final_loss': avg_loss if avg_loss is not None else 0})
 
     print(f"\n训练完成！")
     print(f"使用以下命令查看 TensorBoard：")
