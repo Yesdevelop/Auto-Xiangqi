@@ -11,7 +11,7 @@ class NNUE(nn.Module):
         if self.is_quantizing:
             self.quant = quantization.QuantStub()
         else:
-            self.quant = nn.Identity()
+            self.quant = None
 
         self.fc = nn.Sequential(
             nn.Linear(in_features=input_size, out_features=256),
@@ -29,7 +29,10 @@ class NNUE(nn.Module):
             self.dequant = nn.Identity()
 
     def forward(self, x):
-        x = self.quant(x)
-        x = self.fc(x)
-        x = self.dequant(x)
+        if self.is_quantizing:
+            x = self.quant(x)
+            x = self.fc(x)
+            x = self.dequant(x)
+        else:
+            x = self.fc(x)
         return x
