@@ -100,7 +100,7 @@ if __name__ == "__main__":
     print(f"TensorBoard 日志将保存到: {log_dir}")
     #
     hidden_size = 64
-    lr = 5e-5
+    lr = 1e-5
     batch_size = 128
     epochs = 10000
     num_files = -1
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     model = NNUE(input_size=7 * 9 * 10).to(public_device)
 
-    # model.load_state_dict(torch.load("models/epoch_1.pth",map_location=public_device))
+    model.load_state_dict(torch.load("models/epoch_1.pth",map_location=public_device))
 
     optimizer = optim.RAdam(model.parameters(), lr=lr)
 
