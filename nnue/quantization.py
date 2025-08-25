@@ -1,19 +1,32 @@
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from model import NNUE
+from model import NNUE, qNNUE
 from board import Situation, Red, Black
 from train import NNUEDataset, collect_json_files, create_dataloader, public_device
 import os
 import copy
+import torch.ao.quantization as quantization
 
 def quantize_and_save_model(model_path, data_dir, output_path):
-    model = NNUE(input_size=7 * 9 * 10,is_quantizing=True).to('cpu')
-    model.load_state_dict(torch.load(model_path, map_location='cpu'))
-    model.eval()
+    # 1. 加载原始NNUE模型权重
+    original_model = NNUE(input_size=7 * 9 * 10).to('cpu')
+    original_model.load_state_dict(torch.load(model_path, map_location='cpu'))
+    original_model.eval()
 
-    quantized_model = copy.deepcopy(model)
+    # 2. 实例化qNNUE模型并加载NNUE的权重
+    quant_model = qNNUE(input_size=7 * 9 * 10).to('cpu')
+    quant_model.load_weights_from_nnue(original_model)
+    quant_model.eval()
 
+    # 3. 模块融合以提高量化性能
+    fused_model = quantization.fuse_modules(
+        quant_model,
+        [['linear1', 'relu1'], ['linear2', 'relu2'], ['linear3', 'relu3']],
+        inplace=False
+    )
+
+    # 4. 配置和准备量化 (使用手动配置以消除警告)
     quant_config = torch.ao.quantization.QConfig(
         activation=torch.ao.quantization.MinMaxObserver.with_args(
             qscheme=torch.per_tensor_affine,
@@ -28,26 +41,27 @@ def quantize_and_save_model(model_path, data_dir, output_path):
             quant_max=127
         )
     )
-    quantized_model.qconfig = quant_config
+    fused_model.qconfig = quant_config
+    quantization.prepare(fused_model, inplace=True)
 
-    torch.ao.quantization.prepare(quantized_model, inplace=True)
-
+    # 5. 校准
     json_files = collect_json_files(root_path=data_dir, num=50)
     calibration_dataloader = create_dataloader(json_files, batch_size=128, num_workers=1)
 
     with torch.no_grad():
         for i, (x_batch, _, _) in enumerate(calibration_dataloader):
-            quantized_model(x_batch)
+            fused_model(x_batch)
             if i >= 10:
                 break
 
-    torch.ao.quantization.convert(quantized_model, inplace=True)
+    # 6. 转换模型
+    quantized_model = quantization.convert(fused_model, inplace=False)
 
+    # 7. JIT Trace并保存模型
     dummy_input = torch.randn(1, 7 * 9 * 10).to('cpu')
     scripted_model = torch.jit.trace(quantized_model, dummy_input)
-
     scripted_model.save(output_path)
-
+    
     print(f"Quantized and scripted model saved to: {output_path}")
 
     orig_size = os.path.getsize(model_path) / 1e6
@@ -55,7 +69,6 @@ def quantize_and_save_model(model_path, data_dir, output_path):
     print(f"\nOriginal model size: {orig_size:.2f} MB")
     print(f"Quantized model size: {quant_size:.2f} MB")
     print(f"Size reduction: {(1 - quant_size/orig_size) * 100:.2f}%")
-
 
 if __name__ == "__main__":
     trained_model_path = "models/epoch_1.pth"
