@@ -99,7 +99,6 @@ if __name__ == "__main__":
     print(f"使用设备: {public_device}")
     print(f"TensorBoard 日志将保存到: {log_dir}")
     #
-    hidden_size = 64
     lr = 1e-5
     batch_size = 128
     epochs = 10000
@@ -118,7 +117,6 @@ if __name__ == "__main__":
     criterion_eval = nn.L1Loss()
 
     hparams = {
-        'hidden_size': hidden_size,
         'lr': lr,
         'batch_size': batch_size,
         'optimizer': 'RAdam',

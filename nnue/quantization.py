@@ -1,34 +1,60 @@
 import torch
-import torch.quantization
+import torch.nn as nn
+from torch.utils.data import DataLoader
 from model import NNUE
+from board import Situation, Red, Black
+from train import NNUEDataset, collect_json_files, create_dataloader, public_device
+import os
+import copy
 
-# 1. 加载原始模型
-device = "cpu"
-model_path = "model.pth"
-model = NNUE()  # 替换为你的模型类
-model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
-model.to(device)
-model.eval()  # 重要！量化前必须设为eval模式
-model = torch.quantization.quantize_dynamic(
-    model,  # 原始模型
-    {torch.nn.Linear},  # 要量化的层类型
-    dtype=torch.qint8  # 量化精度
-)
-# 2. 准备量化配置
-model.qconfig = torch.quantization.get_default_qconfig('qnnpack')  # 移动端推荐
+def quantize_and_save_model(model_path, data_dir, output_path):
+    model = NNUE(input_size=7 * 9 * 10,is_quantizing=True).to('cpu')
+    model.load_state_dict(torch.load(model_path, map_location='cpu'))
+    model.eval()
 
-# 3. 插入量化/反量化节点
-model_prepared = torch.quantization.prepare(model)
+    quantized_model = copy.deepcopy(model)
 
-# 4. 校准模型（用一些样本数据）
-# 这里需要你准备一些校准数据
-calibration_data = []  # 你的输入样本
-for data in calibration_data:
-    model_prepared(data)
+    quantized_model.qconfig = torch.ao.quantization.get_default_qconfig('fbgemm')
+    torch.ao.quantization.prepare(quantized_model, inplace=True)
 
-# 5. 转换为量化模型
-model_quantized = torch.quantization.convert(model_prepared)
-print("量化完成")
-# 6. 保存为TorchScript
-traced_script = torch.jit.trace(model_quantized, torch.randn(1, 7*9*10))  # 替换input_size
-traced_script.save('model_quantized.pt')
+    json_files = collect_json_files(root_path=data_dir, num=50)
+    calibration_dataloader = create_dataloader(json_files, batch_size=128, num_workers=1)
+
+    with torch.no_grad():
+        for i, (x_batch, _, _) in enumerate(calibration_dataloader):
+            quantized_model(x_batch)
+            if i >= 10:
+                break
+
+    torch.ao.quantization.convert(quantized_model, inplace=True)
+
+    dummy_input = torch.randn(1, 7 * 9 * 10).to('cpu')
+    scripted_model = torch.jit.trace(quantized_model, dummy_input)
+
+    scripted_model.save(output_path)
+
+    print(f"Quantized and scripted model saved to: {output_path}")
+
+    orig_size = os.path.getsize(model_path) / 1e6
+    quant_size = os.path.getsize(output_path) / 1e6
+    print(f"\nOriginal model size: {orig_size:.2f} MB")
+    print(f"Quantized model size: {quant_size:.2f} MB")
+    print(f"Size reduction: {(1 - quant_size/orig_size) * 100:.2f}%")
+
+
+if __name__ == "__main__":
+    trained_model_path = "models/epoch_1.pth"
+    data_directory = r"F:\chess_data"
+    output_model_path = "models/nnue_quantized.pt"
+
+    if not os.path.exists(trained_model_path):
+        print(f"Error: The trained model file '{trained_model_path}' was not found.")
+    else:
+        try:
+            quantize_and_save_model(
+                model_path=trained_model_path,
+                data_dir=data_directory,
+                output_path=output_model_path
+            )
+        except Exception as e:
+            print(f"An error occurred during quantization: {e}")
