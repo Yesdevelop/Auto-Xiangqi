@@ -14,7 +14,22 @@ def quantize_and_save_model(model_path, data_dir, output_path):
 
     quantized_model = copy.deepcopy(model)
 
-    quantized_model.qconfig = torch.ao.quantization.get_default_qconfig('fbgemm')
+    quant_config = torch.ao.quantization.QConfig(
+        activation=torch.ao.quantization.MinMaxObserver.with_args(
+            qscheme=torch.per_tensor_affine,
+            dtype=torch.quint8,
+            quant_min=0,
+            quant_max=255
+        ),
+        weight=torch.ao.quantization.MinMaxObserver.with_args(
+            qscheme=torch.per_tensor_symmetric,
+            dtype=torch.qint8,
+            quant_min=-128,
+            quant_max=127
+        )
+    )
+    quantized_model.qconfig = quant_config
+
     torch.ao.quantization.prepare(quantized_model, inplace=True)
 
     json_files = collect_json_files(root_path=data_dir, num=50)
