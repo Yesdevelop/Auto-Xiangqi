@@ -61,7 +61,7 @@ def quantize_and_save_model(model_path, data_dir, output_path):
     dummy_input = torch.randn(1, 7 * 9 * 10).to('cpu')
     scripted_model = torch.jit.trace(quantized_model, dummy_input)
     scripted_model.save(output_path)
-    
+
     print(f"Quantized and scripted model saved to: {output_path}")
 
     orig_size = os.path.getsize(model_path) / 1e6

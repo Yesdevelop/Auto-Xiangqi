@@ -1,31 +1,55 @@
 import os
 import torch
-from model import NNUE
+import time
+from model import NNUE, qNNUE
 from board import Situation, Red, Black
 
-# 仅使用CPU
-device = "cpu"
-
-# 与训练参数保持一致
-input_size = 7 * 9 * 10
-model_path = "models/epoch_1.pth"
-
-# 初始化模型
-model = NNUE(input_size=input_size)
-model.load_state_dict(torch.load(model_path, map_location=torch.device(device),weights_only=True))
-model.to(device)
-model.eval()
-
-def evaluate(fen):
+def evaluate_position(model, device, fen):
+    """
+    使用给定模型评估一个局面。
+    """
     sit = Situation(fen)
     input_tensor = torch.tensor(sit.matrix.copy(), dtype=torch.float32).view(1, -1).to(device)
+
     with torch.no_grad():
-        output = model(input_tensor)  # [1, 2]
+        output = model(input_tensor)
+
     flag = Red if 'w' in fen else Black
     score = output[0, 1 - flag].item() * 1000
     return score
 
-# 示例
+def evaluate_model(model, fens, device):
+    """
+    对一个已加载的模型进行评估，并计算总耗时。
+    不包括打印时间。
+    """
+    # 在第一次运行前进行热身
+    dummy_input = torch.randn(1, 7 * 9 * 10).to(device)
+    for _ in range(5): # 减少热身次数以避免过长等待
+        _ = model(dummy_input)
+
+    start_time = time.time()
+
+    # 评估所有局面，不进行打印
+    results = []
+    for fen, info in fens:
+        score = evaluate_position(model, device, fen)
+        results.append((fen, info, score))
+
+    end_time = time.time()
+    total_time = end_time - start_time
+
+    # 打印评估结果和耗时
+    print("-----------------------------------")
+    for fen, info, score in results:
+        flag = '红方' if 'w' in fen else '黑方'
+        print(f'{info} | {flag}先行动 => {score:.2f}')
+    print("-----------------------------------")
+
+    print(f"总耗时：{total_time:.4f} 秒")
+    print(f"平均每局耗时：{(total_time / len(fens)) * 1000:.4f} 毫秒")
+
+
 if __name__ == "__main__":
     fens = [
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C2C4/9/RNBAKABNR b - - 0 1","炮二平五"],
@@ -52,7 +76,17 @@ if __name__ == "__main__":
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/BC5C1/9/RN1AKABNR b - - 0 1","相七进九"],
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/BC5C1/9/RN1AKABNR w - - 0 1","相七进九"],
     ]
-    for fen,info in fens:
-        score = evaluate(fen)
-        flag = '红方' if 'w' in fen else '黑方'
-        print(f'{info} | {flag}先行动 => {score:.2f}')
+
+    # 加载和评估原始模型
+    print("--- 正在加载和评估原始模型 ---")
+    original_model = NNUE(input_size=7 * 9 * 10)
+    original_model.load_state_dict(torch.load("models/epoch_1.pth", map_location='cpu', weights_only=True))
+    original_model.to('cpu')
+    original_model.eval()
+    evaluate_model(original_model, fens, 'cpu')
+
+    print("\n\n--- 正在加载和评估量化模型 ---")
+    # 加载和评估量化模型
+    quantized_model = torch.jit.load("models/nnue_quantized.pt", map_location='cpu')
+    quantized_model.eval()
+    evaluate_model(quantized_model, fens, 'cpu')
